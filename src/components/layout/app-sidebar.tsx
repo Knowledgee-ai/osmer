@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useSession, signOut } from "next-auth/react";
 import { useChatStore } from "@/stores/chat-store";
 import { deleteConversationMessages } from "@/lib/messages/store";
 import { Button } from "@/components/ui/button";
@@ -150,19 +151,7 @@ export function AppSidebar({ onOpenSettings }: AppSidebarProps) {
       </ScrollArea>
 
       {/* Footer */}
-      <div className="p-3 border-t border-border space-y-1">
-        <div className="flex items-center gap-2 px-2 py-1.5 rounded-md text-xs text-muted-foreground">
-          <BrainIcon className="h-4 w-4" />
-          <span>Memory: Active</span>
-        </div>
-        <button
-          onClick={onOpenSettings}
-          className="flex items-center gap-2 px-2 py-1.5 rounded-md text-xs text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50 transition-colors w-full"
-        >
-          <SettingsIcon className="h-4 w-4" />
-          <span>Settings</span>
-        </button>
-      </div>
+      <SidebarFooter onOpenSettings={onOpenSettings} />
     </div>
   );
 }
@@ -172,6 +161,51 @@ function PlusIcon({ className }: { className?: string }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
       <path d="M5 12h14" /><path d="M12 5v14" />
+    </svg>
+  );
+}
+
+function SidebarFooter({ onOpenSettings }: { onOpenSettings?: () => void }) {
+  const { data: session } = useSession();
+
+  return (
+    <div className="p-3 border-t border-border space-y-1">
+      {session?.user && (
+        <div className="flex items-center gap-2 px-2 py-1.5 rounded-md text-xs">
+          <div className="h-5 w-5 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+            <span className="text-[9px] font-bold text-primary">
+              {session.user.name?.[0]?.toUpperCase() || "U"}
+            </span>
+          </div>
+          <span className="truncate flex-1 text-foreground">{session.user.name}</span>
+          <button
+            onClick={() => signOut({ callbackUrl: "/" })}
+            className="text-muted-foreground hover:text-foreground transition-colors"
+            title="Sign out"
+          >
+            <LogOutIcon className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
+      <div className="flex items-center gap-2 px-2 py-1.5 rounded-md text-xs text-muted-foreground">
+        <BrainIcon className="h-4 w-4" />
+        <span>Memory: Active</span>
+      </div>
+      <button
+        onClick={onOpenSettings}
+        className="flex items-center gap-2 px-2 py-1.5 rounded-md text-xs text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50 transition-colors w-full"
+      >
+        <SettingsIcon className="h-4 w-4" />
+        <span>Settings</span>
+      </button>
+    </div>
+  );
+}
+
+function LogOutIcon({ className }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" x2="9" y1="12" y2="12" />
     </svg>
   );
 }
