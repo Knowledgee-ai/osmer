@@ -1,8 +1,10 @@
 import { streamText, type ModelMessage } from 'ai';
-import { getLanguageModel, getLanguageModelWithKeys } from '@/lib/ai/router';
+import { getLanguageModel, getLanguageModelWithKeys, estimateCost } from '@/lib/ai/router';
 import { getModel } from '@/lib/ai/models';
 import { auth } from '@/lib/auth';
 import { searchKnowledgeByVector } from '@/lib/knowledge/db-store';
+import { db } from '@/lib/db';
+import { modelUsage } from '@/lib/db/schema';
 
 export const maxDuration = 60;
 
@@ -69,8 +71,22 @@ export async function POST(req: Request) {
     system: systemPrompt,
     messages: modelMessages,
     onFinish: async ({ usage }) => {
-      if (usage) {
-        console.log(`[${modelId}] tokens: ${JSON.stringify(usage)}`);
+      if (usage && session?.user?.id) {
+        const u = usage as unknown as Record<string, number>;
+        const tokensIn = u.inputTokens || u.promptTokens || 0;
+        const tokensOut = u.outputTokens || u.completionTokens || 0;
+        const cost = estimateCost(modelId, tokensIn, tokensOut);
+
+        // Persist to model_usage table
+        db.insert(modelUsage)
+          .values({
+            userId: session.user.id,
+            model: modelId,
+            tokensIn,
+            tokensOut,
+            cost,
+          })
+          .catch(() => {}); // Best-effort
       }
     },
   });

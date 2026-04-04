@@ -14,13 +14,17 @@ export async function GET() {
     atoms: atoms.map((a) => ({
       id: a.id,
       type: a.type,
+      scope: a.scope,
       content: a.content,
       confidence: a.confidence,
       status: a.status,
       topics: a.topics || [],
-      entities: (a.structured as { entities?: string[] })?.entities || [],
-      extractedBy: a.extractedBy,
-      createdAt: a.createdAt,
+      entities: a.structured?.entities || [],
+      extractedBy: a.extracted_by,
+      createdAt: a.created_at,
+      decayRate: a.decay_rate,
+      lastAffirmed: a.last_affirmed,
+      affirmedCount: a.affirmed_count,
     })),
   });
 }
