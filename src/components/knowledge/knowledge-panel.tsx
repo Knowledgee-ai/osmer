@@ -1,0 +1,267 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { getKnowledgeAtoms, removeKnowledgeAtom, type LocalKnowledgeAtom } from "@/lib/knowledge/store";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+
+interface KnowledgePanelProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+const TYPE_COLORS: Record<string, string> = {
+  fact: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+  decision: "bg-purple-500/10 text-purple-400 border-purple-500/20",
+  preference: "bg-green-500/10 text-green-400 border-green-500/20",
+  solution: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
+  relationship: "bg-pink-500/10 text-pink-400 border-pink-500/20",
+  process: "bg-orange-500/10 text-orange-400 border-orange-500/20",
+  context: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
+};
+
+export function KnowledgePanel({ open, onClose }: KnowledgePanelProps) {
+  const [atoms, setAtoms] = useState<LocalKnowledgeAtom[]>([]);
+  const [search, setSearch] = useState("");
+  const [filterType, setFilterType] = useState<string | null>(null);
+
+  const refreshAtoms = useCallback(() => {
+    setAtoms(getKnowledgeAtoms());
+  }, []);
+
+  useEffect(() => {
+    if (open) refreshAtoms();
+  }, [open, refreshAtoms]);
+
+  // Listen for storage changes (from extraction in other tabs)
+  useEffect(() => {
+    const handler = () => refreshAtoms();
+    window.addEventListener("storage", handler);
+    return () => window.removeEventListener("storage", handler);
+  }, [refreshAtoms]);
+
+  const filtered = atoms.filter((atom) => {
+    if (filterType && atom.type !== filterType) return false;
+    if (search) {
+      const q = search.toLowerCase();
+      return (
+        atom.content.toLowerCase().includes(q) ||
+        atom.topics.some((t) => t.toLowerCase().includes(q)) ||
+        atom.entities.some((e) => e.toLowerCase().includes(q))
+      );
+    }
+    return true;
+  });
+
+  const handleDelete = (id: string) => {
+    removeKnowledgeAtom(id);
+    refreshAtoms();
+  };
+
+  // Count by type
+  const typeCounts = atoms.reduce((acc, a) => {
+    acc[a.type] = (acc[a.type] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  if (!open) return null;
+
+  return (
+    <div className="w-80 border-l border-border bg-background flex flex-col h-full">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+        <div className="flex items-center gap-2">
+          <BrainIcon className="h-4 w-4 text-primary" />
+          <span className="font-semibold text-sm">Knowledge Base</span>
+          <Badge variant="secondary" className="text-[10px] font-normal">
+            {atoms.length}
+          </Badge>
+        </div>
+        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onClose}>
+          <XIcon className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+
+      {/* Search */}
+      <div className="px-3 py-2 border-b border-border">
+        <Input
+          placeholder="Search knowledge..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="h-7 text-xs"
+        />
+      </div>
+
+      {/* Type filters */}
+      <div className="px-3 py-2 border-b border-border flex flex-wrap gap-1">
+        <button
+          onClick={() => setFilterType(null)}
+          className={cn(
+            "text-[10px] px-2 py-0.5 rounded-full border transition-colors",
+            !filterType
+              ? "bg-primary/10 text-primary border-primary/20"
+              : "text-muted-foreground border-transparent hover:border-border"
+          )}
+        >
+          All ({atoms.length})
+        </button>
+        {Object.entries(typeCounts).map(([type, count]) => (
+          <button
+            key={type}
+            onClick={() => setFilterType(filterType === type ? null : type)}
+            className={cn(
+              "text-[10px] px-2 py-0.5 rounded-full border transition-colors",
+              filterType === type
+                ? TYPE_COLORS[type]
+                : "text-muted-foreground border-transparent hover:border-border"
+            )}
+          >
+            {type} ({count})
+          </button>
+        ))}
+      </div>
+
+      {/* Atoms list */}
+      <ScrollArea className="flex-1">
+        <div className="p-3 space-y-2">
+          {filtered.length === 0 ? (
+            <div className="text-center py-8">
+              <BrainIcon className="h-8 w-8 mx-auto text-muted-foreground/30 mb-2" />
+              <p className="text-xs text-muted-foreground">
+                {atoms.length === 0
+                  ? "No knowledge extracted yet. Start chatting to build your knowledge base."
+                  : "No matching knowledge found."}
+              </p>
+            </div>
+          ) : (
+            filtered.map((atom) => (
+              <KnowledgeAtomCard
+                key={atom.id}
+                atom={atom}
+                onDelete={() => handleDelete(atom.id)}
+              />
+            ))
+          )}
+        </div>
+      </ScrollArea>
+
+      {/* Footer stats */}
+      {atoms.length > 0 && (
+        <div className="px-3 py-2 border-t border-border text-[10px] text-muted-foreground flex justify-between">
+          <span>
+            Avg confidence: {(atoms.reduce((s, a) => s + a.confidence, 0) / atoms.length).toFixed(2)}
+          </span>
+          <span>
+            {new Set(atoms.flatMap((a) => a.topics)).size} topics
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function KnowledgeAtomCard({
+  atom,
+  onDelete,
+}: {
+  atom: LocalKnowledgeAtom;
+  onDelete: () => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div
+      className="group rounded-lg border border-border/50 p-2.5 hover:border-border transition-colors cursor-pointer"
+      onClick={() => setExpanded(!expanded)}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5 mb-1">
+            <Badge
+              variant="outline"
+              className={cn("text-[9px] px-1.5 py-0 font-normal", TYPE_COLORS[atom.type])}
+            >
+              {atom.type}
+            </Badge>
+            <span className="text-[9px] text-muted-foreground">
+              {(atom.confidence * 100).toFixed(0)}%
+            </span>
+          </div>
+          <p className={cn("text-xs leading-relaxed", !expanded && "line-clamp-2")}>
+            {atom.content}
+          </p>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-5 w-5 opacity-0 group-hover:opacity-100 shrink-0"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+        >
+          <XIcon className="h-3 w-3" />
+        </Button>
+      </div>
+
+      {expanded && (
+        <div className="mt-2 pt-2 border-t border-border/30 space-y-1.5">
+          {atom.topics.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {atom.topics.map((topic) => (
+                <span
+                  key={topic}
+                  className="text-[9px] bg-muted/50 rounded px-1.5 py-0.5 text-muted-foreground"
+                >
+                  {topic}
+                </span>
+              ))}
+            </div>
+          )}
+          {atom.entities.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {atom.entities.map((entity) => (
+                <span
+                  key={entity}
+                  className="text-[9px] bg-primary/5 rounded px-1.5 py-0.5 text-primary/70"
+                >
+                  {entity}
+                </span>
+              ))}
+            </div>
+          )}
+          <div className="text-[9px] text-muted-foreground/50">
+            Extracted {new Date(atom.createdAt).toLocaleDateString()} via {atom.extractedBy.split('/').pop()}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BrainIcon({ className }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z" />
+      <path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z" />
+      <path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4" />
+      <path d="M17.599 6.5a3 3 0 0 0 .399-1.375" />
+      <path d="M6.003 5.125A3 3 0 0 0 6.401 6.5" />
+      <path d="M3.477 10.896a4 4 0 0 1 .585-.396" />
+      <path d="M19.938 10.5a4 4 0 0 1 .585.396" />
+      <path d="M6 18a4 4 0 0 1-1.967-.516" />
+      <path d="M19.967 17.484A4 4 0 0 1 18 18" />
+    </svg>
+  );
+}
+
+function XIcon({ className }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M18 6 6 18" /><path d="m6 6 12 12" />
+    </svg>
+  );
+}
