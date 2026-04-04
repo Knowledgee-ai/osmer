@@ -34,31 +34,68 @@ export async function saveKnowledgeAtomToDb(atom: AtomInput) {
     // Embedding generation is best-effort
   }
 
-  // Check for duplicate/similar knowledge — if found, affirm instead of inserting
+  // Check for duplicate/similar knowledge
   if (embedding) {
     const existing = await db.execute(
-      sql`SELECT id, content, affirmed_count
+      sql`SELECT id, content, affirmed_count, version,
+          1 - (embedding <=> ${JSON.stringify(embedding)}::vector) as similarity
         FROM knowledge_atoms
         WHERE scope_id = ${atom.userId}
           AND status = 'active'
           AND embedding IS NOT NULL
-          AND 1 - (embedding <=> ${JSON.stringify(embedding)}::vector) > 0.85
+          AND 1 - (embedding <=> ${JSON.stringify(embedding)}::vector) > 0.80
         ORDER BY embedding <=> ${JSON.stringify(embedding)}::vector
         LIMIT 1`
     );
 
     if (existing.rows.length > 0) {
-      const match = existing.rows[0] as { id: string; affirmed_count: number };
-      // Affirm existing atom instead of creating duplicate
-      await db.execute(
-        sql`UPDATE knowledge_atoms
-          SET last_affirmed = NOW(),
-              affirmed_count = ${match.affirmed_count + 1},
-              confidence = LEAST(confidence + 0.05, 1.0),
-              updated_at = NOW()
-          WHERE id = ${match.id}`
-      );
-      return { id: match.id, affirmed: true };
+      const match = existing.rows[0] as { id: string; content: string; affirmed_count: number; version: number; similarity: number };
+
+      if (match.similarity > 0.92) {
+        // Very similar — just affirm existing (same knowledge, re-confirmed)
+        await db.execute(
+          sql`UPDATE knowledge_atoms
+            SET last_affirmed = NOW(),
+                affirmed_count = ${match.affirmed_count + 1},
+                confidence = LEAST(confidence + 0.05, 1.0),
+                updated_at = NOW()
+            WHERE id = ${match.id}`
+        );
+        return { id: match.id, affirmed: true, versioned: false };
+      } else {
+        // Similar topic but different content — create new version (Knowledge Replay)
+        // Archive the old version
+        await db.execute(
+          sql`UPDATE knowledge_atoms SET status = 'archived', updated_at = NOW() WHERE id = ${match.id}`
+        );
+        // New atom supersedes the old one
+        const decayRate = DECAY_RATES[atom.type] || 0.5;
+        const [saved] = await db
+          .insert(knowledgeAtoms)
+          .values({
+            type: atom.type as 'fact' | 'decision' | 'preference' | 'solution' | 'relationship' | 'process' | 'context',
+            scope: "personal",
+            scopeId: atom.userId,
+            content: atom.content,
+            confidence: atom.confidence,
+            decayRate,
+            version: match.version + 1,
+            supersedesId: match.id,
+            topics: atom.topics,
+            structured: { entities: atom.entities },
+            sourceConversationId: atom.sourceConversationId,
+            sourceUserId: atom.userId,
+            extractedBy: atom.extractedBy,
+          })
+          .returning({ id: knowledgeAtoms.id });
+
+        if (embedding && saved) {
+          await db.execute(
+            sql`UPDATE knowledge_atoms SET embedding = ${JSON.stringify(embedding)}::vector WHERE id = ${saved.id}`
+          );
+        }
+        return { id: saved?.id, affirmed: false, versioned: true };
+      }
     }
   }
 

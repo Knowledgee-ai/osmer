@@ -366,7 +366,21 @@ function KnowledgeAtomCard({
   onPromote: (teamId: string) => Promise<void>;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const [timeline, setTimeline] = useState<Array<{ id: string; content: string; version: number; status: string; createdAt: string }> | null>(null);
   const isTeamScoped = atom.scope === "team";
+
+  const loadTimeline = async () => {
+    if (timeline) return; // Already loaded
+    try {
+      const res = await fetch(`/api/knowledge/atoms/${atom.id}/history`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.timeline?.length > 1) {
+          setTimeline(data.timeline);
+        }
+      }
+    } catch {}
+  };
 
   return (
     <div
@@ -374,7 +388,7 @@ function KnowledgeAtomCard({
         "group rounded-lg border p-2.5 hover:border-border transition-colors cursor-pointer",
         isTeamScoped ? "border-primary/20 bg-primary/5" : "border-border/50"
       )}
-      onClick={() => setExpanded(!expanded)}
+      onClick={() => { setExpanded(!expanded); if (!expanded) loadTimeline(); }}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
@@ -455,6 +469,42 @@ function KnowledgeAtomCard({
                   >
                     Share to {team.name}
                   </button>
+                ))}
+              </div>
+            </div>
+          )}
+          {/* Knowledge Replay Timeline */}
+          {timeline && timeline.length > 1 && (
+            <div className="pt-1.5">
+              <div className="text-[9px] text-muted-foreground mb-1.5 font-medium">Knowledge Replay</div>
+              <div className="space-y-0 border-l border-border/50 ml-1.5 pl-3">
+                {timeline.map((v, i) => (
+                  <div key={v.id} className="relative pb-2 last:pb-0">
+                    <div
+                      className={cn(
+                        "absolute -left-[15px] top-1 h-2 w-2 rounded-full border-2",
+                        v.id === atom.id
+                          ? "bg-primary border-primary"
+                          : v.status === "archived"
+                          ? "bg-muted-foreground/30 border-muted-foreground/30"
+                          : "bg-muted border-border"
+                      )}
+                    />
+                    <div className="text-[9px]">
+                      <span className="text-muted-foreground">v{v.version}</span>
+                      <span className="mx-1 text-muted-foreground/30">|</span>
+                      <span className="text-muted-foreground">{new Date(v.createdAt).toLocaleDateString()}</span>
+                      {v.status === "archived" && (
+                        <span className="ml-1 text-muted-foreground/50">(archived)</span>
+                      )}
+                    </div>
+                    <p className={cn(
+                      "text-[10px] mt-0.5 line-clamp-2",
+                      v.id === atom.id ? "text-foreground" : "text-muted-foreground"
+                    )}>
+                      {v.content}
+                    </p>
+                  </div>
                 ))}
               </div>
             </div>
