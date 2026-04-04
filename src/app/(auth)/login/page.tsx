@@ -19,18 +19,25 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
 
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
 
-    setLoading(false);
+      setLoading(false);
 
-    if (result?.error) {
-      setError("Invalid email or password");
-    } else {
-      router.push("/chat");
+      if (result?.error) {
+        setError("Invalid email or password");
+      } else if (result?.ok) {
+        window.location.href = "/chat";
+      } else {
+        setError("Sign in failed. Please try again.");
+      }
+    } catch (err) {
+      setLoading(false);
+      setError("An error occurred. Please try again.");
     }
   };
 

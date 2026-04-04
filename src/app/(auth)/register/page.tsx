@@ -35,18 +35,23 @@ export default function RegisterPage() {
     }
 
     // Auto sign-in after registration
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
 
-    setLoading(false);
+      setLoading(false);
 
-    if (result?.error) {
-      setError("Account created but sign-in failed. Try logging in.");
-    } else {
-      router.push("/chat");
+      if (result?.ok) {
+        window.location.href = "/chat";
+      } else {
+        setError("Account created but sign-in failed. Try logging in.");
+      }
+    } catch {
+      setLoading(false);
+      window.location.href = "/login";
     }
   };
 
