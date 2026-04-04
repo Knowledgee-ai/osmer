@@ -358,6 +358,13 @@ function SidebarFooter({ onOpenSettings }: { onOpenSettings?: () => void }) {
         <ChartIcon className="h-4 w-4" />
         <span>Analytics</span>
       </a>
+      <a
+        href="/chat/graph"
+        className="flex items-center gap-2 px-2 py-1.5 rounded-md text-xs text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50 transition-colors w-full"
+      >
+        <GraphIcon className="h-4 w-4" />
+        <span>Knowledge Graph</span>
+      </a>
       <button
         onClick={onOpenSettings}
         className="flex items-center gap-2 px-2 py-1.5 rounded-md text-xs text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50 transition-colors w-full"
@@ -429,6 +436,14 @@ function BrainIcon({ className }: { className?: string }) {
       <path d="M19.938 10.5a4 4 0 0 1 .585.396" />
       <path d="M6 18a4 4 0 0 1-1.967-.516" />
       <path d="M19.967 17.484A4 4 0 0 1 18 18" />
+    </svg>
+  );
+}
+
+function GraphIcon({ className }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <circle cx="18" cy="18" r="3" /><circle cx="6" cy="6" r="3" /><circle cx="18" cy="6" r="3" /><path d="M8.6 7.4 15.4 16.6" /><path d="m15.4 7.4-6.8 3.2" />
     </svg>
   );
 }
