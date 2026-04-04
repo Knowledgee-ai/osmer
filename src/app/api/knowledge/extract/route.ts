@@ -1,6 +1,8 @@
 import { generateObject } from 'ai';
 import { z } from 'zod';
 import { getLanguageModel } from '@/lib/ai/router';
+import { auth } from '@/lib/auth';
+import { saveKnowledgeAtomToDb } from '@/lib/knowledge/db-store';
 
 const KnowledgeAtomSchema = z.object({
   type: z.enum(['fact', 'decision', 'preference', 'solution', 'relationship', 'process', 'context']),
@@ -76,6 +78,21 @@ ${conversationText}`,
       lastAffirmed: new Date().toISOString(),
       affirmedCount: 1,
     }));
+
+    // Persist to DB with embeddings (fire-and-forget, don't block response)
+    const session = await auth();
+    if (session?.user?.id) {
+      Promise.all(
+        result.object.atoms.map((atom) =>
+          saveKnowledgeAtomToDb({
+            ...atom,
+            sourceConversationId: conversationId,
+            extractedBy: extractionModelId,
+            userId: session.user!.id!,
+          }).catch(() => {}) // Best-effort
+        )
+      );
+    }
 
     return Response.json({ atoms });
   } catch (error) {

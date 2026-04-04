@@ -20,6 +20,22 @@ interface UseChatOptions {
   apiKeys?: Record<string, string>;
 }
 
+// Persist a message to the DB (fire-and-forget)
+function persistMessageToDb(conversationId: string, msg: StoredMessage) {
+  fetch(`/api/conversations/${conversationId}/messages`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      id: msg.id,
+      role: msg.role,
+      content: msg.content,
+      modelUsed: msg.modelUsed,
+    }),
+  }).catch(() => {
+    // DB persistence is best-effort — localStorage is the fallback
+  });
+}
+
 export function useKnowledgeeChat({
   conversationId,
   modelId,
@@ -34,18 +50,38 @@ export function useKnowledgeeChat({
   const abortRef = useRef<AbortController | null>(null);
   const conversationIdRef = useRef(conversationId);
 
-  // When conversation changes, load its messages
+  // When conversation changes, load messages (try DB first, fall back to localStorage)
   useEffect(() => {
     if (conversationId !== conversationIdRef.current) {
       conversationIdRef.current = conversationId;
-      const stored = getMessages(conversationId);
-      setMessages(stored);
+
+      // Immediately show localStorage cache
+      const cached = getMessages(conversationId);
+      setMessages(cached);
       setStatus("ready");
       setError(undefined);
+
+      // Then try to load from DB (fresher data)
+      fetch(`/api/conversations/${conversationId}/messages`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data?.messages?.length > 0 && conversationIdRef.current === conversationId) {
+            const dbMessages: StoredMessage[] = data.messages.map((m: { id: string; role: string; content: string; modelUsed: string | null; createdAt: string }) => ({
+              id: m.id,
+              role: m.role as 'user' | 'assistant',
+              content: m.content,
+              modelUsed: m.modelUsed || undefined,
+              createdAt: m.createdAt,
+            }));
+            setMessages(dbMessages);
+            saveMessages(conversationId, dbMessages); // Update cache
+          }
+        })
+        .catch(() => {}); // Silently fall back to cache
     }
   }, [conversationId]);
 
-  // Persist messages whenever they change
+  // Persist messages to localStorage whenever they change
   useEffect(() => {
     if (messages.length > 0) {
       saveMessages(conversationId, messages);
@@ -62,7 +98,6 @@ export function useKnowledgeeChat({
     async (text: string) => {
       setError(undefined);
 
-      // Add user message
       const userMessage: StoredMessage = {
         id: crypto.randomUUID(),
         role: "user",
@@ -74,7 +109,9 @@ export function useKnowledgeeChat({
       setMessages(updatedMessages);
       setStatus("submitted");
 
-      // Prepare the request
+      // Persist user message to DB
+      persistMessageToDb(conversationId, userMessage);
+
       const abortController = new AbortController();
       abortRef.current = abortController;
 
@@ -82,7 +119,6 @@ export function useKnowledgeeChat({
         const headers: Record<string, string> = {
           "Content-Type": "application/json",
         };
-        // Pass BYOK API keys as a header
         if (apiKeys && Object.keys(apiKeys).length > 0) {
           headers["x-api-keys"] = btoa(JSON.stringify(apiKeys));
         }
@@ -113,13 +149,11 @@ export function useKnowledgeeChat({
 
         setStatus("streaming");
 
-        // Parse the UI message stream
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let assistantContent = "";
         const assistantId = crypto.randomUUID();
 
-        // Add empty assistant message that we'll update
         setMessages((prev) => [
           ...prev,
           {
@@ -138,9 +172,8 @@ export function useKnowledgeeChat({
 
           buffer += decoder.decode(value, { stream: true });
 
-          // Parse SSE lines
           const lines = buffer.split("\n");
-          buffer = lines.pop() || ""; // Keep incomplete line in buffer
+          buffer = lines.pop() || "";
 
           for (const line of lines) {
             if (!line.startsWith("data: ")) continue;
@@ -163,13 +196,21 @@ export function useKnowledgeeChat({
                 throw new Error(parsed.errorText || "Stream error");
               }
             } catch (e) {
-              // Skip unparseable lines (start/finish markers, etc.)
               if (e instanceof Error && e.message !== "Stream error" && !e.message.includes("JSON")) {
                 throw e;
               }
             }
           }
         }
+
+        // Persist completed assistant message to DB
+        persistMessageToDb(conversationId, {
+          id: assistantId,
+          role: "assistant",
+          content: assistantContent,
+          modelUsed: modelId,
+          createdAt: new Date().toISOString(),
+        });
 
         setStatus("ready");
       } catch (err) {

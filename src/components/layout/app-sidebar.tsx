@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useChatStore } from "@/stores/chat-store";
-import { deleteConversationMessages } from "@/lib/messages/store";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
@@ -17,6 +16,7 @@ export function AppSidebar({ onOpenSettings }: AppSidebarProps) {
     conversations,
     activeConversationId,
     setActiveConversation,
+    setConversations,
     removeConversation,
     sidebarOpen,
     setSidebarOpen,
@@ -24,6 +24,25 @@ export function AppSidebar({ onOpenSettings }: AppSidebarProps) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
+
+  // Load conversations from DB on mount
+  useEffect(() => {
+    fetch("/api/conversations")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.conversations?.length > 0) {
+          setConversations(
+            data.conversations.map((c: { id: string; title: string; modelDefault: string; updatedAt: string }) => ({
+              id: c.id,
+              title: c.title,
+              modelDefault: c.modelDefault,
+              updatedAt: c.updatedAt,
+            }))
+          );
+        }
+      })
+      .catch(() => {}); // Fall back to persisted Zustand state
+  }, [setConversations]);
 
   const filteredConversations = search
     ? conversations.filter((c) =>
@@ -137,8 +156,9 @@ export function AppSidebar({ onOpenSettings }: AppSidebarProps) {
                     className="h-5 w-5 opacity-50 hover:opacity-100"
                     onClick={(e) => {
                       e.stopPropagation();
-                      deleteConversationMessages(conv.id);
                       removeConversation(conv.id);
+                      // Delete from DB
+                      fetch(`/api/conversations/${conv.id}`, { method: "DELETE" }).catch(() => {});
                     }}
                   >
                     <XIcon className="h-3 w-3" />

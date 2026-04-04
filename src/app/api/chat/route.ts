@@ -1,23 +1,25 @@
 import { streamText, type ModelMessage } from 'ai';
 import { getLanguageModel, getLanguageModelWithKeys } from '@/lib/ai/router';
 import { getModel } from '@/lib/ai/models';
+import { auth } from '@/lib/auth';
+import { searchKnowledgeByVector } from '@/lib/knowledge/db-store';
 
 export const maxDuration = 60;
 
 export async function POST(req: Request) {
+  const session = await auth();
+
   // Read BYOK API keys from header
   const apiKeysHeader = req.headers.get('x-api-keys');
   let byokKeys: Record<string, string> | undefined;
   if (apiKeysHeader) {
     try {
       byokKeys = JSON.parse(atob(apiKeysHeader));
-    } catch {
-      // Ignore malformed keys
-    }
+    } catch {}
   }
 
   const body = await req.json();
-  const { modelId, conversationId, knowledgeContext } = body as {
+  const { modelId, conversationId, knowledgeContext: clientContext } = body as {
     modelId: string;
     conversationId: string | null;
     knowledgeContext?: string[];
@@ -33,7 +35,26 @@ export async function POST(req: Request) {
     };
   });
 
-  // Use BYOK keys if provided, otherwise fall back to server env vars
+  // Server-side semantic knowledge search
+  let knowledgeContext = clientContext;
+  if (session?.user?.id && !knowledgeContext) {
+    const lastUserMessage = modelMessages.filter(m => m.role === 'user').pop();
+    if (lastUserMessage) {
+      try {
+        const results = await searchKnowledgeByVector(
+          lastUserMessage.content as string,
+          session.user.id,
+          8
+        );
+        if (results.length > 0) {
+          knowledgeContext = results.map(r => r.content);
+        }
+      } catch {
+        // Knowledge search is best-effort
+      }
+    }
+  }
+
   const languageModel = byokKeys
     ? getLanguageModelWithKeys(modelId, byokKeys)
     : getLanguageModel(modelId);

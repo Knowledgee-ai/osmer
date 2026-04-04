@@ -123,6 +123,12 @@ export function ChatPanel({ onToggleKnowledge }: ChatPanelProps) {
         const { title } = await response.json();
         if (title) {
           updateConversationTitle(conversationId, title);
+          // Persist to DB
+          fetch(`/api/conversations/${conversationId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title }),
+          }).catch(() => {});
         }
       }
     } catch {
@@ -151,14 +157,10 @@ export function ChatPanel({ onToggleKnowledge }: ChatPanelProps) {
     setKnowledgeCount(getKnowledgeAtoms().length);
   }, []);
 
-  const onSubmit = () => {
-    if (!input.trim() || isLoading) return;
-    const messageText = input;
-    setInput("");
-
+  const createConversationIfNeeded = useCallback((messageText: string) => {
     if (!activeConversationId) {
-      // Quick title from first message — will be replaced by AI title later
       const title = messageText.slice(0, 50) + (messageText.length > 50 ? "..." : "");
+      // Add to local state immediately
       addConversation({
         id: chatId,
         title,
@@ -166,8 +168,20 @@ export function ChatPanel({ onToggleKnowledge }: ChatPanelProps) {
         updatedAt: new Date().toISOString(),
       });
       setActiveConversation(chatId);
+      // Persist to DB (fire-and-forget)
+      fetch("/api/conversations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: chatId, title, modelDefault: selectedModel }),
+      }).catch(() => {});
     }
+  }, [activeConversationId, chatId, selectedModel, addConversation, setActiveConversation]);
 
+  const onSubmit = () => {
+    if (!input.trim() || isLoading) return;
+    const messageText = input;
+    setInput("");
+    createConversationIfNeeded(messageText);
     sendMessage(messageText);
   };
 
@@ -225,19 +239,9 @@ export function ChatPanel({ onToggleKnowledge }: ChatPanelProps) {
         error={error}
         onSendPrompt={(text) => {
           setInput(text);
-          // Small delay so the input is visible before sending
           setTimeout(() => {
             setInput("");
-            if (!activeConversationId) {
-              const title = text.slice(0, 50) + (text.length > 50 ? "..." : "");
-              addConversation({
-                id: chatId,
-                title,
-                modelDefault: selectedModel,
-                updatedAt: new Date().toISOString(),
-              });
-              setActiveConversation(chatId);
-            }
+            createConversationIfNeeded(text);
             sendMessage(text);
           }, 100);
         }}
