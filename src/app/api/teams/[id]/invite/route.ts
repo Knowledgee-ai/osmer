@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { teamMembers, users, teams } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
+import { createNotification } from "@/lib/notifications";
 
 // POST /api/teams/[id]/invite — invite a user by email
 export async function POST(
@@ -61,6 +62,16 @@ export async function POST(
     userId: invitee.id,
     role: "member",
   });
+
+  // Notify the invitee
+  const [team] = await db.select({ name: teams.name }).from(teams).where(eq(teams.id, teamId)).limit(1);
+  createNotification(
+    invitee.id,
+    'team.invite',
+    `You've been added to ${team?.name || 'a team'}`,
+    `${session.user.name || 'Someone'} invited you to join their team.`,
+    '/chat/teams'
+  );
 
   return Response.json({ success: true, member: { id: invitee.id, name: invitee.name, email } });
 }

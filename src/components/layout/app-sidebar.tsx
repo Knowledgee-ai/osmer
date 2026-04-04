@@ -253,6 +253,70 @@ function PlusIcon({ className }: { className?: string }) {
   );
 }
 
+function NotificationBell() {
+  const [count, setCount] = useState(0);
+  const [notifications, setNotifications] = useState<Array<{ id: string; title: string; body: string; type: string; read: boolean; created_at: string }>>([]);
+  const [showPanel, setShowPanel] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/notifications")
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (d) {
+          setCount(d.unreadCount || 0);
+          setNotifications(d.notifications || []);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const markRead = () => {
+    fetch("/api/notifications", { method: "PATCH" }).catch(() => {});
+    setCount(0);
+  };
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => { setShowPanel(!showPanel); if (!showPanel && count > 0) markRead(); }}
+        className="relative text-muted-foreground hover:text-foreground transition-colors"
+        title="Notifications"
+      >
+        <BellIcon className="h-3.5 w-3.5" />
+        {count > 0 && (
+          <span className="absolute -top-1 -right-1 h-3 w-3 bg-primary rounded-full flex items-center justify-center">
+            <span className="text-[7px] text-primary-foreground font-bold">{count}</span>
+          </span>
+        )}
+      </button>
+      {showPanel && (
+        <div className="absolute bottom-8 left-0 w-64 bg-popover border border-border rounded-lg shadow-lg p-2 z-50">
+          <div className="text-xs font-medium mb-2 px-1">Notifications</div>
+          {notifications.length === 0 ? (
+            <p className="text-[10px] text-muted-foreground px-1 py-2">No notifications</p>
+          ) : (
+            <div className="space-y-1 max-h-48 overflow-y-auto">
+              {notifications.slice(0, 8).map(n => (
+                <a
+                  key={n.id}
+                  href="/chat/teams"
+                  className={cn(
+                    "block px-2 py-1.5 rounded text-[10px] hover:bg-muted/50 transition-colors",
+                    !n.read && "bg-primary/5"
+                  )}
+                >
+                  <div className="font-medium">{n.title}</div>
+                  {n.body && <div className="text-muted-foreground mt-0.5">{n.body}</div>}
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function SidebarFooter({ onOpenSettings }: { onOpenSettings?: () => void }) {
   const { data: session } = useSession();
 
@@ -266,6 +330,7 @@ function SidebarFooter({ onOpenSettings }: { onOpenSettings?: () => void }) {
             </span>
           </div>
           <span className="truncate flex-1 text-foreground">{session.user.name}</span>
+          <NotificationBell />
           <button
             onClick={() => signOut({ callbackUrl: "/" })}
             className="text-muted-foreground hover:text-foreground transition-colors"
@@ -301,6 +366,14 @@ function SidebarFooter({ onOpenSettings }: { onOpenSettings?: () => void }) {
         <span>Settings</span>
       </button>
     </div>
+  );
+}
+
+function BellIcon({ className }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+    </svg>
   );
 }
 
