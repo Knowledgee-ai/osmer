@@ -23,11 +23,23 @@ const TYPE_COLORS: Record<string, string> = {
   context: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
 };
 
+interface KnowledgeStats {
+  total: number;
+  healthScore: number;
+  confidence: { avg: number; min: number; max: number };
+  topTopics: Array<{ topic: string; count: number }>;
+  openConflicts: number;
+  recentCount: number;
+  byType: Array<{ type: string; count: number }>;
+}
+
 export function KnowledgePanel({ open, onClose }: KnowledgePanelProps) {
   const [atoms, setAtoms] = useState<LocalKnowledgeAtom[]>([]);
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [stats, setStats] = useState<KnowledgeStats | null>(null);
+  const [showStats, setShowStats] = useState(false);
 
   const refreshAtoms = useCallback(async () => {
     // Try DB first, fall back to localStorage
@@ -62,9 +74,22 @@ export function KnowledgePanel({ open, onClose }: KnowledgePanelProps) {
     setLoading(false);
   }, []);
 
+  const refreshStats = useCallback(async () => {
+    try {
+      const res = await fetch("/api/knowledge/stats");
+      if (res.ok) {
+        const data = await res.json();
+        setStats(data.stats);
+      }
+    } catch {}
+  }, []);
+
   useEffect(() => {
-    if (open) refreshAtoms();
-  }, [open, refreshAtoms]);
+    if (open) {
+      refreshAtoms();
+      refreshStats();
+    }
+  }, [open, refreshAtoms, refreshStats]);
 
   const filtered = atoms.filter((atom) => {
     if (filterType && atom.type !== filterType) return false;
@@ -126,10 +151,88 @@ export function KnowledgePanel({ open, onClose }: KnowledgePanelProps) {
             {atoms.length}
           </Badge>
         </div>
-        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onClose}>
-          <XIcon className="h-3.5 w-3.5" />
-        </Button>
+        <div className="flex items-center gap-1">
+          {stats && (
+            <button
+              onClick={() => setShowStats(!showStats)}
+              className="text-[10px] text-muted-foreground hover:text-foreground px-1.5 py-0.5 rounded hover:bg-muted/50 transition-colors"
+            >
+              Health: {stats.healthScore}%
+            </button>
+          )}
+          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onClose}>
+            <XIcon className="h-3.5 w-3.5" />
+          </Button>
+        </div>
       </div>
+
+      {/* Health Dashboard */}
+      {showStats && stats && (
+        <div className="px-3 py-2.5 border-b border-border bg-muted/10 space-y-2">
+          {/* Health Score Bar */}
+          <div>
+            <div className="flex items-center justify-between text-[10px] mb-1">
+              <span className="text-muted-foreground">Knowledge Health</span>
+              <span className={cn(
+                "font-medium",
+                stats.healthScore >= 70 ? "text-green-400" :
+                stats.healthScore >= 40 ? "text-yellow-400" :
+                "text-red-400"
+              )}>
+                {stats.healthScore}%
+              </span>
+            </div>
+            <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+              <div
+                className={cn(
+                  "h-full rounded-full transition-all",
+                  stats.healthScore >= 70 ? "bg-green-500" :
+                  stats.healthScore >= 40 ? "bg-yellow-500" :
+                  "bg-red-500"
+                )}
+                style={{ width: `${stats.healthScore}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Quick Stats */}
+          <div className="grid grid-cols-3 gap-2">
+            <div className="text-center">
+              <div className="text-sm font-semibold">{stats.total}</div>
+              <div className="text-[9px] text-muted-foreground">Total</div>
+            </div>
+            <div className="text-center">
+              <div className="text-sm font-semibold">{stats.recentCount}</div>
+              <div className="text-[9px] text-muted-foreground">This week</div>
+            </div>
+            <div className="text-center">
+              <div className="text-sm font-semibold text-primary">{(stats.confidence.avg * 100).toFixed(0)}%</div>
+              <div className="text-[9px] text-muted-foreground">Avg conf.</div>
+            </div>
+          </div>
+
+          {/* Top Topics */}
+          {stats.topTopics.length > 0 && (
+            <div>
+              <div className="text-[9px] text-muted-foreground mb-1">Top Topics</div>
+              <div className="flex flex-wrap gap-1">
+                {stats.topTopics.slice(0, 6).map((t) => (
+                  <span key={t.topic} className="text-[9px] bg-muted/50 rounded px-1.5 py-0.5 text-muted-foreground">
+                    {t.topic} ({t.count})
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Warnings */}
+          {stats.openConflicts > 0 && (
+            <div className="text-[10px] text-yellow-400 bg-yellow-500/10 rounded px-2 py-1">
+              {stats.openConflicts} unresolved conflict{stats.openConflicts > 1 ? 's' : ''}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Search */}
       <div className="px-3 py-2 border-b border-border">

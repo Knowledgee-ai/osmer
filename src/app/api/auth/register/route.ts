@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { users } from "@/lib/db/schema";
+import { users, organizations } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
@@ -18,7 +18,6 @@ export async function POST(req: Request) {
     return Response.json({ error: "Password must be at least 6 characters" }, { status: 400 });
   }
 
-  // Check if user exists
   const [existing] = await db
     .select({ id: users.id })
     .from(users)
@@ -31,6 +30,20 @@ export async function POST(req: Request) {
 
   const passwordHash = await bcrypt.hash(password, 12);
 
+  // Create a personal organization for the user
+  const orgSlug = email.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "-") + "-org";
+  const orgName = name + "'s Organization";
+
+  const [org] = await db
+    .insert(organizations)
+    .values({
+      name: orgName,
+      slug: orgSlug,
+      plan: "free",
+    })
+    .returning({ id: organizations.id });
+
+  // Create user linked to their organization
   const [user] = await db
     .insert(users)
     .values({
@@ -38,8 +51,9 @@ export async function POST(req: Request) {
       email,
       passwordHash,
       role: "owner",
+      orgId: org.id,
     })
     .returning({ id: users.id, email: users.email, name: users.name });
 
-  return Response.json({ user });
+  return Response.json({ user, organization: org });
 }

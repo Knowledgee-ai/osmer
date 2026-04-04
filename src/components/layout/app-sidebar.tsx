@@ -44,11 +44,46 @@ export function AppSidebar({ onOpenSettings }: AppSidebarProps) {
       .catch(() => {}); // Fall back to persisted Zustand state
   }, [setConversations]);
 
+  const [searchResults, setSearchResults] = useState<Array<{ conversationId: string; title: string; matchPreview: string }>>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Debounced server-side search
+  useEffect(() => {
+    if (search.length < 3) {
+      setSearchResults([]);
+      return;
+    }
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    searchTimerRef.current = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const res = await fetch("/api/conversations/search", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: search }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setSearchResults(data.results || []);
+        }
+      } catch {}
+      setIsSearching(false);
+    }, 300);
+    return () => { if (searchTimerRef.current) clearTimeout(searchTimerRef.current); };
+  }, [search]);
+
+  // Local title filter for quick results, augmented by server search
   const filteredConversations = search
     ? conversations.filter((c) =>
         c.title.toLowerCase().includes(search.toLowerCase())
       )
     : conversations;
+
+  // Merge server search results that aren't already in filtered list
+  const serverOnlyResults = searchResults.filter(
+    (sr) => !filteredConversations.some((c) => c.id === sr.conversationId)
+  );
 
   const handleNewChat = () => {
     setActiveConversation(null);
@@ -166,6 +201,39 @@ export function AppSidebar({ onOpenSettings }: AppSidebarProps) {
                 )}
               </div>
             ))
+          )}
+          {/* Server search results (messages containing the search term) */}
+          {serverOnlyResults.length > 0 && (
+            <>
+              <div className="px-3 pt-2 pb-1">
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                  Found in messages
+                </span>
+              </div>
+              {serverOnlyResults.map((sr) => (
+                <div
+                  key={sr.conversationId}
+                  className="px-3 py-2 rounded-md cursor-pointer text-sm transition-colors text-sidebar-foreground hover:bg-sidebar-accent/50"
+                  onClick={() => {
+                    setActiveConversation(sr.conversationId);
+                    setSearch("");
+                  }}
+                >
+                  <div className="flex items-center gap-2">
+                    <SearchIcon className="h-3 w-3 shrink-0 opacity-50" />
+                    <span className="truncate text-xs">{sr.title}</span>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground mt-0.5 ml-5 line-clamp-1">
+                    {sr.matchPreview}
+                  </p>
+                </div>
+              ))}
+            </>
+          )}
+          {isSearching && (
+            <div className="px-3 py-2 text-[10px] text-muted-foreground animate-pulse">
+              Searching messages...
+            </div>
           )}
         </div>
       </ScrollArea>
