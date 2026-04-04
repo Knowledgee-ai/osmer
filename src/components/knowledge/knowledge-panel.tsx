@@ -27,21 +27,44 @@ export function KnowledgePanel({ open, onClose }: KnowledgePanelProps) {
   const [atoms, setAtoms] = useState<LocalKnowledgeAtom[]>([]);
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const refreshAtoms = useCallback(() => {
+  const refreshAtoms = useCallback(async () => {
+    // Try DB first, fall back to localStorage
+    setLoading(true);
+    try {
+      const res = await fetch("/api/knowledge/atoms");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.atoms?.length > 0) {
+          setAtoms(data.atoms.map((a: Record<string, unknown>) => ({
+            id: a.id as string,
+            type: a.type as string,
+            content: a.content as string,
+            confidence: a.confidence as number,
+            topics: (a.topics as string[]) || [],
+            entities: (a.entities as string[]) || [],
+            extractedBy: (a.extractedBy as string) || "",
+            createdAt: a.createdAt as string,
+            scope: "personal",
+            sourceConversationId: null,
+            lastAffirmed: a.createdAt as string,
+            affirmedCount: 1,
+          })));
+          setLoading(false);
+          return;
+        }
+      }
+    } catch {}
+
+    // Fall back to localStorage
     setAtoms(getKnowledgeAtoms());
+    setLoading(false);
   }, []);
 
   useEffect(() => {
     if (open) refreshAtoms();
   }, [open, refreshAtoms]);
-
-  // Listen for storage changes (from extraction in other tabs)
-  useEffect(() => {
-    const handler = () => refreshAtoms();
-    window.addEventListener("storage", handler);
-    return () => window.removeEventListener("storage", handler);
-  }, [refreshAtoms]);
 
   const filtered = atoms.filter((atom) => {
     if (filterType && atom.type !== filterType) return false;
@@ -56,12 +79,35 @@ export function KnowledgePanel({ open, onClose }: KnowledgePanelProps) {
     return true;
   });
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
+    // Remove locally
     removeKnowledgeAtom(id);
-    refreshAtoms();
+    setAtoms((prev) => prev.filter((a) => a.id !== id));
+    // Remove from DB
+    fetch(`/api/knowledge/atoms/${id}`, { method: "DELETE" }).catch(() => {});
   };
 
-  // Count by type
+  const handleReconcile = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/knowledge/reconcile", { method: "POST" });
+      if (res.ok) {
+        const { report } = await res.json();
+        alert(
+          `Reconciliation complete:\n` +
+          `- ${report.decayedCount} atoms decayed\n` +
+          `- ${report.staleCount} marked stale\n` +
+          `- ${report.conflictsFound} conflicts found\n` +
+          `- ${report.totalAtoms} total atoms`
+        );
+        refreshAtoms();
+      }
+    } catch {
+      alert("Reconciliation failed");
+    }
+    setLoading(false);
+  };
+
   const typeCounts = atoms.reduce((acc, a) => {
     acc[a.type] = (acc[a.type] || 0) + 1;
     return acc;
@@ -127,7 +173,12 @@ export function KnowledgePanel({ open, onClose }: KnowledgePanelProps) {
       {/* Atoms list */}
       <ScrollArea className="flex-1">
         <div className="p-3 space-y-2">
-          {filtered.length === 0 ? (
+          {loading ? (
+            <div className="text-center py-8">
+              <div className="h-5 w-5 mx-auto animate-spin rounded-full border-2 border-muted border-t-primary mb-2" />
+              <p className="text-xs text-muted-foreground">Loading knowledge...</p>
+            </div>
+          ) : filtered.length === 0 ? (
             <div className="text-center py-8">
               <BrainIcon className="h-8 w-8 mx-auto text-muted-foreground/30 mb-2" />
               <p className="text-xs text-muted-foreground">
@@ -148,15 +199,26 @@ export function KnowledgePanel({ open, onClose }: KnowledgePanelProps) {
         </div>
       </ScrollArea>
 
-      {/* Footer stats */}
+      {/* Footer */}
       {atoms.length > 0 && (
-        <div className="px-3 py-2 border-t border-border text-[10px] text-muted-foreground flex justify-between">
-          <span>
-            Avg confidence: {(atoms.reduce((s, a) => s + a.confidence, 0) / atoms.length).toFixed(2)}
-          </span>
-          <span>
-            {new Set(atoms.flatMap((a) => a.topics)).size} topics
-          </span>
+        <div className="px-3 py-2 border-t border-border">
+          <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-1.5">
+            <span>
+              Avg confidence: {(atoms.reduce((s, a) => s + a.confidence, 0) / atoms.length).toFixed(2)}
+            </span>
+            <span>
+              {new Set(atoms.flatMap((a) => a.topics)).size} topics
+            </span>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full h-7 text-[10px]"
+            onClick={handleReconcile}
+            disabled={loading}
+          >
+            {loading ? "Running..." : "Run Reconciliation"}
+          </Button>
         </div>
       )}
     </div>
@@ -234,7 +296,7 @@ function KnowledgeAtomCard({
             </div>
           )}
           <div className="text-[9px] text-muted-foreground/50">
-            Extracted {new Date(atom.createdAt).toLocaleDateString()} via {atom.extractedBy.split('/').pop()}
+            Extracted {new Date(atom.createdAt).toLocaleDateString()} via {atom.extractedBy?.split('/').pop() || 'unknown'}
           </div>
         </div>
       )}

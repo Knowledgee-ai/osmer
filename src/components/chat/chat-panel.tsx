@@ -72,6 +72,7 @@ export function ChatPanel({ onToggleKnowledge }: ChatPanelProps) {
     modelId: selectedModel,
     knowledgeContext: knowledgeContext.length > 0 ? knowledgeContext : undefined,
     apiKeys: activeKeys,
+    knowledgeMode,
   });
 
   const isLoading = status === "streaming" || status === "submitted";
@@ -182,11 +183,23 @@ export function ChatPanel({ onToggleKnowledge }: ChatPanelProps) {
     const messageText = input;
     setInput("");
     createConversationIfNeeded(messageText);
+
+    // knowledgeMode is passed to the API via the chat hook
+    // "company" mode triggers "Ask the Company" behavior server-side
     sendMessage(messageText);
   };
 
   return (
     <div className="flex flex-col h-full">
+      {/* Ask Company banner */}
+      {knowledgeMode === "company" && (
+        <div className="px-4 py-1.5 bg-primary/5 border-b border-primary/10 text-center">
+          <span className="text-[11px] text-primary font-medium">
+            Ask the Company — AI answers only from your knowledge base
+          </span>
+        </div>
+      )}
+
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-border">
         <div className="flex items-center gap-3">
@@ -263,10 +276,10 @@ function KnowledgeModeIndicator() {
   const { knowledgeMode, setKnowledgeMode } = useChatStore();
 
   const modes = [
-    { value: "personal" as const, label: "Personal", icon: "\u{1F464}" },
-    { value: "team" as const, label: "Team", icon: "\u{1F465}" },
-    { value: "company" as const, label: "Company", icon: "\u{1F3E2}" },
-    { value: "locked" as const, label: "Locked", icon: "\u{1F512}" },
+    { value: "personal" as const, label: "Personal", icon: "\u{1F464}", desc: "Knowledge stays private" },
+    { value: "team" as const, label: "Team", icon: "\u{1F465}", desc: "Shared with team" },
+    { value: "company" as const, label: "Ask Company", icon: "\u{1F3E2}", desc: "Answers from knowledge base only" },
+    { value: "locked" as const, label: "Locked", icon: "\u{1F512}", desc: "No knowledge extraction" },
   ];
 
   const current = modes.find((m) => m.value === knowledgeMode) || modes[0];

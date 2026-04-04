@@ -18,6 +18,7 @@ interface UseChatOptions {
   modelId: string;
   knowledgeContext?: string[];
   apiKeys?: Record<string, string>;
+  knowledgeMode?: string;
 }
 
 // Persist a message to the DB (fire-and-forget)
@@ -41,6 +42,7 @@ export function useKnowledgeeChat({
   modelId,
   knowledgeContext,
   apiKeys,
+  knowledgeMode,
 }: UseChatOptions): UseChatReturn {
   const [messages, setMessages] = useState<StoredMessage[]>(() =>
     getMessages(conversationId)
@@ -135,6 +137,7 @@ export function useKnowledgeeChat({
             modelId,
             conversationId,
             knowledgeContext,
+            knowledgeMode,
           }),
         });
 
@@ -224,7 +227,7 @@ export function useKnowledgeeChat({
         abortRef.current = null;
       }
     },
-    [messages, modelId, conversationId, knowledgeContext, apiKeys]
+    [messages, modelId, conversationId, knowledgeContext, apiKeys, knowledgeMode]
   );
 
   return { messages, status, error, sendMessage, stop };
