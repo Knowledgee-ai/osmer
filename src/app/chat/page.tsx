@@ -1,19 +1,41 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { ChatPanel } from "@/components/chat/chat-panel";
 import { KnowledgePanel } from "@/components/knowledge/knowledge-panel";
 import { SettingsDialog } from "@/components/settings/settings-dialog";
+import { OnboardingDialog } from "@/components/onboarding/onboarding-dialog";
 import { useHydration } from "@/hooks/use-hydration";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { useTheme } from "@/hooks/use-theme";
 
 export default function ChatPage() {
   const hydrated = useHydration();
-  useTheme(); // Apply theme from settings
+  useTheme();
   const [knowledgePanelOpen, setKnowledgePanelOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  // Check if onboarding is needed (no knowledge atoms yet)
+  useEffect(() => {
+    const onboardingDone = localStorage.getItem("knowledgee-onboarding-done");
+    if (onboardingDone) return;
+
+    fetch("/api/knowledge/atoms")
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.atoms || data.atoms.length === 0) {
+          setShowOnboarding(true);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleOnboardingClose = () => {
+    setShowOnboarding(false);
+    localStorage.setItem("knowledgee-onboarding-done", "true");
+  };
 
   const toggleKnowledge = useCallback(
     () => setKnowledgePanelOpen((prev) => !prev),
@@ -47,6 +69,10 @@ export default function ChatPage() {
       <SettingsDialog
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
+      />
+      <OnboardingDialog
+        open={showOnboarding}
+        onClose={handleOnboardingClose}
       />
     </div>
   );

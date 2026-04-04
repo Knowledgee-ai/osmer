@@ -179,6 +179,29 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
             </div>
           </div>
 
+          {/* Data Export */}
+          <div>
+            <h3 className="text-sm font-medium mb-3">Data</h3>
+            <div className="flex items-center justify-between p-2.5 rounded-lg border border-border/50">
+              <div>
+                <p className="text-sm">Export all data</p>
+                <p className="text-[10px] text-muted-foreground">
+                  Download conversations, messages, and knowledge as JSON
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 text-xs"
+                onClick={() => {
+                  window.open("/api/export", "_blank");
+                }}
+              >
+                Download
+              </Button>
+            </div>
+          </div>
+
           {/* Appearance */}
           <div>
             <h3 className="text-sm font-medium mb-3">Appearance</h3>
