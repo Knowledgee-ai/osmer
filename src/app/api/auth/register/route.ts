@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { users, organizations } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
+import { logAudit } from "@/lib/audit";
 
 export async function POST(req: Request) {
   const { name, email, password } = await req.json() as {
@@ -54,6 +55,8 @@ export async function POST(req: Request) {
       orgId: org.id,
     })
     .returning({ id: users.id, email: users.email, name: users.name });
+
+  logAudit(user.id, 'user.register', 'user', user.id, { email: user.email });
 
   return Response.json({ user, organization: org });
 }

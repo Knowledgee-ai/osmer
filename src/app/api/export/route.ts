@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { conversations, messages, knowledgeAtoms, users } from '@/lib/db/schema';
 import { eq, sql } from 'drizzle-orm';
+import { logAudit } from '@/lib/audit';
 
 // GET /api/export — download all user data as JSON
 export async function GET() {
@@ -46,6 +47,11 @@ export async function GET() {
       ORDER BY created_at DESC
     `),
   ]);
+
+  logAudit(userId, 'data.export', 'export', undefined, {
+    conversations: convData.rows.length,
+    knowledgeAtoms: knowledgeData.rows.length,
+  });
 
   const exportData = {
     exportedAt: new Date().toISOString(),

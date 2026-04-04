@@ -179,9 +179,51 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
             </div>
           </div>
 
-          {/* Data Export */}
+          {/* Data */}
           <div>
             <h3 className="text-sm font-medium mb-3">Data</h3>
+            <div className="space-y-2">
+            {/* Import */}
+            <div className="flex items-center justify-between p-2.5 rounded-lg border border-border/50">
+              <div>
+                <p className="text-sm">Import conversations</p>
+                <p className="text-[10px] text-muted-foreground">
+                  Import from ChatGPT export (conversations.json)
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 text-xs"
+                onClick={() => {
+                  const input = document.createElement('input');
+                  input.type = 'file';
+                  input.accept = '.json';
+                  input.onchange = async (e) => {
+                    const file = (e.target as HTMLInputElement).files?.[0];
+                    if (!file) return;
+                    const text = await file.text();
+                    try {
+                      const data = JSON.parse(text);
+                      const res = await fetch('/api/import', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ data, source: 'chatgpt' }),
+                      });
+                      const result = await res.json();
+                      alert(result.message || result.error || 'Import complete');
+                      window.location.reload();
+                    } catch {
+                      alert('Failed to parse file');
+                    }
+                  };
+                  input.click();
+                }}
+              >
+                Import
+              </Button>
+            </div>
+            {/* Export */}
             <div className="flex items-center justify-between p-2.5 rounded-lg border border-border/50">
               <div>
                 <p className="text-sm">Export all data</p>
@@ -199,6 +241,7 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
               >
                 Download
               </Button>
+            </div>
             </div>
           </div>
 

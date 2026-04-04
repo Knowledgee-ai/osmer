@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { getLanguageModel } from '@/lib/ai/router';
 import { auth } from '@/lib/auth';
 import { saveKnowledgeAtomToDb } from '@/lib/knowledge/db-store';
+import { logAudit } from '@/lib/audit';
 
 const KnowledgeAtomSchema = z.object({
   type: z.enum(['fact', 'decision', 'preference', 'solution', 'relationship', 'process', 'context']),
@@ -92,6 +93,7 @@ ${conversationText}`,
           }).catch(() => {}) // Best-effort
         )
       );
+      logAudit(session.user.id, 'knowledge.extract', 'knowledge', conversationId, { atomCount: atoms.length });
     }
 
     return Response.json({ atoms });
