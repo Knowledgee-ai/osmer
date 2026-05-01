@@ -1,325 +1,829 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export default function LandingPage() {
   return (
-    <div className="min-h-full bg-background">
-      {/* Nav */}
-      <nav className="flex items-center justify-between px-6 py-4 max-w-6xl mx-auto">
-        <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground text-sm font-bold">K</span>
-          </div>
-          <span className="font-bold text-lg">Knowledgee</span>
-        </div>
-        <Link
-          href="/chat"
-          className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-        >
-          Open App
-        </Link>
-      </nav>
-
-      {/* Hero */}
-      <section className="px-6 pt-20 pb-16 max-w-4xl mx-auto text-center">
-        <div className="inline-flex items-center gap-2 rounded-full border border-border/50 bg-muted/30 px-4 py-1.5 text-xs text-muted-foreground mb-8">
-          <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-          Now with 10+ AI models from 5 providers
-        </div>
-        <h1 className="text-5xl sm:text-6xl font-bold tracking-tight leading-[1.1] mb-6">
-          Your organization&apos;s
-          <br />
-          <span className="bg-gradient-to-r from-orange-400 via-pink-500 to-purple-500 bg-clip-text text-transparent">
-            AI brain
-          </span>
-        </h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-          Chat with GPT-4o, Claude, Gemini, and Grok in one place. Every conversation
-          builds your organization&apos;s knowledge base — automatically extracted,
-          always available, compounding with every chat.
-        </p>
-        <div className="flex items-center justify-center gap-4">
-          <Link
-            href="/chat"
-            className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
-          >
-            Start chatting free
-            <ArrowRightIcon className="ml-2 h-4 w-4" />
-          </Link>
-          <a
-            href="#features"
-            className="inline-flex items-center justify-center rounded-lg border border-border px-6 py-3 text-sm font-medium text-foreground hover:bg-muted/50 transition-colors"
-          >
-            See how it works
-          </a>
-        </div>
-      </section>
-
-      {/* Product Preview */}
-      <section className="px-6 pb-20 max-w-5xl mx-auto">
-        <div className="rounded-xl border border-border/50 bg-card overflow-hidden shadow-2xl shadow-black/20">
-          <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-muted/20">
-            <div className="flex gap-1.5">
-              <div className="h-3 w-3 rounded-full bg-red-500/60" />
-              <div className="h-3 w-3 rounded-full bg-yellow-500/60" />
-              <div className="h-3 w-3 rounded-full bg-green-500/60" />
-            </div>
-            <span className="text-xs text-muted-foreground ml-2">Knowledgee</span>
-          </div>
-          <div className="flex h-[400px]">
-            {/* Simulated sidebar */}
-            <div className="w-56 border-r border-border bg-card/50 p-3 hidden sm:block">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="h-6 w-6 rounded bg-primary/10 flex items-center justify-center">
-                  <span className="text-[10px] font-bold text-primary">K</span>
-                </div>
-                <span className="text-xs font-semibold">Knowledgee</span>
-              </div>
-              <div className="space-y-1">
-                {["API Architecture Design", "Database Migration Plan", "Team Standup Notes"].map((title, i) => (
-                  <div
-                    key={title}
-                    className={`text-[11px] px-2 py-1.5 rounded ${i === 0 ? 'bg-muted/50 text-foreground' : 'text-muted-foreground'}`}
-                  >
-                    {title}
-                  </div>
-                ))}
-              </div>
-            </div>
-            {/* Simulated chat */}
-            <div className="flex-1 flex flex-col">
-              <div className="flex items-center gap-2 px-4 py-2 border-b border-border">
-                <span className="h-2 w-2 rounded-full bg-orange-400" />
-                <span className="text-xs">Claude Sonnet 4</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground ml-2">8 context</span>
-              </div>
-              <div className="flex-1 p-4 space-y-4 overflow-hidden">
-                <div className="flex justify-end">
-                  <div className="bg-primary text-primary-foreground rounded-2xl px-4 py-2 text-xs max-w-[70%]">
-                    What database should we use for the new microservice?
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center shrink-0">
-                    <SparklesIcon className="h-3 w-3 text-muted-foreground" />
-                  </div>
-                  <div className="bg-muted/30 rounded-2xl px-4 py-2 text-xs max-w-[80%] space-y-2">
-                    <p>Based on your organization&apos;s context, I&apos;d recommend <strong>Neon Postgres</strong> since your team already uses it for the main app with Drizzle ORM.</p>
-                    <p className="text-muted-foreground">This keeps your stack consistent and leverages existing team expertise.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {/* Simulated knowledge panel */}
-            <div className="w-52 border-l border-border bg-card/50 p-3 hidden md:block">
-              <div className="flex items-center gap-1.5 mb-3">
-                <BrainIcon className="h-3.5 w-3.5 text-primary" />
-                <span className="text-xs font-semibold">Knowledge</span>
-                <span className="text-[9px] bg-muted px-1.5 py-0.5 rounded-full ml-auto">24</span>
-              </div>
-              <div className="space-y-2">
-                {[
-                  { type: "fact", text: "Uses Neon Postgres with Drizzle ORM", color: "text-blue-400" },
-                  { type: "decision", text: "Chose OpenRouter for multi-model routing", color: "text-purple-400" },
-                  { type: "solution", text: "Use edge functions for low-latency AI", color: "text-yellow-400" },
-                ].map((atom) => (
-                  <div key={atom.text} className="rounded border border-border/30 p-2">
-                    <span className={`text-[9px] font-medium ${atom.color}`}>{atom.type}</span>
-                    <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-2">{atom.text}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section id="features" className="px-6 py-20 max-w-5xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold mb-4">Every conversation makes you smarter</h2>
-          <p className="text-muted-foreground max-w-xl mx-auto">
-            Traditional AI chats are isolated. Knowledgee connects them all — across models, people, and time.
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          {[
-            {
-              icon: "\u{1F500}",
-              title: "Multi-Model Access",
-              description: "GPT-4o, Claude, Gemini, Grok, Llama — all in one interface. Switch models mid-conversation. Use the best model for each task.",
-            },
-            {
-              icon: "\u{1F9E0}",
-              title: "Self-Evolving Memory",
-              description: "Knowledge is automatically extracted from every conversation. Facts, decisions, solutions — captured and available across all future chats.",
-            },
-            {
-              icon: "\u{1F4CA}",
-              title: "Knowledge Compounds",
-              description: "Ask a question in a new chat and the AI already knows your tech stack, decisions, and context from previous conversations.",
-            },
-            {
-              icon: "\u{1F465}",
-              title: "Team Knowledge",
-              description: "Personal, team, and company knowledge tiers. Share what matters, keep what's private. Knowledge flows upward with approval.",
-            },
-            {
-              icon: "\u{1F512}",
-              title: "Privacy First",
-              description: "Locked mode for sensitive chats. Companies see knowledge atoms, not raw conversations. Full audit trail and compliance controls.",
-            },
-            {
-              icon: "\u{1F4B0}",
-              title: "BYOK — Your Keys, Your Cost",
-              description: "Bring your own API keys for direct provider access. Lower latency, transparent costs, no middleman markup.",
-            },
-          ].map((feature) => (
-            <div
-              key={feature.title}
-              className="rounded-xl border border-border/50 p-6 hover:border-border transition-colors"
-            >
-              <span className="text-2xl mb-3 block">{feature.icon}</span>
-              <h3 className="font-semibold mb-2">{feature.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {feature.description}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="px-6 py-20 max-w-4xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold mb-4">How knowledge compounds</h2>
-        </div>
-        <div className="grid sm:grid-cols-3 gap-8">
-          {[
-            {
-              step: "1",
-              title: "Chat naturally",
-              description: "Ask questions, discuss architecture, debug problems — with any AI model you choose.",
-            },
-            {
-              step: "2",
-              title: "Knowledge is extracted",
-              description: "After each conversation, AI identifies facts, decisions, and solutions worth remembering.",
-            },
-            {
-              step: "3",
-              title: "Context grows",
-              description: "Future conversations automatically include relevant knowledge. The AI already knows your stack, your decisions, your team.",
-            },
-          ].map((item) => (
-            <div key={item.step} className="text-center">
-              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                <span className="text-sm font-bold text-primary">{item.step}</span>
-              </div>
-              <h3 className="font-semibold mb-2">{item.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {item.description}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Models */}
-      <section className="px-6 py-20 max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">All the models you need</h2>
-          <p className="text-muted-foreground">No more juggling subscriptions. One platform, every flagship model.</p>
-        </div>
-        <div className="flex flex-wrap justify-center gap-3">
-          {[
-            { name: "GPT-4o", color: "#10a37f" },
-            { name: "Claude Opus 4.6", color: "#d97757" },
-            { name: "Claude Sonnet 4", color: "#d97757" },
-            { name: "Gemini 2.5 Pro", color: "#4285f4" },
-            { name: "Grok 3", color: "#888" },
-            { name: "Llama 4", color: "#0668E1" },
-            { name: "o3-mini", color: "#10a37f" },
-            { name: "Gemini Flash", color: "#4285f4" },
-            { name: "Claude Haiku", color: "#d97757" },
-            { name: "GPT-4o Mini", color: "#10a37f" },
-          ].map((model) => (
-            <div
-              key={model.name}
-              className="flex items-center gap-2 rounded-full border border-border/50 px-4 py-2 text-sm hover:border-border transition-colors"
-            >
-              <span
-                className="h-2 w-2 rounded-full"
-                style={{ backgroundColor: model.color }}
-              />
-              {model.name}
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="px-6 py-20 max-w-3xl mx-auto text-center">
-        <h2 className="text-3xl font-bold mb-4">
-          Stop losing your AI knowledge
-        </h2>
-        <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-          Every conversation your team has with AI is generating valuable knowledge.
-          Knowledgee makes sure it compounds instead of evaporating.
-        </p>
-        <Link
-          href="/chat"
-          className="inline-flex items-center justify-center rounded-lg bg-primary px-8 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
-        >
-          Get started for free
-          <ArrowRightIcon className="ml-2 h-4 w-4" />
-        </Link>
-      </section>
-
-      {/* Footer */}
-      <footer className="px-6 py-8 border-t border-border">
-        <div className="max-w-5xl mx-auto flex items-center justify-between text-xs text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <div className="h-5 w-5 rounded bg-primary/10 flex items-center justify-center">
-              <span className="text-[8px] font-bold text-primary">K</span>
-            </div>
-            <span>Knowledgee</span>
-          </div>
-          <span>Your organization&apos;s AI brain</span>
-        </div>
-      </footer>
+    <div
+      data-theme="paper"
+      className="paper-grain h-full overflow-y-auto"
+      style={{ scrollBehavior: "smooth" }}
+    >
+      <Nav />
+      <Hero />
+      <Manifesto />
+      <Problem />
+      <ThreeTiers />
+      <Protocol />
+      <MultiModel />
+      <ProductTheatre />
+      <Closing />
+      <Footer />
     </div>
   );
 }
 
-function ArrowRightIcon({ className }: { className?: string }) {
+/* ───────────────────────── NAV ───────────────────────── */
+
+function Nav() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
+    <nav className="relative z-10 mx-auto flex max-w-[1440px] items-center justify-between px-8 pt-7 pb-4 lg:px-14">
+      <Link href="/" className="flex items-center gap-2.5">
+        <Wordmark />
+        <span className="display text-[1.55rem] tracking-tight text-[var(--ink)]">
+          Knowledgee
+        </span>
+      </Link>
+      <div className="hidden items-center gap-10 md:flex">
+        <a href="#problem" className="mono link-underline text-[var(--ink-soft)]">
+          Problem
+        </a>
+        <a href="#tiers" className="mono link-underline text-[var(--ink-soft)]">
+          Memory
+        </a>
+        <a href="#protocol" className="mono link-underline text-[var(--ink-soft)]">
+          Protocol
+        </a>
+        <a href="#models" className="mono link-underline text-[var(--ink-soft)]">
+          Models
+        </a>
+      </div>
+      <Link
+        href="/chat"
+        className="mono link-shift inline-flex items-center rounded-full border border-[var(--ink)] bg-[var(--ink)] px-5 py-2.5 text-[var(--paper)] hover:bg-[var(--clay-deep)] hover:border-[var(--clay-deep)]"
+      >
+        Open the app
+        <ArrowEast />
+      </Link>
+    </nav>
+  );
+}
+
+/* ───────────────────────── HERO ───────────────────────── */
+
+function Hero() {
+  return (
+    <section className="relative">
+      <div className="spotlight pointer-events-none absolute inset-0 -z-10" />
+      <div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-x-6 px-8 pt-20 pb-32 lg:px-14 lg:pt-28 lg:pb-40">
+        {/* Left rail — eyebrow + headline */}
+        <div className="col-span-12 lg:col-span-7">
+          <p className="mono blur-in mb-7 text-[var(--clay-deep)]" style={{ animationDelay: "100ms" }}>
+            Vol. 01 / The Organizational Memory Protocol
+          </p>
+          <h1 className="display text-[clamp(3.5rem,8.4vw,7.5rem)] text-[var(--ink)]">
+            <span className="rise block" style={{ animationDelay: "200ms" }}>
+              The shape
+            </span>
+            <span className="rise block" style={{ animationDelay: "320ms" }}>
+              of <span className="display-italic">organizational</span>
+            </span>
+            <span className="rise block" style={{ animationDelay: "440ms" }}>
+              memory.
+            </span>
+          </h1>
+          <p
+            className="rise mt-10 max-w-[36ch] text-[1.18rem] leading-[1.55] text-[var(--ink-soft)]"
+            style={{ animationDelay: "640ms" }}
+          >
+            Every conversation your team has with an AI generates knowledge that today
+            evaporates the moment the tab closes. Knowledgee is the system of record for
+            the work your colleagues do <em className="display-italic">with</em> machines —
+            captured, refined, and passed forward.
+          </p>
+          <div
+            className="rise mt-12 flex flex-wrap items-center gap-6"
+            style={{ animationDelay: "780ms" }}
+          >
+            <Link
+              href="/chat"
+              className="mono link-shift inline-flex items-center rounded-full bg-[var(--ink)] px-7 py-4 text-[var(--paper)] hover:bg-[var(--clay-deep)]"
+            >
+              Begin a conversation
+              <ArrowEast />
+            </Link>
+            <a href="#problem" className="mono link-underline text-[var(--ink-soft)]">
+              Read the thesis ↓
+            </a>
+          </div>
+          <dl
+            className="rise mt-20 grid grid-cols-3 gap-6 border-t border-[var(--hairline)] pt-8 text-[var(--ink-soft)] lg:max-w-[520px]"
+            style={{ animationDelay: "920ms" }}
+          >
+            <div>
+              <dt className="mono mb-2 text-[var(--ink-faint)]">Models</dt>
+              <dd className="display text-3xl text-[var(--ink)]">10</dd>
+            </div>
+            <div>
+              <dt className="mono mb-2 text-[var(--ink-faint)]">Providers</dt>
+              <dd className="display text-3xl text-[var(--ink)]">5</dd>
+            </div>
+            <div>
+              <dt className="mono mb-2 text-[var(--ink-faint)]">Tiers</dt>
+              <dd className="display text-3xl text-[var(--ink)]">
+                3<span className="display-italic text-[var(--clay)]">.</span>
+              </dd>
+            </div>
+          </dl>
+        </div>
+
+        {/* Right rail — hero image */}
+        <div className="col-span-12 mt-16 lg:col-span-5 lg:mt-0">
+          <figure className="fade-in relative drift" style={{ animationDelay: "300ms" }}>
+            <div className="absolute -inset-3 -z-10 rounded-full bg-[var(--clay-soft)]/40 blur-3xl" />
+            <Image
+              src="/landing/hero-knowledge-graph.png"
+              alt=""
+              width={1536}
+              height={1024}
+              priority
+              className="aspect-square w-full rounded-[2px] object-cover"
+              sizes="(max-width: 1024px) 100vw, 40vw"
+            />
+            <figcaption className="mono mt-5 flex items-center justify-between text-[var(--ink-faint)]">
+              <span>Plate I</span>
+              <span>A knowledge graph, in section</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ──────────────────────── MANIFESTO ──────────────────────── */
+
+function Manifesto() {
+  return (
+    <section className="border-y border-[var(--hairline)] bg-[var(--paper-pale)]/40 py-28 lg:py-40">
+      <div className="mx-auto max-w-[1100px] px-8 lg:px-14">
+        <p className="mono mb-10 text-[var(--clay-deep)]">A note on the work</p>
+        <p className="display text-[clamp(2rem,4.4vw,3.6rem)] leading-[1.12] text-[var(--ink)]">
+          Before Salesforce, customer knowledge lived in individual notebooks and heads.
+          When someone left, it walked out the door. Knowledgee proposes the same
+          inflection for the knowledge that flows through{" "}
+          <span className="display-italic text-[var(--clay-deep)]">
+            every AI conversation
+          </span>{" "}
+          your company has — that it should belong to the organization, not to the inbox
+          of one employee.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+/* ───────────────────────── PROBLEM ───────────────────────── */
+
+function Problem() {
+  return (
+    <section id="problem" className="py-28 lg:py-40">
+      <div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-x-6 gap-y-14 px-8 lg:px-14">
+        <div className="col-span-12 lg:col-span-4">
+          <p className="mono mb-7 text-[var(--clay-deep)]">§ 01 / The shadow AI problem</p>
+          <h2 className="display text-[clamp(2.4rem,4.6vw,4rem)] leading-[0.98] text-[var(--ink)]">
+            Knowledge is being created at unprecedented scale, then{" "}
+            <span className="display-italic">forgotten</span> at the same rate.
+          </h2>
+        </div>
+        <div className="col-span-12 grid grid-cols-1 gap-12 text-[1.05rem] leading-[1.65] text-[var(--ink-soft)] sm:grid-cols-2 lg:col-span-7 lg:col-start-6">
+          <div>
+            <p>
+              The average knowledge worker now uses three to five different AI models in
+              a working week. Each chat thread contains a small private archive of
+              decisions, hypotheses, debugging traces, and resolved problems.
+            </p>
+            <p className="mt-5">
+              None of it is searchable by colleagues. None of it survives a tab close.
+              When the employee leaves, it leaves with them.
+            </p>
+          </div>
+          <div>
+            <p>
+              We call this <em className="display-italic">shadow AI</em> — the
+              twenty-first-century cousin of shadow IT, with one important difference:
+              the artefacts are not files but conversations, and they are produced faster
+              than any documentation practice can capture.
+            </p>
+            <p className="mt-5">
+              No model provider solves this. They optimise for their own walled garden.
+              The problem is, by definition, between them.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Statistic strip */}
+      <div className="mx-auto mt-24 max-w-[1440px] border-y border-[var(--hairline)] px-8 py-10 lg:px-14">
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-3">
+          {[
+            { stat: "92%", label: "of knowledge workers use AI weekly" },
+            { stat: "3-5", label: "providers used per person, per week" },
+            { stat: "0%", label: "of that knowledge is captured by default" },
+          ].map((s, i) => (
+            <div key={s.stat} className={i > 0 ? "sm:border-l sm:border-[var(--hairline)] sm:pl-10" : ""}>
+              <div className="display text-[clamp(3rem,5vw,4.5rem)] leading-none text-[var(--ink)]">
+                {s.stat}
+              </div>
+              <div className="mono mt-3 text-[var(--ink-mute)]">{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ──────────────────────── THREE TIERS ──────────────────────── */
+
+function ThreeTiers() {
+  return (
+    <section id="tiers" className="bg-[var(--paper-pale)]/60 py-28 lg:py-40">
+      <div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-x-6 gap-y-12 px-8 lg:px-14">
+        <div className="col-span-12 lg:col-span-5">
+          <p className="mono mb-7 text-[var(--clay-deep)]">§ 02 / Three tiers of memory</p>
+          <h2 className="display text-[clamp(2.4rem,4.6vw,4rem)] leading-[0.98] text-[var(--ink)]">
+            <span className="display-italic">Personal.</span>
+            <br />
+            Team.
+            <br />
+            Organisation.
+          </h2>
+          <p className="mt-8 max-w-[44ch] text-[1.05rem] leading-[1.65] text-[var(--ink-soft)]">
+            Memory in Knowledgee is structured as a three-tier protocol. A fact you
+            discover in a private conversation belongs to you. A decision your team makes
+            belongs to the team. A truth about the company belongs to the organisation.
+            Each atom carries provenance, confidence, and a decay function — knowledge,
+            but with metabolism.
+          </p>
+          <div className="mt-12 space-y-5">
+            {[
+              {
+                tier: "Personal",
+                desc: "Private to the user. Preferences, working context, drafts.",
+                weight: "0.0",
+              },
+              {
+                tier: "Team",
+                desc: "Shared with the team. Conventions, decisions, on-call playbooks.",
+                weight: "0.4",
+              },
+              {
+                tier: "Organisation",
+                desc: "Visible across the company. Stack, compliance, strategy.",
+                weight: "0.9",
+              },
+            ].map((t, i) => (
+              <div
+                key={t.tier}
+                className="grid grid-cols-[auto_1fr_auto] items-baseline gap-6 border-b border-[var(--hairline)] pb-5"
+              >
+                <span className="mono text-[var(--ink-faint)]">0{i + 1}</span>
+                <div>
+                  <div className="display text-2xl text-[var(--ink)]">{t.tier}</div>
+                  <p className="mt-1 text-[0.95rem] text-[var(--ink-mute)]">{t.desc}</p>
+                </div>
+                <span className="mono text-[var(--clay-deep)]">decay {t.weight}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Animated SVG diagram */}
+        <div className="col-span-12 flex items-center justify-center lg:col-span-7">
+          <TiersDiagram />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function TiersDiagram() {
+  return (
+    <div className="relative aspect-square w-full max-w-[640px]">
+      <svg
+        viewBox="0 0 600 600"
+        className="absolute inset-0 h-full w-full"
+        aria-hidden="true"
+      >
+        <defs>
+          <radialGradient id="tier-glow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#C15F3C" stopOpacity="0.18" />
+            <stop offset="60%" stopColor="#C15F3C" stopOpacity="0.05" />
+            <stop offset="100%" stopColor="#C15F3C" stopOpacity="0" />
+          </radialGradient>
+          <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#1a1814" strokeWidth="0.3" opacity="0.06" />
+          </pattern>
+        </defs>
+
+        {/* Background grid */}
+        <rect width="600" height="600" fill="url(#grid)" />
+        <circle cx="300" cy="300" r="290" fill="url(#tier-glow)" />
+
+        {/* Outer ring — Organisation */}
+        <g className="ring-pulse-3">
+          <circle
+            cx="300"
+            cy="300"
+            r="270"
+            fill="none"
+            stroke="#1a1814"
+            strokeWidth="1"
+            strokeDasharray="2 6"
+            opacity="0.5"
+          />
+        </g>
+        <g className="orbit-slow" style={{ transformOrigin: "300px 300px" }}>
+          <circle cx="300" cy="30" r="4" fill="#1a1814" />
+          <circle cx="570" cy="300" r="3" fill="#665f54" />
+          <circle cx="120" cy="510" r="3" fill="#665f54" />
+        </g>
+
+        {/* Middle ring — Team */}
+        <g className="ring-pulse-2">
+          <circle
+            cx="300"
+            cy="300"
+            r="180"
+            fill="none"
+            stroke="#1a1814"
+            strokeWidth="1"
+            opacity="0.7"
+          />
+        </g>
+        <g className="orbit-rev" style={{ transformOrigin: "300px 300px" }}>
+          <circle cx="300" cy="120" r="5" fill="#C15F3C" />
+          <circle cx="480" cy="300" r="4" fill="#1a1814" />
+          <circle cx="180" cy="420" r="4" fill="#1a1814" />
+        </g>
+
+        {/* Inner ring — Personal */}
+        <g className="ring-pulse-1">
+          <circle
+            cx="300"
+            cy="300"
+            r="100"
+            fill="#FAF6EE"
+            stroke="#1a1814"
+            strokeWidth="1.2"
+          />
+        </g>
+
+        {/* Center — the user */}
+        <circle cx="300" cy="300" r="10" fill="#1a1814" />
+
+        {/* Connecting lines from center */}
+        <g opacity="0.3">
+          <line x1="300" y1="300" x2="300" y2="120" stroke="#1a1814" strokeWidth="0.5" />
+          <line x1="300" y1="300" x2="480" y2="300" stroke="#1a1814" strokeWidth="0.5" />
+          <line x1="300" y1="300" x2="300" y2="30" stroke="#1a1814" strokeWidth="0.5" />
+        </g>
+
+        {/* Labels */}
+        <text x="300" y="318" textAnchor="middle" fontSize="9" fill="#FAF6EE" fontFamily="var(--font-geist-mono)" letterSpacing="2">
+          YOU
+        </text>
+      </svg>
+
+      {/* Tier labels */}
+      <div className="pointer-events-none absolute inset-0">
+        <span className="mono absolute left-1/2 top-[44%] -translate-x-1/2 text-[var(--ink-mute)]">
+          Personal
+        </span>
+        <span className="mono absolute left-1/2 top-[24%] -translate-x-1/2 text-[var(--ink-mute)]">
+          Team
+        </span>
+        <span className="mono absolute left-1/2 top-[5%] -translate-x-1/2 text-[var(--ink-mute)]">
+          Organisation
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/* ───────────────────────── PROTOCOL ───────────────────────── */
+
+function Protocol() {
+  return (
+    <section id="protocol" className="py-28 lg:py-40">
+      <div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-x-6 gap-y-16 px-8 lg:px-14">
+        <div className="col-span-12 lg:col-span-5">
+          <figure className="relative">
+            <div className="absolute -inset-2 -z-10 rounded-full bg-[var(--clay-soft)]/30 blur-3xl" />
+            <Image
+              src="/landing/knowledge-atom.png"
+              alt=""
+              width={1024}
+              height={1024}
+              className="aspect-square w-full rounded-[2px] object-cover"
+              sizes="(max-width: 1024px) 100vw, 40vw"
+            />
+            <figcaption className="mono mt-5 flex justify-between text-[var(--ink-faint)]">
+              <span>Plate II</span>
+              <span>A single atom, in macro</span>
+            </figcaption>
+          </figure>
+        </div>
+
+        <div className="col-span-12 lg:col-span-6 lg:col-start-7">
+          <p className="mono mb-7 text-[var(--clay-deep)]">§ 03 / The protocol</p>
+          <h2 className="display text-[clamp(2.4rem,4.6vw,4rem)] leading-[0.98] text-[var(--ink)]">
+            Knowledge as a structured object, not a chat log.
+          </h2>
+          <p className="mt-8 text-[1.05rem] leading-[1.65] text-[var(--ink-soft)]">
+            We extract atoms, not transcripts. Each atom has a type, a confidence, a
+            scope, a provenance, and a half-life. They are stored in pgvector for
+            similarity, indexed for the graph, and reconciled nightly to detect drift,
+            staleness, and contradiction.
+          </p>
+          <hr className="rule my-10" />
+
+          <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+            {[
+              { kind: "Fact", note: "verifiable, slow decay" },
+              { kind: "Decision", note: "rationale preserved" },
+              { kind: "Solution", note: "actionable, cross-referenced" },
+              { kind: "Preference", note: "personal scope by default" },
+              { kind: "Process", note: "high decay, frequent review" },
+              { kind: "Relationship", note: "graph-linked to entities" },
+              { kind: "Context", note: "ephemeral, expires on signal" },
+              { kind: "Conflict", note: "flagged for human review" },
+            ].map((a) => (
+              <div key={a.kind} className="border-b border-[var(--hairline)] pb-3">
+                <div className="display text-xl text-[var(--ink)]">{a.kind}</div>
+                <div className="mono mt-1 text-[var(--ink-mute)]">{a.note}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mono mt-12 inline-flex items-center gap-3 rounded-full border border-[var(--ink)] px-5 py-3 text-[var(--ink)]">
+            <Pulse />
+            Open spec — OMP v1
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ───────────────────────── MULTI MODEL ───────────────────────── */
+
+function MultiModel() {
+  const models = [
+    "GPT-4o",
+    "Claude Opus 4.6",
+    "Claude Sonnet 4",
+    "Gemini 2.5 Pro",
+    "Grok 3",
+    "Llama 4",
+    "o3",
+    "Gemini Flash",
+    "Claude Haiku",
+    "GPT-4o Mini",
+  ];
+  return (
+    <section id="models" className="border-t border-[var(--hairline)] bg-[var(--ink)] text-[var(--paper)]">
+      <div className="mx-auto max-w-[1440px] px-8 py-28 lg:px-14 lg:py-40">
+        <div className="grid grid-cols-12 gap-x-6 gap-y-14">
+          <div className="col-span-12 lg:col-span-5">
+            <p className="mono mb-7 text-[var(--clay-soft)]">§ 04 / Every model, one room</p>
+            <h2 className="display text-[clamp(2.4rem,4.6vw,4rem)] leading-[0.98] text-[var(--paper)]">
+              Why bet on a single provider when you can have all of them — and keep what
+              you learn, regardless of which one was talking?
+            </h2>
+          </div>
+
+          <div className="col-span-12 lg:col-span-6 lg:col-start-7">
+            <figure className="relative">
+              <Image
+                src="/landing/multi-model-constellation.png"
+                alt=""
+                width={1536}
+                height={1024}
+                className="w-full rounded-[2px] object-cover"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+              />
+              <figcaption className="mono mt-5 flex justify-between text-[var(--paper)]/50">
+                <span>Plate III</span>
+                <span>Five providers, in constellation</span>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+
+        {/* Marquee of model names */}
+        <div className="mt-20 overflow-hidden border-y border-[var(--paper)]/15">
+          <div className="marquee-track flex items-center gap-12 py-7">
+            {[...models, ...models].map((m, i) => (
+              <span
+                key={i}
+                className="display flex items-center gap-12 whitespace-nowrap text-[2.6rem] text-[var(--paper)]/85"
+              >
+                {m}
+                <span className="display-italic text-[var(--clay-soft)]">·</span>
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Mid-conversation switch */}
+        <div className="mt-20 grid grid-cols-12 gap-x-6 gap-y-10">
+          <div className="col-span-12 lg:col-span-7">
+            <p className="mono mb-5 text-[var(--clay-soft)]">A unique capability</p>
+            <h3 className="display text-[clamp(1.8rem,3vw,2.6rem)] leading-[1.05] text-[var(--paper)]">
+              Switch models <span className="display-italic">mid-thread.</span> Context
+              survives.
+            </h3>
+            <p className="mt-6 max-w-[58ch] text-[1.05rem] leading-[1.65] text-[var(--paper)]/70">
+              A second opinion is one keystroke away. Open a thread with Claude, ask GPT
+              the next question, then send the result to Gemini — Knowledgee keeps the
+              entire context coherent across providers.
+            </p>
+          </div>
+          <div className="col-span-12 lg:col-span-5">
+            <SwitchDemo />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SwitchDemo() {
+  const turns = [
+    { who: "You", model: null, text: "How would we shard the events table?" },
+    { who: "Claude Sonnet", model: "claude", text: "Hash by tenant_id, range by week — keeps tenants co-located while bounding hot partitions." },
+    { who: "You", model: null, text: "Send that answer to GPT-4o for a sanity check." },
+    { who: "GPT-4o", model: "gpt", text: "Concur on tenant_id hash. Suggest pg_partman for the weekly ranges; review your retention policy." },
+  ];
+  return (
+    <div className="rounded-[2px] border border-[var(--paper)]/15 bg-[var(--paper)]/5 p-6">
+      <div className="mono mb-5 flex items-center justify-between text-[var(--paper)]/50">
+        <span>Knowledgee · thread #4421</span>
+        <span className="flex items-center gap-1.5">
+          <Pulse soft /> live
+        </span>
+      </div>
+      <div className="space-y-4 text-[0.95rem]">
+        {turns.map((t, i) => (
+          <div key={i} className="grid grid-cols-[88px_1fr] items-baseline gap-3">
+            <span className="mono text-[var(--paper)]/45">{t.who}</span>
+            <p className="leading-[1.55] text-[var(--paper)]/90">{t.text}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ───────────────────────── PRODUCT THEATRE ───────────────────────── */
+
+function ProductTheatre() {
+  return (
+    <section className="py-28 lg:py-40">
+      <div className="mx-auto max-w-[1440px] px-8 lg:px-14">
+        <div className="grid grid-cols-12 items-end gap-6">
+          <div className="col-span-12 lg:col-span-7">
+            <p className="mono mb-7 text-[var(--clay-deep)]">§ 05 / In practice</p>
+            <h2 className="display text-[clamp(2.4rem,4.6vw,4rem)] leading-[0.98] text-[var(--ink)]">
+              A workspace that <span className="display-italic">remembers</span>.
+            </h2>
+          </div>
+          <div className="col-span-12 lg:col-span-4 lg:col-start-9">
+            <p className="text-[1.02rem] leading-[1.65] text-[var(--ink-soft)]">
+              Three panels: the conversation, the model in use, and the knowledge atoms
+              quietly attached to the answer — with citations, confidence, and the option
+              to promote any atom to your team&rsquo;s shared memory.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-16 overflow-hidden rounded-[3px] border border-[var(--ink)] bg-[var(--paper-pale)] shadow-[0_30px_80px_-30px_rgba(26,24,20,0.35)]">
+          {/* Top rail */}
+          <div className="flex items-center justify-between border-b border-[var(--ink)] bg-[var(--ink)] px-6 py-3 text-[var(--paper)]">
+            <div className="mono flex items-center gap-2 text-[var(--paper)]/60">
+              <span>knowledgee</span>
+              <span className="text-[var(--paper)]/30">/</span>
+              <span>workspace</span>
+              <span className="text-[var(--paper)]/30">/</span>
+              <span className="text-[var(--clay-soft)]">events-sharding</span>
+            </div>
+            <div className="mono flex items-center gap-2 text-[var(--paper)]/60">
+              <Pulse soft />
+              autosave
+            </div>
+          </div>
+
+          {/* Three columns */}
+          <div className="grid grid-cols-12 gap-0 lg:min-h-[520px]">
+            {/* Threads */}
+            <aside className="col-span-12 border-r border-[var(--hairline)] bg-[var(--paper)] p-6 lg:col-span-3">
+              <div className="mono mb-5 text-[var(--ink-faint)]">Recent threads</div>
+              <ul className="space-y-1.5">
+                {[
+                  { t: "Events sharding", on: true },
+                  { t: "Q3 pricing brief", on: false },
+                  { t: "Onboarding rewrite", on: false },
+                  { t: "Stripe webhook race", on: false },
+                  { t: "Migration plan v2", on: false },
+                ].map((th) => (
+                  <li
+                    key={th.t}
+                    className={`rounded-[2px] border px-3 py-2 text-[0.92rem] ${
+                      th.on
+                        ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--paper)]"
+                        : "border-transparent text-[var(--ink-mute)] hover:border-[var(--hairline)]"
+                    }`}
+                  >
+                    {th.t}
+                  </li>
+                ))}
+              </ul>
+            </aside>
+
+            {/* Conversation */}
+            <main className="col-span-12 border-r border-[var(--hairline)] p-8 lg:col-span-6">
+              <div className="mono mb-6 flex items-center gap-3 text-[var(--ink-faint)]">
+                <span>Claude Sonnet 4</span>
+                <span>·</span>
+                <span>8 atoms in context</span>
+              </div>
+              <div className="space-y-7 text-[0.96rem] leading-[1.62] text-[var(--ink)]">
+                <div>
+                  <div className="mono mb-1.5 text-[var(--ink-faint)]">You</div>
+                  <p>How would we shard the events table for the new region?</p>
+                </div>
+                <div>
+                  <div className="mono mb-1.5 text-[var(--clay-deep)]">Knowledgee</div>
+                  <p>
+                    Given the team&rsquo;s prior decision (March &rsquo;26) to standardise on{" "}
+                    <em className="display-italic">hash-by-tenant_id, range-by-week</em>,
+                    extending the same pattern to the new region keeps pg_partman config
+                    portable.
+                  </p>
+                  <p className="mt-3 text-[var(--ink-soft)]">
+                    Two atoms attached this answer to past context.
+                  </p>
+                </div>
+              </div>
+            </main>
+
+            {/* Atoms */}
+            <aside className="col-span-12 bg-[var(--paper)] p-6 lg:col-span-3">
+              <div className="mono mb-5 flex items-center justify-between text-[var(--ink-faint)]">
+                <span>Atoms</span>
+                <span>0.94 confidence</span>
+              </div>
+              <div className="space-y-3">
+                {[
+                  { type: "decision", text: "Standardise on hash(tenant_id) + range(week)", scope: "team" },
+                  { type: "fact", text: "events table currently sharded by region", scope: "org" },
+                ].map((a) => (
+                  <div
+                    key={a.text}
+                    className="border-l-2 border-[var(--clay)] bg-[var(--paper-pale)] p-3"
+                  >
+                    <div className="mono mb-1.5 flex justify-between text-[var(--clay-deep)]">
+                      <span>{a.type}</span>
+                      <span className="text-[var(--ink-faint)]">{a.scope}</span>
+                    </div>
+                    <p className="text-[0.86rem] leading-[1.5] text-[var(--ink)]">{a.text}</p>
+                  </div>
+                ))}
+              </div>
+
+              <hr className="rule my-7" />
+              <div className="mono mb-3 text-[var(--ink-faint)]">Reconciled today</div>
+              <ul className="space-y-2 text-[0.86rem] text-[var(--ink-soft)]">
+                <li>· 2 atoms affirmed</li>
+                <li>· 1 atom marked stale</li>
+                <li>· 1 conflict resolved</li>
+              </ul>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ───────────────────────── CLOSING ───────────────────────── */
+
+function Closing() {
+  return (
+    <section className="border-t border-[var(--hairline)] bg-[var(--paper-pale)]/50 py-32 lg:py-44">
+      <div className="mx-auto max-w-[1100px] px-8 text-center lg:px-14">
+        <p className="mono mb-10 text-[var(--clay-deep)]">A closing remark</p>
+        <p className="display text-[clamp(2.4rem,5.4vw,4.6rem)] leading-[1.04] text-[var(--ink)]">
+          The companies that win the next decade are the ones that{" "}
+          <span className="display-italic">remember</span> what their people learned with
+          machines.
+        </p>
+        <div className="mt-16 flex flex-wrap items-center justify-center gap-6">
+          <Link
+            href="/chat"
+            className="mono link-shift inline-flex items-center rounded-full bg-[var(--ink)] px-8 py-4 text-[var(--paper)] hover:bg-[var(--clay-deep)]"
+          >
+            Begin a conversation
+            <ArrowEast />
+          </Link>
+          <Link
+            href="/register"
+            className="mono link-underline text-[var(--ink-soft)]"
+          >
+            Create an organisation →
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ───────────────────────── FOOTER ───────────────────────── */
+
+function Footer() {
+  return (
+    <footer className="border-t border-[var(--hairline)] py-14">
+      <div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-6 px-8 text-[var(--ink-soft)] lg:px-14">
+        <div className="col-span-12 lg:col-span-5">
+          <Link href="/" className="display text-[1.7rem] tracking-tight text-[var(--ink)]">
+            Knowledgee<span className="display-italic text-[var(--clay-deep)]">.</span>
+          </Link>
+          <p className="mt-4 max-w-[40ch] text-[0.95rem] leading-[1.6]">
+            The Organizational Memory Protocol — and the workspace that implements it.
+          </p>
+        </div>
+        <div className="col-span-6 lg:col-span-2">
+          <div className="mono mb-4 text-[var(--ink-faint)]">Product</div>
+          <ul className="space-y-2 text-[0.9rem]">
+            <li><Link href="/chat" className="link-underline">App</Link></li>
+            <li><a href="#tiers" className="link-underline">Memory</a></li>
+            <li><a href="#protocol" className="link-underline">Protocol</a></li>
+          </ul>
+        </div>
+        <div className="col-span-6 lg:col-span-2">
+          <div className="mono mb-4 text-[var(--ink-faint)]">Company</div>
+          <ul className="space-y-2 text-[0.9rem]">
+            <li><Link href="/register" className="link-underline">Register</Link></li>
+            <li><Link href="/login" className="link-underline">Sign in</Link></li>
+          </ul>
+        </div>
+        <div className="col-span-12 lg:col-span-3">
+          <div className="mono mb-4 text-[var(--ink-faint)]">Colophon</div>
+          <p className="text-[0.86rem] leading-[1.6]">
+            Set in Fraunces and Inter Tight. Plates I-III generated for this issue.
+          </p>
+        </div>
+        <div className="col-span-12 mt-8 flex items-center justify-between border-t border-[var(--hairline)] pt-6 text-[0.8rem]">
+          <span className="mono">© Knowledgee {new Date().getFullYear()}</span>
+          <span className="mono text-[var(--ink-faint)]">v1 — issue 01</span>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+/* ───────────────────────── PRIMITIVES ───────────────────────── */
+
+function Wordmark() {
+  return (
+    <svg width="32" height="32" viewBox="0 0 40 40" aria-hidden="true">
+      <circle cx="20" cy="20" r="19" fill="none" stroke="#1a1814" strokeWidth="1" />
+      <circle cx="20" cy="20" r="13" fill="none" stroke="#1a1814" strokeWidth="1" />
+      <circle cx="20" cy="20" r="6" fill="#1a1814" />
+      <circle cx="20" cy="6.5" r="1.4" fill="#C15F3C" />
     </svg>
   );
 }
 
-function SparklesIcon({ className }: { className?: string }) {
+function ArrowEast() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" />
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 14 14"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M2 7h10" />
+      <path d="m8 3 4 4-4 4" />
     </svg>
   );
 }
 
-function BrainIcon({ className }: { className?: string }) {
+function Pulse({ soft }: { soft?: boolean }) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z" />
-      <path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z" />
-      <path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4" />
-      <path d="M17.599 6.5a3 3 0 0 0 .399-1.375" />
-      <path d="M6.003 5.125A3 3 0 0 0 6.401 6.5" />
-      <path d="M3.477 10.896a4 4 0 0 1 .585-.396" />
-      <path d="M19.938 10.5a4 4 0 0 1 .585.396" />
-      <path d="M6 18a4 4 0 0 1-1.967-.516" />
-      <path d="M19.967 17.484A4 4 0 0 1 18 18" />
-    </svg>
+    <span className="relative inline-flex h-2 w-2">
+      <span
+        className={`absolute inline-flex h-full w-full animate-ping rounded-full ${soft ? "bg-[var(--clay-soft)]" : "bg-[var(--clay)]"} opacity-60`}
+      />
+      <span
+        className={`relative inline-flex h-2 w-2 rounded-full ${soft ? "bg-[var(--clay-soft)]" : "bg-[var(--clay)]"}`}
+      />
+    </span>
   );
 }

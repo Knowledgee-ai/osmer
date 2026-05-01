@@ -128,3 +128,179 @@
     @apply font-sans;
   }
 }
+
+/* ============================================================
+   Landing — "Paper" theme
+   Editorial cream palette scoped to [data-theme="paper"].
+   Overrides the dark theme variables when applied.
+   ============================================================ */
+
+[data-theme="paper"] {
+  --paper: #f4efe6;
+  --paper-deep: #ede5d2;
+  --paper-pale: #faf6ee;
+  --ink: #1a1814;
+  --ink-soft: #3a342c;
+  --ink-mute: #665f54;
+  --ink-faint: #9a9183;
+  --hairline: #e0d6c2;
+  --hairline-strong: #c9bda4;
+  --clay: #c15f3c;
+  --clay-deep: #8b3a1f;
+  --clay-soft: #e9b89e;
+
+  /* Override shadcn variables within this scope */
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: var(--paper-pale);
+  --card-foreground: var(--ink);
+  --muted: var(--paper-deep);
+  --muted-foreground: var(--ink-mute);
+  --border: var(--hairline);
+  --primary: var(--ink);
+  --primary-foreground: var(--paper);
+  --accent: var(--clay);
+  --accent-foreground: var(--paper);
+  --ring: var(--clay);
+
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body), system-ui, sans-serif;
+  letter-spacing: -0.011em;
+  font-feature-settings: "ss01", "ss02", "cv01", "cv11";
+}
+
+/* Subtle paper grain — applied via overlay pseudo */
+[data-theme="paper"] .paper-grain {
+  position: relative;
+  isolation: isolate;
+}
+[data-theme="paper"] .paper-grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.09 0 0 0 0 0.07 0 0 0 0.06 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+[data-theme="paper"] .display {
+  font-family: var(--font-display), Georgia, serif;
+  font-feature-settings: "ss01", "ss02", "ss03";
+  font-variation-settings: "opsz" 144, "SOFT" 50, "WONK" 0;
+  letter-spacing: -0.025em;
+  line-height: 0.96;
+}
+[data-theme="paper"] .display-italic {
+  font-family: var(--font-display), Georgia, serif;
+  font-style: italic;
+  font-variation-settings: "opsz" 144, "SOFT" 100;
+}
+[data-theme="paper"] .mono {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+}
+
+/* Hover ink-shift on links */
+[data-theme="paper"] .link-shift {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: gap 220ms cubic-bezier(0.32, 0.72, 0, 1), color 220ms;
+}
+[data-theme="paper"] .link-shift:hover {
+  gap: 0.7rem;
+  color: var(--clay-deep);
+}
+[data-theme="paper"] .link-underline {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 100% 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 280ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+[data-theme="paper"] .link-underline:hover {
+  background-size: 0% 1px;
+}
+
+/* Hairline rule */
+[data-theme="paper"] hr.rule {
+  border: 0;
+  border-top: 1px solid var(--hairline);
+  margin: 0;
+}
+
+/* Sticky scroll-reveal — staggered fade up */
+@keyframes paper-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes paper-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes ink-blur-in {
+  from { opacity: 0; filter: blur(8px); transform: translateY(20px); }
+  to   { opacity: 1; filter: blur(0);   transform: translateY(0); }
+}
+[data-theme="paper"] .rise {
+  animation: paper-rise 1100ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+[data-theme="paper"] .blur-in {
+  animation: ink-blur-in 1400ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+[data-theme="paper"] .fade-in {
+  animation: paper-fade 1600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Drift loop — gentle for hero ornament */
+@keyframes drift {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50%      { transform: translateY(-8px) rotate(0.4deg); }
+}
+[data-theme="paper"] .drift { animation: drift 9s ease-in-out infinite; }
+
+/* Marquee for model wordmarks */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+[data-theme="paper"] .marquee-track {
+  animation: marquee 38s linear infinite;
+  width: max-content;
+}
+
+/* Three-tier diagram pulse */
+@keyframes ring-pulse {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50%      { opacity: 0.8; transform: scale(1.04); }
+}
+[data-theme="paper"] .ring-pulse-1 { animation: ring-pulse 6s ease-in-out infinite; }
+[data-theme="paper"] .ring-pulse-2 { animation: ring-pulse 6s ease-in-out infinite 1.5s; }
+[data-theme="paper"] .ring-pulse-3 { animation: ring-pulse 6s ease-in-out infinite 3s; }
+
+/* Knowledge atom orbit */
+@keyframes orbit {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+[data-theme="paper"] .orbit-slow { animation: orbit 32s linear infinite; transform-origin: center; }
+[data-theme="paper"] .orbit-rev  { animation: orbit 24s linear infinite reverse; transform-origin: center; }
+
+/* Cursor-following gradient */
+[data-theme="paper"] .spotlight {
+  background:
+    radial-gradient(60rem 36rem at 80% 0%, rgba(193,95,60,0.10), transparent 60%),
+    radial-gradient(48rem 30rem at 0% 100%, rgba(26,24,20,0.06), transparent 60%);
+}

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Fraunces, Inter_Tight } from "next/font/google";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Providers } from "@/components/providers";
 import "./globals.css";
@@ -14,10 +14,23 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const fraunces = Fraunces({
+  variable: "--font-display",
+  subsets: ["latin"],
+  axes: ["opsz", "SOFT", "WONK"],
+  display: "swap",
+});
+
+const interTight = Inter_Tight({
+  variable: "--font-body",
+  subsets: ["latin"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "Knowledgee — Your Organization's AI Brain",
+  title: "Knowledgee — The shape of organizational memory",
   description:
-    "Multi-model AI chat with organizational memory. Chat with GPT-4o, Claude, Gemini, and more — with knowledge that compounds across every conversation.",
+    "Every AI conversation in your company generates knowledge that today evaporates. Knowledgee captures it, refines it, and makes it the property of the organization — not the inbox of one employee.",
 };
 
 export default function RootLayout({
@@ -28,7 +41,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} ${interTight.variable} dark h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="h-full overflow-hidden">
