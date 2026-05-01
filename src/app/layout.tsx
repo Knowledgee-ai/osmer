@@ -28,9 +28,9 @@ const interTight = Inter_Tight({
 });
 
 export const metadata: Metadata = {
-  title: "Knowledgee — The shape of organizational memory",
+  title: "Knowledgee · The shape of organizational memory",
   description:
-    "Every AI conversation in your company generates knowledge that today evaporates. Knowledgee captures it, refines it, and makes it the property of the organization — not the inbox of one employee.",
+    "Every AI conversation in your company generates knowledge that today evaporates. Knowledgee captures it, refines it, and makes it the property of the organization, not the inbox of one employee.",
 };
 
 export default function RootLayout({

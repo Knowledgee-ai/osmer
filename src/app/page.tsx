@@ -65,7 +65,7 @@ function Hero() {
     <section className="relative">
       <div className="spotlight pointer-events-none absolute inset-0 -z-10" />
       <div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-x-6 px-8 pt-20 pb-32 lg:px-14 lg:pt-28 lg:pb-40">
-        {/* Left rail — eyebrow + headline */}
+        {/* Left rail: eyebrow and headline */}
         <div className="col-span-12 lg:col-span-7">
           <p className="mono blur-in mb-7 text-[var(--clay-deep)]" style={{ animationDelay: "100ms" }}>
             Vol. 01 / The Organizational Memory Protocol
@@ -87,8 +87,8 @@ function Hero() {
           >
             Every conversation your team has with an AI generates knowledge that today
             evaporates the moment the tab closes. Knowledgee is the system of record for
-            the work your colleagues do <em className="display-italic">with</em> machines —
-            captured, refined, and passed forward.
+            the work your colleagues do <em className="display-italic">with</em> machines.
+            Captured, refined, and passed forward.
           </p>
           <div
             className="rise mt-12 flex flex-wrap items-center gap-6"
@@ -126,7 +126,7 @@ function Hero() {
           </dl>
         </div>
 
-        {/* Right rail — hero image */}
+        {/* Right rail: hero image */}
         <div className="col-span-12 mt-16 lg:col-span-5 lg:mt-0">
           <figure className="fade-in relative drift" style={{ animationDelay: "300ms" }}>
             <div className="absolute -inset-3 -z-10 rounded-full bg-[var(--clay-soft)]/40 blur-3xl" />
@@ -164,8 +164,8 @@ function Manifesto() {
           <span className="display-italic text-[var(--clay-deep)]">
             every AI conversation
           </span>{" "}
-          your company has — that it should belong to the organization, not to the inbox
-          of one employee.
+          your company has. The knowledge should belong to the organization, not to
+          the inbox of one employee.
         </p>
       </div>
     </section>
@@ -199,10 +199,10 @@ function Problem() {
           </div>
           <div>
             <p>
-              We call this <em className="display-italic">shadow AI</em> — the
-              twenty-first-century cousin of shadow IT, with one important difference:
-              the artefacts are not files but conversations, and they are produced faster
-              than any documentation practice can capture.
+              We call this <em className="display-italic">shadow AI</em>: the
+              twenty-first-century cousin of shadow IT, with one important difference.
+              The artefacts are not files but conversations, and they are produced
+              faster than any documentation practice can capture.
             </p>
             <p className="mt-5">
               No model provider solves this. They optimise for their own walled garden.
@@ -252,7 +252,7 @@ function ThreeTiers() {
             Memory in Knowledgee is structured as a three-tier protocol. A fact you
             discover in a private conversation belongs to you. A decision your team makes
             belongs to the team. A truth about the company belongs to the organisation.
-            Each atom carries provenance, confidence, and a decay function — knowledge,
+            Each atom carries provenance, confidence, and a decay function. Knowledge,
             but with metabolism.
           </p>
           <div className="mt-12 space-y-5">
@@ -320,7 +320,7 @@ function TiersDiagram() {
         <rect width="600" height="600" fill="url(#grid)" />
         <circle cx="300" cy="300" r="290" fill="url(#tier-glow)" />
 
-        {/* Outer ring — Organisation */}
+        {/* Outer ring: Organisation */}
         <g className="ring-pulse-3">
           <circle
             cx="300"
@@ -339,7 +339,7 @@ function TiersDiagram() {
           <circle cx="120" cy="510" r="3" fill="#665f54" />
         </g>
 
-        {/* Middle ring — Team */}
+        {/* Middle ring: Team */}
         <g className="ring-pulse-2">
           <circle
             cx="300"
@@ -357,7 +357,7 @@ function TiersDiagram() {
           <circle cx="180" cy="420" r="4" fill="#1a1814" />
         </g>
 
-        {/* Inner ring — Personal */}
+        {/* Inner ring: Personal */}
         <g className="ring-pulse-1">
           <circle
             cx="300"
@@ -369,7 +369,7 @@ function TiersDiagram() {
           />
         </g>
 
-        {/* Center — the user */}
+        {/* Center: the user */}
         <circle cx="300" cy="300" r="10" fill="#1a1814" />
 
         {/* Connecting lines from center */}
@@ -458,7 +458,7 @@ function Protocol() {
 
           <div className="mono mt-12 inline-flex items-center gap-3 rounded-full border border-[var(--ink)] px-5 py-3 text-[var(--ink)]">
             <Pulse />
-            Open spec — OMP v1
+            Open spec · OMP v1
           </div>
         </div>
       </div>
@@ -488,8 +488,8 @@ function MultiModel() {
           <div className="col-span-12 lg:col-span-5">
             <p className="mono mb-7 text-[var(--clay-soft)]">§ 04 / Every model, one room</p>
             <h2 className="display text-[clamp(2.4rem,4.6vw,4rem)] leading-[0.98] text-[var(--paper)]">
-              Why bet on a single provider when you can have all of them — and keep what
-              you learn, regardless of which one was talking?
+              Why bet on a single provider when you can have all of them, and keep
+              what you learn regardless of which one was talking?
             </h2>
           </div>
 
@@ -535,9 +535,9 @@ function MultiModel() {
               survives.
             </h3>
             <p className="mt-6 max-w-[58ch] text-[1.05rem] leading-[1.65] text-[var(--paper)]/70">
-              A second opinion is one keystroke away. Open a thread with Claude, ask GPT
-              the next question, then send the result to Gemini — Knowledgee keeps the
-              entire context coherent across providers.
+              A second opinion is one keystroke away. Open a thread with Claude,
+              ask GPT the next question, then send the result to Gemini. Knowledgee
+              keeps the entire context coherent across providers.
             </p>
           </div>
           <div className="col-span-12 lg:col-span-5">
@@ -552,7 +552,7 @@ function MultiModel() {
 function SwitchDemo() {
   const turns = [
     { who: "You", model: null, text: "How would we shard the events table?" },
-    { who: "Claude Sonnet", model: "claude", text: "Hash by tenant_id, range by week — keeps tenants co-located while bounding hot partitions." },
+    { who: "Claude Sonnet", model: "claude", text: "Hash by tenant_id, range by week. Keeps tenants co-located while bounding hot partitions." },
     { who: "You", model: null, text: "Send that answer to GPT-4o for a sanity check." },
     { who: "GPT-4o", model: "gpt", text: "Concur on tenant_id hash. Suggest pg_partman for the weekly ranges; review your retention policy." },
   ];
@@ -592,7 +592,7 @@ function ProductTheatre() {
           <div className="col-span-12 lg:col-span-4 lg:col-start-9">
             <p className="text-[1.02rem] leading-[1.65] text-[var(--ink-soft)]">
               Three panels: the conversation, the model in use, and the knowledge atoms
-              quietly attached to the answer — with citations, confidence, and the option
+              quietly attached to the answer, with citations, confidence, and the option
               to promote any atom to your team&rsquo;s shared memory.
             </p>
           </div>
@@ -750,7 +750,7 @@ function Footer() {
             Knowledgee<span className="display-italic text-[var(--clay-deep)]">.</span>
           </Link>
           <p className="mt-4 max-w-[40ch] text-[0.95rem] leading-[1.6]">
-            The Organizational Memory Protocol — and the workspace that implements it.
+            The Organizational Memory Protocol. The workspace that implements it.
           </p>
         </div>
         <div className="col-span-6 lg:col-span-2">
@@ -776,7 +776,7 @@ function Footer() {
         </div>
         <div className="col-span-12 mt-8 flex items-center justify-between border-t border-[var(--hairline)] pt-6 text-[0.8rem]">
           <span className="mono">© Knowledgee {new Date().getFullYear()}</span>
-          <span className="mono text-[var(--ink-faint)]">v1 — issue 01</span>
+          <span className="mono text-[var(--ink-faint)]">v1 · issue 01</span>
         </div>
       </div>
     </footer>
@@ -786,12 +786,37 @@ function Footer() {
 /* ───────────────────────── PRIMITIVES ───────────────────────── */
 
 function Wordmark() {
+  /**
+   * Knowledgee mark.
+   *
+   * A custom slab-serif K letterform with a single clay-terracotta atom dot
+   * floating at upper-right. The K identifies the brand; the dot is the OMP
+   * "atom" mark — a footnote, a citation, a captured fact. Asymmetric on
+   * purpose so it isn't visually confusable with concentric/wreath marks
+   * commonly used by AI brands.
+   */
   return (
-    <svg width="32" height="32" viewBox="0 0 40 40" aria-hidden="true">
-      <circle cx="20" cy="20" r="19" fill="none" stroke="#1a1814" strokeWidth="1" />
-      <circle cx="20" cy="20" r="13" fill="none" stroke="#1a1814" strokeWidth="1" />
-      <circle cx="20" cy="20" r="6" fill="#1a1814" />
-      <circle cx="20" cy="6.5" r="1.4" fill="#C15F3C" />
+    <svg
+      width="34"
+      height="34"
+      viewBox="0 0 80 80"
+      aria-hidden="true"
+      className="overflow-visible"
+    >
+      <g fill="#1a1814">
+        {/* Spine */}
+        <rect x="14" y="18" width="8" height="44" />
+        {/* Top slab serif */}
+        <rect x="10" y="14" width="16" height="4" />
+        {/* Bottom slab serif */}
+        <rect x="10" y="62" width="16" height="4" />
+        {/* Upper arm */}
+        <path d="M22 38 L52 18 L60 18 L60 22 L56 22 L30 40 Z" />
+        {/* Lower leg */}
+        <path d="M22 42 L52 62 L60 62 L60 58 L56 58 L30 40 Z" />
+      </g>
+      {/* Atom — the OMP citation mark */}
+      <circle cx="68" cy="14" r="4" fill="#C15F3C" />
     </svg>
   );
 }
