@@ -35,22 +35,24 @@ export function LandingNav() {
       className="nav-shell sticky top-0 z-40"
       data-scrolled={collapsed ? "true" : "false"}
     >
-      <nav className="mx-auto flex max-w-[1440px] items-center justify-between px-8 pt-7 pb-4 lg:px-14">
+      <nav className="mx-auto grid max-w-[1440px] grid-cols-[1fr_auto_1fr] items-center px-8 pt-7 pb-4 lg:px-14">
         <Link
           href="/"
           aria-label="Knowledgee, home"
-          className="logo-collapsible group flex items-center"
+          className="logo-collapsible justify-self-start"
           data-collapsed={collapsed ? "true" : "false"}
         >
-          <KMark />
-          <span className="logo-tail display text-[1.55rem] tracking-tight text-[var(--ink)]">
-            <span aria-hidden="true">nowledgee</span>
+          <span className="logo-k" aria-hidden="true">
+            K
+            <span className="atom-dot" />
           </span>
-          {/* Visually-hidden full word for screen readers */}
+          <span className="logo-tail" aria-hidden="true">
+            nowledgee
+          </span>
           <span className="sr-only">Knowledgee</span>
         </Link>
 
-        <div className="hidden items-center gap-10 md:flex">
+        <div className="hidden items-center gap-10 justify-self-center md:flex">
           <a href="#problem" className="mono link-underline text-[var(--ink-soft)]">
             Problem
           </a>
@@ -67,34 +69,13 @@ export function LandingNav() {
 
         <Link
           href="/chat"
-          className="mono link-shift inline-flex items-center rounded-full border border-[var(--ink)] bg-[var(--ink)] px-5 py-2.5 text-[var(--paper)] hover:border-[var(--clay-deep)] hover:bg-[var(--clay-deep)]"
+          className="mono link-shift inline-flex items-center justify-self-end rounded-full border border-[var(--ink)] bg-[var(--ink)] px-5 py-2.5 text-[var(--paper)] hover:border-[var(--clay-deep)] hover:bg-[var(--clay-deep)]"
         >
           Open the app
           <ArrowEast />
         </Link>
       </nav>
     </div>
-  );
-}
-
-function KMark() {
-  return (
-    <svg
-      width="34"
-      height="34"
-      viewBox="0 0 80 80"
-      aria-hidden="true"
-      className="logo-mark shrink-0 overflow-visible"
-    >
-      <g fill="#1a1814">
-        <rect x="14" y="18" width="8" height="44" />
-        <rect x="10" y="14" width="16" height="4" />
-        <rect x="10" y="62" width="16" height="4" />
-        <path d="M22 38 L52 18 L60 18 L60 22 L56 22 L30 40 Z" />
-        <path d="M22 42 L52 62 L60 62 L60 58 L56 58 L30 40 Z" />
-      </g>
-      <circle cx="68" cy="14" r="4" fill="#C15F3C" />
-    </svg>
   );
 }
 
