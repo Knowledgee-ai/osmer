@@ -46,8 +46,8 @@ export function LandingNav() {
             K
             <span className="atom-dot" />
           </span>
-          <span className="logo-tail" aria-hidden="true">
-            nowledgee
+          <span className="tail-clip" aria-hidden="true">
+            <span className="logo-tail">nowledgee</span>
           </span>
           <span className="sr-only">Knowledgee</span>
         </Link>

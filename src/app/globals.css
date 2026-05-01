@@ -326,10 +326,20 @@
   border-bottom-color: var(--hairline);
 }
 
-/* Wordmark: "K" + atom dot + "nowledgee", all in Fraunces, on a single
- * baseline. The K is a text glyph (not an SVG path) so the entire word
- * shares the same typeface, weight, and metrics. The atom dot is an
- * absolutely-positioned circle anchored to the K's upper-right corner. */
+/* Wordmark animation, Anthropic-style.
+ *
+ * The trailing letters of "Knowledgee" never visually cross the K.
+ * They stay perfectly still in their natural typographic positions;
+ * a reveal mask anchored to the K's right edge expands and contracts.
+ * The mask grows rightward to show "nowledgee" letter by letter, and
+ * retracts leftward to hide them right-to-left.
+ *
+ * Animation primitives: clip-path (GPU compositor, no layout) and
+ * width (so the link's bounding box also contracts so there's no
+ * dead horizontal space to the right of the collapsed K). Both
+ * properties are co-animated on Apple's smooth ease curve. No
+ * transform on the letters — that's what made the previous
+ * implementation feel like the text was sliding across the K. */
 
 [data-theme="paper"] .logo-collapsible {
   position: relative;
@@ -337,13 +347,13 @@
   align-items: baseline;
   font-family: var(--font-display), Georgia, serif;
   font-feature-settings: "ss01", "ss02";
-  font-variation-settings: "opsz" 100, "SOFT" 50;
+  font-variation-settings: "opsz" 100, "SOFT" 50, "wght" 500;
+  font-weight: 500;
   font-size: 1.6rem;
   line-height: 1.2;
   letter-spacing: -0.028em;
   color: var(--ink);
   white-space: nowrap;
-  /* Generous bottom room for descenders inside any clipped child. */
   padding-bottom: 0.06em;
   isolation: isolate;
 }
@@ -351,7 +361,6 @@
 [data-theme="paper"] .logo-k {
   position: relative;
   display: inline-block;
-  z-index: 2;
 }
 
 [data-theme="paper"] .atom-dot {
@@ -365,36 +374,34 @@
   pointer-events: none;
 }
 
-[data-theme="paper"] .logo-tail {
+/* The reveal mask. Width animates so the link contracts in layout;
+ * clip-path animates so the visible region narrows from the right
+ * smoothly on the compositor. The two are timing-locked so they
+ * read as one motion. */
+[data-theme="paper"] .tail-clip {
   display: inline-block;
   white-space: nowrap;
-  overflow: hidden;
-  /* Tight kerning to K: a small negative compensates for the gap that
-   * appears between adjacent inline elements in different DOM nodes. */
+  /* Tight kerning to K, no visible gap. */
   margin-left: -0.04em;
-  /* Bottom padding gives the descender of "g" room inside the
-   * overflow:hidden box; the negative margin keeps layout flow tidy. */
+  /* Descender room for "g" without affecting layout flow. */
   padding-bottom: 0.22em;
   margin-bottom: -0.22em;
-  max-width: 7em;
-  opacity: 1;
-  transform: translate3d(0, 0, 0);
-  transform-origin: left center;
+  width: 6.6em;
+  clip-path: inset(-0.5em 0 -0.5em 0);
   transition:
-    max-width 920ms cubic-bezier(0.65, 0, 0.35, 1),
-    opacity 540ms cubic-bezier(0.65, 0, 0.35, 1) 80ms,
-    transform 920ms cubic-bezier(0.65, 0, 0.35, 1);
-  will-change: max-width, opacity, transform;
+    width 880ms cubic-bezier(0.32, 0.72, 0, 1),
+    clip-path 880ms cubic-bezier(0.32, 0.72, 0, 1);
+  will-change: width, clip-path;
 }
 
-[data-theme="paper"] .logo-collapsible[data-collapsed="true"] .logo-tail {
-  max-width: 0;
-  opacity: 0;
-  transform: translate3d(-0.7rem, 0, 0);
-  transition:
-    max-width 820ms cubic-bezier(0.65, 0, 0.35, 1),
-    opacity 380ms cubic-bezier(0.65, 0, 0.35, 1),
-    transform 820ms cubic-bezier(0.65, 0, 0.35, 1);
+[data-theme="paper"] .logo-tail {
+  display: inline-block;
+  /* Letters do NOT translate; only the mask moves. */
+}
+
+[data-theme="paper"] .logo-collapsible[data-collapsed="true"] .tail-clip {
+  width: 0;
+  clip-path: inset(-0.5em 100% -0.5em 0);
 }
 
 @media (prefers-reduced-motion: reduce) {
