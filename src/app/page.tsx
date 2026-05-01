@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { LandingNav } from "@/components/landing/landing-nav";
 
 export default function LandingPage() {
   return (
@@ -8,7 +9,7 @@ export default function LandingPage() {
       className="paper-grain h-full overflow-y-auto"
       style={{ scrollBehavior: "smooth" }}
     >
-      <Nav />
+      <LandingNav />
       <Hero />
       <Manifesto />
       <Problem />
@@ -19,42 +20,6 @@ export default function LandingPage() {
       <Closing />
       <Footer />
     </div>
-  );
-}
-
-/* ───────────────────────── NAV ───────────────────────── */
-
-function Nav() {
-  return (
-    <nav className="relative z-10 mx-auto flex max-w-[1440px] items-center justify-between px-8 pt-7 pb-4 lg:px-14">
-      <Link href="/" className="flex items-center gap-2.5">
-        <Wordmark />
-        <span className="display text-[1.55rem] tracking-tight text-[var(--ink)]">
-          Knowledgee
-        </span>
-      </Link>
-      <div className="hidden items-center gap-10 md:flex">
-        <a href="#problem" className="mono link-underline text-[var(--ink-soft)]">
-          Problem
-        </a>
-        <a href="#tiers" className="mono link-underline text-[var(--ink-soft)]">
-          Memory
-        </a>
-        <a href="#protocol" className="mono link-underline text-[var(--ink-soft)]">
-          Protocol
-        </a>
-        <a href="#models" className="mono link-underline text-[var(--ink-soft)]">
-          Models
-        </a>
-      </div>
-      <Link
-        href="/chat"
-        className="mono link-shift inline-flex items-center rounded-full border border-[var(--ink)] bg-[var(--ink)] px-5 py-2.5 text-[var(--paper)] hover:bg-[var(--clay-deep)] hover:border-[var(--clay-deep)]"
-      >
-        Open the app
-        <ArrowEast />
-      </Link>
-    </nav>
   );
 }
 
@@ -784,42 +749,6 @@ function Footer() {
 }
 
 /* ───────────────────────── PRIMITIVES ───────────────────────── */
-
-function Wordmark() {
-  /**
-   * Knowledgee mark.
-   *
-   * A custom slab-serif K letterform with a single clay-terracotta atom dot
-   * floating at upper-right. The K identifies the brand; the dot is the OMP
-   * "atom" mark — a footnote, a citation, a captured fact. Asymmetric on
-   * purpose so it isn't visually confusable with concentric/wreath marks
-   * commonly used by AI brands.
-   */
-  return (
-    <svg
-      width="34"
-      height="34"
-      viewBox="0 0 80 80"
-      aria-hidden="true"
-      className="overflow-visible"
-    >
-      <g fill="#1a1814">
-        {/* Spine */}
-        <rect x="14" y="18" width="8" height="44" />
-        {/* Top slab serif */}
-        <rect x="10" y="14" width="16" height="4" />
-        {/* Bottom slab serif */}
-        <rect x="10" y="62" width="16" height="4" />
-        {/* Upper arm */}
-        <path d="M22 38 L52 18 L60 18 L60 22 L56 22 L30 40 Z" />
-        {/* Lower leg */}
-        <path d="M22 42 L52 62 L60 62 L60 58 L56 58 L30 40 Z" />
-      </g>
-      {/* Atom — the OMP citation mark */}
-      <circle cx="68" cy="14" r="4" fill="#C15F3C" />
-    </svg>
-  );
-}
 
 function ArrowEast() {
   return (

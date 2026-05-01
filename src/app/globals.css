@@ -304,3 +304,80 @@
     radial-gradient(60rem 36rem at 80% 0%, rgba(193,95,60,0.10), transparent 60%),
     radial-gradient(48rem 30rem at 0% 100%, rgba(26,24,20,0.06), transparent 60%);
 }
+
+/* ============================================================
+   Sticky nav with frosted backdrop on scroll, and a wordmark
+   that collapses to just the K when the page scrolls past 32px.
+   ============================================================ */
+
+[data-theme="paper"] .nav-shell {
+  background: transparent;
+  border-bottom: 1px solid transparent;
+  transition:
+    background-color 360ms cubic-bezier(0.32, 0.72, 0, 1),
+    border-color 360ms cubic-bezier(0.32, 0.72, 0, 1),
+    backdrop-filter 360ms cubic-bezier(0.32, 0.72, 0, 1);
+  will-change: background-color, backdrop-filter;
+}
+[data-theme="paper"] .nav-shell[data-scrolled="true"] {
+  background-color: rgba(244, 239, 230, 0.78);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(140%);
+  border-bottom-color: var(--hairline);
+}
+
+[data-theme="paper"] .logo-collapsible {
+  display: inline-flex;
+  align-items: center;
+  isolation: isolate;
+}
+
+[data-theme="paper"] .logo-mark {
+  position: relative;
+  z-index: 2;
+}
+
+[data-theme="paper"] .logo-tail {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.625rem;
+  max-width: 9.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  transform-origin: left center;
+  transform: translate3d(0, 0, 0);
+  opacity: 1;
+  transition:
+    max-width 720ms cubic-bezier(0.85, 0, 0.15, 1),
+    opacity 360ms cubic-bezier(0.85, 0, 0.15, 1) 60ms,
+    transform 720ms cubic-bezier(0.85, 0, 0.15, 1),
+    margin-left 720ms cubic-bezier(0.85, 0, 0.15, 1);
+  will-change: max-width, opacity, transform;
+}
+/* The trailing letters render with a leading "k" cap visually attached to
+ * the K mark, but the actual visible text is "nowledgee" so when collapsed
+ * the K itself is still the visible identity. */
+[data-theme="paper"] .logo-tail::before {
+  content: "";
+  display: inline-block;
+  width: 0;
+}
+
+[data-theme="paper"] .logo-collapsible[data-collapsed="true"] .logo-tail {
+  max-width: 0;
+  opacity: 0;
+  transform: translate3d(-1.5rem, 0, 0);
+  margin-left: 0;
+  transition:
+    max-width 680ms cubic-bezier(0.85, 0, 0.15, 1),
+    opacity 280ms cubic-bezier(0.85, 0, 0.15, 1),
+    transform 680ms cubic-bezier(0.85, 0, 0.15, 1),
+    margin-left 680ms cubic-bezier(0.85, 0, 0.15, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="paper"] .logo-tail,
+  [data-theme="paper"] .nav-shell {
+    transition: none !important;
+  }
+}
