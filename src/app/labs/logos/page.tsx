@@ -21,15 +21,13 @@ const CANDIDATES: Candidate[] = [
       "A solid filled square — the headquarters, the archive, the stamp — with three negative-space slits dividing it into Personal / Team / Organisation. A clay dot sits at the upper-right corner like a wax seal. Reads as a brand mark, not a diagram. Holds up at 16px.",
     Mark: () => (
       <svg viewBox="0 0 80 80" className="block h-full w-full">
-        <defs>
-          <mask id="monolith-mask">
-            <rect width="80" height="80" fill="white" />
-            <line x1="14" y1="33" x2="66" y2="33" stroke="black" strokeWidth="2.5" strokeLinecap="round" />
-            <line x1="14" y1="49" x2="66" y2="49" stroke="black" strokeWidth="2.5" strokeLinecap="round" />
-          </mask>
-        </defs>
-        <rect x="12" y="12" width="56" height="56" rx="3" fill="#1a1814" mask="url(#monolith-mask)" />
-        <circle cx="68" cy="12" r="4" fill="#C15F3C" />
+        <rect x="12" y="12" width="56" height="56" rx="3" fill="#1a1814" />
+        {/* Top tier-slit in clay (Personal/Team boundary) */}
+        <rect x="14" y="31.5" width="52" height="3" rx="1.5" fill="#D85728" />
+        {/* Bottom tier-slit cuts through to cream paper (Team/Organisation boundary) */}
+        <rect x="14" y="47.5" width="52" height="3" rx="1.5" fill="#F4EFE6" />
+        {/* Corner wax-seal */}
+        <circle cx="68" cy="12" r="6" fill="#D85728" />
       </svg>
     ),
   },
@@ -80,12 +78,10 @@ const CANDIDATES: Candidate[] = [
       "Three filled rectangles offset rightward, like papers in a filing cabinet pulled forward in sequence. Visible edges hint at depth and accumulation. Architectural file-cabinet feel. Closer to Notion / Perplexity territory than the others, so a slightly safer pick.",
     Mark: () => (
       <svg viewBox="0 0 80 80" className="block h-full w-full">
-        <g fill="#1a1814">
-          <rect x="12" y="20" width="42" height="13" rx="2" />
-          <rect x="16" y="35" width="46" height="13" rx="2" />
-          <rect x="20" y="50" width="50" height="13" rx="2" />
-        </g>
-        <rect x="20" y="65" width="14" height="3" rx="1.5" fill="#C15F3C" />
+        {/* Top sheet (smallest, Personal tier) in clay */}
+        <rect x="12" y="20" width="42" height="13" rx="2" fill="#D85728" />
+        <rect x="16" y="35" width="46" height="13" rx="2" fill="#1a1814" />
+        <rect x="20" y="50" width="50" height="13" rx="2" fill="#1a1814" />
       </svg>
     ),
   },
