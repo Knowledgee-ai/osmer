@@ -711,8 +711,20 @@ function Footer() {
     <footer className="border-t border-[var(--hairline)] py-14">
       <div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-6 px-8 text-[var(--ink-soft)] lg:px-14">
         <div className="col-span-12 lg:col-span-5">
-          <Link href="/" className="display text-[1.7rem] tracking-tight text-[var(--ink)]">
-            Knowledge HQ<span className="display-italic text-[var(--clay-deep)]">.</span>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2.5 text-[1.5rem] font-semibold tracking-[-0.022em] text-[var(--ink)]"
+            style={{ fontFamily: "var(--font-body), system-ui, sans-serif" }}
+          >
+            <svg width="28" height="28" viewBox="0 0 80 80" aria-hidden="true">
+              <g fill="#1a1814">
+                <rect x="14" y="22" width="14" height="9" rx="2" />
+                <rect x="14" y="36" width="28" height="9" rx="2" />
+                <rect x="14" y="50" width="42" height="9" rx="2" />
+              </g>
+              <circle cx="21" cy="13" r="3.5" fill="#C15F3C" />
+            </svg>
+            Knowledge HQ
           </Link>
           <p className="mt-4 max-w-[40ch] text-[0.95rem] leading-[1.6]">
             The Organizational Memory Protocol. The workspace that implements it.

@@ -42,12 +42,11 @@ export function LandingNav() {
           className="logo-collapsible justify-self-start"
           data-collapsed={collapsed ? "true" : "false"}
         >
-          <span className="logo-k" aria-hidden="true">
-            K
-            <span className="atom-dot" />
+          <span className="logo-mark" aria-hidden="true">
+            <SymbolMark />
           </span>
           <span className="tail-clip" aria-hidden="true">
-            <span className="logo-tail">nowledge&nbsp;HQ</span>
+            <span className="logo-tail">Knowledge&nbsp;HQ</span>
           </span>
           <span className="sr-only">Knowledge HQ</span>
         </Link>
@@ -95,6 +94,37 @@ function ArrowEast() {
     >
       <path d="M2 7h10" />
       <path d="m8 3 4 4-4 4" />
+    </svg>
+  );
+}
+
+/**
+ * Knowledge HQ symbol mark.
+ *
+ * Three left-aligned horizontal bars growing in width from top to bottom,
+ * encoding the OMP three-tier protocol: Personal (smallest), Team
+ * (middle), Organisation (widest, the foundation). A clay terracotta
+ * dot sits above the smallest bar as a "you are here" marker — the
+ * single atom of knowledge that flows up through the tiers.
+ *
+ * Geometric, architectural, no letterforms. Stands alone or pairs with
+ * the wordmark.
+ */
+function SymbolMark() {
+  return (
+    <svg
+      width="32"
+      height="32"
+      viewBox="0 0 80 80"
+      aria-hidden="true"
+      className="block"
+    >
+      <g fill="#1a1814">
+        <rect x="14" y="22" width="14" height="9" rx="2" />
+        <rect x="14" y="36" width="28" height="9" rx="2" />
+        <rect x="14" y="50" width="42" height="9" rx="2" />
+      </g>
+      <circle cx="21" cy="13" r="3.5" fill="#C15F3C" />
     </svg>
   );
 }
