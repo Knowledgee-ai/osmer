@@ -107,7 +107,7 @@ const CANDIDATES: Candidate[] = [
 
 export default function LogoLabPage() {
   return (
-    <div data-theme="paper" className="paper-grain min-h-screen overflow-y-auto">
+    <div data-theme="paper" className="paper-grain h-full overflow-y-auto">
       <header className="border-b border-[var(--hairline)]">
         <div className="mx-auto flex max-w-[1280px] items-center justify-between px-8 py-7 lg:px-14">
           <Link href="/" className="mono link-underline text-[var(--ink-soft)]">
