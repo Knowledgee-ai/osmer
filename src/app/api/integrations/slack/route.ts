@@ -24,7 +24,7 @@ export async function POST(req: Request) {
       return Response.json({ ok: true }); // Skip short messages
     }
 
-    // Find the Knowledgee user linked to this Slack workspace
+    // Find the Knowledge HQ user linked to this Slack workspace
     // For now, use a simple token-based auth via query param or header
     const apiKey = req.headers.get('x-knowledgee-key');
     if (!apiKey) {

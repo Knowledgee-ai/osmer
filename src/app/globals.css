@@ -328,7 +328,7 @@
 
 /* Wordmark animation, Anthropic-style.
  *
- * The trailing letters of "Knowledgee" never visually cross the K.
+ * The trailing letters of "Knowledge HQ" never visually cross the K.
  * They stay perfectly still in their natural typographic positions;
  * a reveal mask anchored to the K's right edge expands and contracts.
  * The mask grows rightward to show "nowledgee" letter by letter, and
@@ -386,7 +386,7 @@
   /* Descender room for "g" without affecting layout flow. */
   padding-bottom: 0.22em;
   margin-bottom: -0.22em;
-  width: 6.6em;
+  width: 7em;
   clip-path: inset(-0.5em 0 -0.5em 0);
   transition:
     width 880ms cubic-bezier(0.32, 0.72, 0, 1),

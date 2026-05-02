@@ -38,7 +38,7 @@ export function LandingNav() {
       <nav className="mx-auto grid max-w-[1440px] grid-cols-[1fr_auto_1fr] items-center px-8 pt-7 pb-4 lg:px-14">
         <Link
           href="/"
-          aria-label="Knowledgee, home"
+          aria-label="Knowledge HQ, home"
           className="logo-collapsible justify-self-start"
           data-collapsed={collapsed ? "true" : "false"}
         >
@@ -47,9 +47,9 @@ export function LandingNav() {
             <span className="atom-dot" />
           </span>
           <span className="tail-clip" aria-hidden="true">
-            <span className="logo-tail">nowledgee</span>
+            <span className="logo-tail">nowledge&nbsp;HQ</span>
           </span>
-          <span className="sr-only">Knowledgee</span>
+          <span className="sr-only">Knowledge HQ</span>
         </Link>
 
         <div className="hidden items-center gap-10 justify-self-center md:flex">

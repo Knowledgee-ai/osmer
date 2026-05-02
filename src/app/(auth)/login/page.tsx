@@ -50,7 +50,7 @@ export default function LoginPage() {
           </div>
           <h1 className="text-2xl font-bold">Welcome back</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Sign in to your Knowledgee account
+            Sign in to your Knowledge HQ account
           </p>
         </div>
 

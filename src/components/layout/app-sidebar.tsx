@@ -116,7 +116,7 @@ export function AppSidebar({ onOpenSettings }: AppSidebarProps) {
           <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center">
             <span className="text-primary-foreground text-xs font-bold">K</span>
           </div>
-          <span className="font-semibold text-sm">Knowledgee</span>
+          <span className="font-semibold text-sm">Knowledge HQ</span>
         </div>
         <div className="flex gap-1">
           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleNewChat}>

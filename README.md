@@ -1,6 +1,6 @@
-# Knowledgee
+# Knowledge HQ
 
-**Your organization's AI brain.** Chat with GPT-4o, Claude, Gemini, Grok, and Llama in one place. Every conversation builds your organization's knowledge base -- automatically extracted, always available, compounding with every chat.
+**Your team's HQ for knowledgee.** Chat with GPT-4o, Claude, Gemini, Grok, and Llama in one place. Every conversation builds your organization's knowledge base -- automatically extracted, always available, compounding with every chat.
 
 **Live:** [knowledgee-olive.vercel.app](https://knowledgee-olive.vercel.app)
 
@@ -16,7 +16,7 @@ Companies use multiple AI tools (ChatGPT, Claude, Gemini, Grok) but knowledge is
 
 ## The Solution
 
-Knowledgee captures knowledge from every AI conversation and makes it available across the organization:
+Knowledge HQ captures knowledge from every AI conversation and makes it available across the organization:
 
 1. **Chat naturally** with any AI model
 2. **Knowledge is extracted** automatically (facts, decisions, solutions, relationships)

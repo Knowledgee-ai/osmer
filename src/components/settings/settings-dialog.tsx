@@ -274,8 +274,8 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
           {/* About Section */}
           <div className="pt-2 border-t border-border">
             <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>Knowledgee v0.1.0</span>
-              <span>Your organization&apos;s AI brain</span>
+              <span>Knowledge HQ v0.1.0</span>
+              <span>Your team&apos;s HQ for knowledgee</span>
             </div>
           </div>
         </div>

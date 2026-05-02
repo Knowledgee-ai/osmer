@@ -231,7 +231,7 @@ function EmptyState({ onSendPrompt }: { onSendPrompt?: (text: string) => void })
           <SparklesIcon className="h-8 w-8 text-primary/60" />
         </div>
         <div>
-          <h2 className="text-lg font-semibold">Welcome to Knowledgee</h2>
+          <h2 className="text-lg font-semibold">Welcome to Knowledge HQ</h2>
           <p className="text-sm text-muted-foreground mt-1">
             Chat with any AI model. Your knowledge compounds with every conversation.
           </p>

@@ -1,4 +1,4 @@
-# Knowledgee — Full Product Plan
+# Knowledge HQ — Full Product Plan
 
 ## The Core Problem
 
@@ -472,7 +472,7 @@ def reconcile(org_id):
 
 **Phase 5: Federation.** OMP atoms can be exchanged between organizations (with consent). Think: vendor shares product knowledge with client's knowledge base.
 
-**The strategic logic:** If OMP becomes a standard, Knowledgee is the best OMP-native platform. Just as GitHub is the best Git platform, even though Git is open.
+**The strategic logic:** If OMP becomes a standard, Knowledge HQ is the best OMP-native platform. Just as GitHub is the best Git platform, even though Git is open.
 
 ---
 
@@ -911,7 +911,7 @@ Month 19-24: Enterprise push
 
 ### Competitive Matrix
 
-| Feature | Knowledgee | Dust.tt | Glean | Poe | TypingMind | ChatGPT Teams |
+| Feature | Knowledge HQ | Dust.tt | Glean | Poe | TypingMind | ChatGPT Teams |
 |---------|-----------|---------|-------|-----|------------|--------------|
 | Multi-model | Yes | Yes | No | Yes | Yes | No |
 | Personal memory | Yes | No | No | No | Basic | Basic |
@@ -927,13 +927,13 @@ Month 19-24: Enterprise push
 
 ### Positioning Against Each
 
-**Dust.tt:** "Dust indexes what you already know. Knowledgee grows what you know with every conversation."
+**Dust.tt:** "Dust indexes what you already know. Knowledge HQ grows what you know with every conversation."
 
-**Glean:** "Glean searches your past. Knowledgee builds your future." (Complementary — Glean integration is a future feature.)
+**Glean:** "Glean searches your past. Knowledge HQ builds your future." (Complementary — Glean integration is a future feature.)
 
-**Poe:** "Poe gives you access to models. Knowledgee gives you access to models that know you."
+**Poe:** "Poe gives you access to models. Knowledge HQ gives you access to models that know you."
 
-**TypingMind:** "TypingMind is a better chat client. Knowledgee is a knowledge platform."
+**TypingMind:** "TypingMind is a better chat client. Knowledge HQ is a knowledge platform."
 
 **ChatGPT/Claude Teams:** "Why bet on one model when you can have all of them — and keep the knowledge regardless of which provider you use?"
 
@@ -942,7 +942,7 @@ Month 19-24: Enterprise push
 1. **Network effects**: Each user's contributions make the knowledge base better for everyone
 2. **Switching costs**: After 6 months, thousands of knowledge entries. Migration is painful.
 3. **Data advantage**: More conversations → better extraction models → better product
-4. **Protocol standard**: If OMP becomes the standard, Knowledgee owns the protocol
+4. **Protocol standard**: If OMP becomes the standard, Knowledge HQ owns the protocol
 
 ### Biggest Risk
 A model provider builds "good enough" team features and companies stay siloed. **Mitigation:** Make multi-model value so clear that single-model lock-in feels unacceptable.
@@ -1077,7 +1077,7 @@ Every company is sitting on a goldmine of knowledge being generated daily throug
 
 **The analogy:** Before Salesforce, every salesperson had their own Rolodex. Customer knowledge lived in individual notebooks and heads. When someone left, the knowledge walked out the door. Salesforce said: "What if customer knowledge belonged to the company?"
 
-Knowledgee is the same inflection point for AI-generated knowledge. Right now, every employee's AI conversations are their personal Rolodex. When they leave (or just switch tools), the knowledge vanishes. Knowledgee says: **"What if AI knowledge belonged to the organization?"**
+Knowledge HQ is the same inflection point for AI-generated knowledge. Right now, every employee's AI conversations are their personal Rolodex. When they leave (or just switch tools), the knowledge vanishes. Knowledge HQ says: **"What if AI knowledge belonged to the organization?"**
 
 The timing is perfect:
 - AI usage is exploding across enterprises (90%+ of knowledge workers use AI weekly)
@@ -1085,4 +1085,4 @@ The timing is perfect:
 - No one owns the "organizational AI memory" space
 - The open protocol play creates a standards-setting opportunity
 
-The moat deepens with every conversation. After 6 months, a company's Knowledgee knowledge base is irreplaceable — it contains thousands of decisions, solutions, and facts that exist nowhere else. That's the ultimate switching cost.
+The moat deepens with every conversation. After 6 months, a company's Knowledge HQ knowledge base is irreplaceable — it contains thousands of decisions, solutions, and facts that exist nowhere else. That's the ultimate switching cost.

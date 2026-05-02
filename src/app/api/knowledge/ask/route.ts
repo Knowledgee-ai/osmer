@@ -41,7 +41,7 @@ export async function POST(req: Request) {
 
   const result = streamText({
     model,
-    system: `You are a knowledge base assistant for the "Ask the Company" feature in Knowledgee.
+    system: `You are a knowledge base assistant for the "Ask the Company" feature in Knowledge HQ.
 
 CRITICAL RULES:
 1. You must ONLY answer using the knowledge provided below. Do NOT use any other knowledge.
