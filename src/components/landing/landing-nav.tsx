@@ -99,16 +99,13 @@ function ArrowEast() {
 }
 
 /**
- * Knowledge HQ symbol mark.
+ * Knowledge HQ symbol mark — Stacked Archive.
  *
- * Three left-aligned horizontal bars growing in width from top to bottom,
- * encoding the OMP three-tier protocol: Personal (smallest), Team
- * (middle), Organisation (widest, the foundation). A clay terracotta
- * dot sits above the smallest bar as a "you are here" marker — the
- * single atom of knowledge that flows up through the tiers.
- *
- * Geometric, architectural, no letterforms. Stands alone or pairs with
- * the wordmark.
+ * Three filled rectangles offset rightward, like papers in a filing
+ * cabinet pulled forward in sequence. The top (smallest) sheet is the
+ * Personal tier in clay terracotta; the middle and bottom sheets are
+ * the Team and Organisation tiers in ink. Visible edges hint at depth
+ * and accumulation — knowledge compounding over time.
  */
 function SymbolMark() {
   return (
@@ -119,12 +116,9 @@ function SymbolMark() {
       aria-hidden="true"
       className="block"
     >
-      <g fill="#1a1814">
-        <rect x="14" y="22" width="14" height="9" rx="2" />
-        <rect x="14" y="36" width="28" height="9" rx="2" />
-        <rect x="14" y="50" width="42" height="9" rx="2" />
-      </g>
-      <circle cx="21" cy="13" r="3.5" fill="#C15F3C" />
+      <rect x="12" y="20" width="42" height="13" rx="2" fill="#D85728" />
+      <rect x="16" y="35" width="46" height="13" rx="2" fill="#1a1814" />
+      <rect x="20" y="50" width="50" height="13" rx="2" fill="#1a1814" />
     </svg>
   );
 }

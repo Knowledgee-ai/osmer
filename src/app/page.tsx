@@ -717,12 +717,9 @@ function Footer() {
             style={{ fontFamily: "var(--font-body), system-ui, sans-serif" }}
           >
             <svg width="28" height="28" viewBox="0 0 80 80" aria-hidden="true">
-              <g fill="#1a1814">
-                <rect x="14" y="22" width="14" height="9" rx="2" />
-                <rect x="14" y="36" width="28" height="9" rx="2" />
-                <rect x="14" y="50" width="42" height="9" rx="2" />
-              </g>
-              <circle cx="21" cy="13" r="3.5" fill="#C15F3C" />
+              <rect x="12" y="20" width="42" height="13" rx="2" fill="#D85728" />
+              <rect x="16" y="35" width="46" height="13" rx="2" fill="#1a1814" />
+              <rect x="20" y="50" width="50" height="13" rx="2" fill="#1a1814" />
             </svg>
             Knowledge HQ
           </Link>
