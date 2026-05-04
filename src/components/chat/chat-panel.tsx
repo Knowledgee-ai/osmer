@@ -188,52 +188,7 @@ export function ChatPanel({ onToggleKnowledge }: ChatPanelProps) {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Editorial top bar — hairline, generous gutters */}
-      <div className="flex items-center justify-between border-b border-border/60 px-8 py-3.5">
-        <div className="flex items-center gap-4">
-          <ModelSelector />
-          <span className="h-3 w-px bg-border/80" aria-hidden />
-          <ConversationAudienceSelector chatId={chatId} />
-          {knowledgeContext.length > 0 && !isLoading && (
-            <span className="mono text-muted-foreground/80">
-              {knowledgeContext.length} in context
-            </span>
-          )}
-          {extracting && (
-            <span className="mono text-muted-foreground/70 animate-pulse">
-              Extracting…
-            </span>
-          )}
-        </div>
-        <div className="flex items-center gap-4">
-          {knowledgeCount > 0 && (
-            <button
-              onClick={onToggleKnowledge}
-              className="mono inline-flex items-center gap-1.5 text-muted-foreground/80 hover:text-foreground transition-colors"
-            >
-              <span>Atoms</span>
-              <span className="text-foreground/80">{knowledgeCount}</span>
-            </button>
-          )}
-          {messages.length > 0 && (
-            <button
-              onClick={() => {
-                const conv = useChatStore.getState().conversations.find(c => c.id === chatId);
-                const title = conv?.title || "Conversation";
-                const md = exportConversationAsMarkdown(title, messages);
-                const filename = `${title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}.md`;
-                downloadMarkdown(md, filename);
-              }}
-              className="mono text-muted-foreground/80 hover:text-foreground transition-colors"
-              title="Export as markdown"
-            >
-              Export
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Messages */}
+      {/* Messages — fills the surface; no top bar to compete */}
       <MessageList
         messages={messages}
         isLoading={isLoading}
@@ -248,13 +203,59 @@ export function ChatPanel({ onToggleKnowledge }: ChatPanelProps) {
         }}
       />
 
-      {/* Input */}
+      {/* Input — composition controls live inside the aura;
+       *  conversation meta sits beside the italic caption. */}
       <ChatInput
         value={input}
         onChange={setInput}
         onSubmit={onSubmit}
         isLoading={isLoading}
         onStop={stop}
+        toolbar={
+          <>
+            <ModelSelector />
+            <span className="h-3 w-px bg-border/80 shrink-0" aria-hidden />
+            <ConversationAudienceSelector chatId={chatId} />
+            {knowledgeContext.length > 0 && !isLoading && (
+              <span className="mono text-muted-foreground/80 hidden md:inline">
+                {knowledgeContext.length} in context
+              </span>
+            )}
+          </>
+        }
+        metaRight={
+          <>
+            {extracting && (
+              <span className="mono text-muted-foreground/70 animate-pulse">
+                Extracting…
+              </span>
+            )}
+            {knowledgeCount > 0 && (
+              <button
+                onClick={onToggleKnowledge}
+                className="mono inline-flex items-center gap-1.5 text-muted-foreground/80 hover:text-foreground transition-colors"
+              >
+                <span>Atoms</span>
+                <span className="text-foreground/80">{knowledgeCount}</span>
+              </button>
+            )}
+            {messages.length > 0 && (
+              <button
+                onClick={() => {
+                  const conv = useChatStore.getState().conversations.find(c => c.id === chatId);
+                  const title = conv?.title || "Conversation";
+                  const md = exportConversationAsMarkdown(title, messages);
+                  const filename = `${title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}.md`;
+                  downloadMarkdown(md, filename);
+                }}
+                className="mono text-muted-foreground/80 hover:text-foreground transition-colors"
+                title="Export as markdown"
+              >
+                Export
+              </button>
+            )}
+          </>
+        }
       />
     </div>
   );
