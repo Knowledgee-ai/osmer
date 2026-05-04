@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { OsmerMark } from "@/components/brand/osmer-mark";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -56,16 +57,21 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-full flex items-center justify-center px-4">
-      <div className="w-full max-w-sm space-y-6">
-        <div className="text-center">
-          <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center mx-auto mb-4">
-            <span className="text-primary-foreground font-bold">K</span>
+    <div className="min-h-full flex items-center justify-center px-4 bg-background text-foreground">
+      <div className="w-full max-w-sm space-y-8">
+        <div className="text-center space-y-5">
+          <OsmerMark className="mx-auto" size={44} />
+          <div className="space-y-1">
+            <h1
+              className="text-3xl text-[var(--ink)]"
+              style={{ fontFamily: "var(--font-display), Georgia, serif", letterSpacing: "-0.02em" }}
+            >
+              Create your account
+            </h1>
+            <p className="mono text-xs text-[var(--ink-mute)]">
+              Start building your organisation&apos;s memory
+            </p>
           </div>
-          <h1 className="text-2xl font-bold">Create your account</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Start building your organization&apos;s AI brain
-          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">

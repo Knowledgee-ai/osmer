@@ -41,7 +41,8 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} ${interTight.variable} dark h-full antialiased`}
+      data-theme="paper"
+      className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} ${interTight.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="h-full overflow-hidden">

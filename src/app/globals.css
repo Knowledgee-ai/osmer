@@ -129,15 +129,20 @@
   }
 }
 
-/* When a paper-themed page is mounted (the editorial landing), repaint
- * html + body in the same paper colour as the inner scroller. Without
- * this the OS overscroll bounce at the top exposes the dark theme bg
- * behind and reads as a "black bar appearing" — fighting the wordmark
- * suck-into-the-void animation. The literal hex matches --paper inside
- * [data-theme="paper"] (which can't cascade up to html / body). */
-html:has([data-theme="paper"]),
-html:has([data-theme="paper"]) body {
+/* Paper is the only theme. Painted on html + body so OS overscroll
+ * bounce reveals paper, never a stray default. The hex matches
+ * --paper inside [data-theme="paper"] (variable can't cascade up to
+ * html itself unless declared here). */
+html,
+html body {
   background-color: #f4efe6;
+}
+
+/* Tailwind utility `font-sans` resolves to Inter Tight everywhere
+ * (the editorial body font). `font-mono` stays on Geist Mono via the
+ * @theme inline mapping above. */
+:root {
+  --font-sans: var(--font-body);
 }
 
 /* ============================================================
