@@ -352,28 +352,23 @@
   flex-shrink: 0;
 }
 
+/* Layout container for the wordmark. Width reserves space for "Osmer"
+ * so the grid doesn't reflow as the inner span is transformed by the
+ * scroll-driven suck-in. Negative vertical inset on overflow keeps any
+ * blur halo visible. The horizontal collapse is now driven inline by
+ * landing-nav.tsx, not by CSS state. */
 [data-theme="paper"] .tail-clip {
   display: inline-block;
   white-space: nowrap;
-  width: 8.4em;
-  clip-path: inset(-0.5em 0 -0.5em 0);
-  transition:
-    width 880ms cubic-bezier(0.32, 0.72, 0, 1),
-    clip-path 880ms cubic-bezier(0.32, 0.72, 0, 1);
-  will-change: width, clip-path;
+  width: 4.6em;
+  overflow: visible;
 }
 
 [data-theme="paper"] .logo-tail {
   display: inline-block;
 }
 
-[data-theme="paper"] .logo-collapsible[data-collapsed="true"] .tail-clip {
-  width: 0;
-  clip-path: inset(-0.5em 100% -0.5em 0);
-}
-
 @media (prefers-reduced-motion: reduce) {
-  [data-theme="paper"] .logo-tail,
   [data-theme="paper"] .nav-shell {
     transition: none !important;
   }

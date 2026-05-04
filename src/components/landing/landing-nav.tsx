@@ -1,21 +1,66 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 
-const COLLAPSE_THRESHOLD = 32;
+// Scroll distance over which the wordmark is fully drawn into the void.
+// Larger range = slower, more cinematic suck-in.
+const SUCK_RANGE_PX = 160;
+// Background-frosting kicks in as soon as we begin scrolling.
+const SCROLL_THRESHOLD = 6;
 
 export function LandingNav() {
-  const [collapsed, setCollapsed] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const tailRef = useRef<HTMLSpanElement | null>(null);
+  const reduceMotionRef = useRef(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    reduceMotionRef.current = mq.matches;
+    const onChange = () => {
+      reduceMotionRef.current = mq.matches;
+    };
+    mq.addEventListener?.("change", onChange);
+    return () => mq.removeEventListener?.("change", onChange);
+  }, []);
 
   useEffect(() => {
     const scroller = document.querySelector<HTMLElement>('[data-theme="paper"]');
     if (!scroller) return;
 
     let ticking = false;
+    const apply = (progress: number) => {
+      const tail = tailRef.current;
+      if (!tail) return;
+      // Reduced-motion: honour the system preference — pure opacity fade,
+      // no translation / blur / rotation.
+      if (reduceMotionRef.current) {
+        tail.style.transform = "";
+        tail.style.filter = "";
+        tail.style.opacity = String(1 - progress);
+        return;
+      }
+      // Quadratic ease-in. Real gravitational pull accelerates near the
+      // singularity, so a slow start with a quick finish reads as "drawn
+      // in by the void" rather than "linearly faded out".
+      const eased = progress * progress;
+      // Pull the wordmark left toward the SymbolMark while shrinking it
+      // toward its own left edge (transform-origin set in style below).
+      // The point ends up just inside the disc.
+      const tx = eased * -14;
+      const scale = Math.max(0.001, 1 - eased * 0.985);
+      const rot = eased * 6; // gentle inward curl
+      const blur = eased * 4; // motion blur as it accelerates
+      tail.style.transform = `translateX(${tx}px) scale(${scale}) rotate(${rot}deg)`;
+      tail.style.filter = blur > 0.05 ? `blur(${blur}px)` : "";
+      tail.style.opacity = String(1 - eased);
+    };
+
     const update = () => {
-      const next = scroller.scrollTop > COLLAPSE_THRESHOLD;
-      setCollapsed((prev) => (prev === next ? prev : next));
+      const t = Math.min(1, Math.max(0, scroller.scrollTop / SUCK_RANGE_PX));
+      apply(t);
+      const nextScrolled = scroller.scrollTop > SCROLL_THRESHOLD;
+      setScrolled((prev) => (prev === nextScrolled ? prev : nextScrolled));
       ticking = false;
     };
     const onScroll = () => {
@@ -30,23 +75,30 @@ export function LandingNav() {
     return () => scroller.removeEventListener("scroll", onScroll);
   }, []);
 
+  const tailStyle: CSSProperties = {
+    display: "inline-block",
+    transformOrigin: "0% 50%",
+    willChange: "transform, opacity, filter",
+  };
+
   return (
     <div
       className="nav-shell sticky top-0 z-40"
-      data-scrolled={collapsed ? "true" : "false"}
+      data-scrolled={scrolled ? "true" : "false"}
     >
       <nav className="mx-auto grid max-w-[1440px] grid-cols-[1fr_auto_1fr] items-center px-8 pt-7 pb-4 lg:px-14">
         <Link
           href="/"
           aria-label="Osmer, home"
           className="logo-collapsible justify-self-start"
-          data-collapsed={collapsed ? "true" : "false"}
         >
           <span className="logo-mark" aria-hidden="true">
             <SymbolMark />
           </span>
           <span className="tail-clip" aria-hidden="true">
-            <span className="logo-tail">Osmer</span>
+            <span ref={tailRef} className="logo-tail" style={tailStyle}>
+              Osmer
+            </span>
           </span>
           <span className="sr-only">Osmer</span>
         </Link>
