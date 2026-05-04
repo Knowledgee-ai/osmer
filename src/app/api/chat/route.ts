@@ -1,5 +1,5 @@
 import { streamText, type ModelMessage } from 'ai';
-import { getLanguageModel, getLanguageModelWithKeys, estimateCost } from '@/lib/ai/router';
+import { getLanguageModel, estimateCost } from '@/lib/ai/router';
 import { getModel } from '@/lib/ai/models';
 import { auth } from '@/lib/auth';
 import { searchKnowledgeByVector } from '@/lib/knowledge/db-store';
@@ -12,15 +12,6 @@ export const maxDuration = 60;
 
 export async function POST(req: Request) {
   const session = await auth();
-
-  // Read BYOK API keys from header
-  const apiKeysHeader = req.headers.get('x-api-keys');
-  let byokKeys: Record<string, string> | undefined;
-  if (apiKeysHeader) {
-    try {
-      byokKeys = JSON.parse(atob(apiKeysHeader));
-    } catch {}
-  }
 
   const body = await req.json();
   const { modelId, conversationId, knowledgeContext: clientContext } = body as {
@@ -147,9 +138,7 @@ export async function POST(req: Request) {
     }
   }
 
-  const languageModel = byokKeys
-    ? getLanguageModelWithKeys(modelId, byokKeys)
-    : getLanguageModel(modelId);
+  const languageModel = getLanguageModel(modelId);
 
   const systemPrompt = buildSystemPrompt(modelId, knowledgeContext, { multiUser });
 

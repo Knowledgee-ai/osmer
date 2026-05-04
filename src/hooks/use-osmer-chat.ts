@@ -17,7 +17,6 @@ interface UseChatOptions {
   conversationId: string;
   modelId: string;
   knowledgeContext?: string[];
-  apiKeys?: Record<string, string>;
 }
 
 // Persist a message to the DB (fire-and-forget)
@@ -40,7 +39,6 @@ export function useOsmerChat({
   conversationId,
   modelId,
   knowledgeContext,
-  apiKeys,
 }: UseChatOptions): UseChatReturn {
   const [messages, setMessages] = useState<StoredMessage[]>(() =>
     getMessages(conversationId)
@@ -121,9 +119,6 @@ export function useOsmerChat({
         const headers: Record<string, string> = {
           "Content-Type": "application/json",
         };
-        if (apiKeys && Object.keys(apiKeys).length > 0) {
-          headers["x-api-keys"] = btoa(JSON.stringify(apiKeys));
-        }
 
         const response = await fetch("/api/chat", {
           method: "POST",
@@ -226,7 +221,7 @@ export function useOsmerChat({
         abortRef.current = null;
       }
     },
-    [messages, modelId, conversationId, knowledgeContext, apiKeys]
+    [messages, modelId, conversationId, knowledgeContext]
   );
 
   return { messages, status, error, sendMessage, stop };

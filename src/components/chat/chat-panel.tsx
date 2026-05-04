@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useChatStore } from "@/stores/chat-store";
-import { useSettingsStore } from "@/stores/settings-store";
 import { useOsmerChat } from "@/hooks/use-osmer-chat";
 import { searchKnowledge, addKnowledgeAtoms, getKnowledgeAtoms } from "@/lib/knowledge/store";
 import { exportConversationAsMarkdown, downloadMarkdown } from "@/lib/export";
@@ -37,7 +36,6 @@ export function ChatPanel({ onToggleKnowledge }: ChatPanelProps) {
     setActiveConversation,
     conversations,
   } = useChatStore();
-  const { apiKeys } = useSettingsStore();
 
   const [input, setInput] = useState("");
   const [knowledgeCount, setKnowledgeCount] = useState(0);
@@ -64,20 +62,10 @@ export function ChatPanel({ onToggleKnowledge }: ChatPanelProps) {
     return relevant.map((a) => a.content);
   }, [input]);
 
-  // Filter to only non-empty API keys
-  const activeKeys = useMemo(() => {
-    const keys: Record<string, string> = {};
-    for (const [k, v] of Object.entries(apiKeys)) {
-      if (v) keys[k] = v;
-    }
-    return Object.keys(keys).length > 0 ? keys : undefined;
-  }, [apiKeys]);
-
   const { messages, status, error, sendMessage, stop } = useOsmerChat({
     conversationId: chatId,
     modelId: selectedModel,
     knowledgeContext: knowledgeContext.length > 0 ? knowledgeContext : undefined,
-    apiKeys: activeKeys,
   });
 
   const isLoading = status === "streaming" || status === "submitted";

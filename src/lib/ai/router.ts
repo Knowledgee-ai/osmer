@@ -80,43 +80,6 @@ export function getLanguageModel(modelId: string): LanguageModel {
 }
 
 /**
- * Routes a model ID using user-provided BYOK API keys.
- * Falls back to server env vars, then to OpenRouter.
- */
-export function getLanguageModelWithKeys(
-  modelId: string,
-  keys: Record<string, string>
-): LanguageModel {
-  const [provider, ...rest] = modelId.split('/');
-  const modelName = rest.join('/');
-
-  // Try user's key for the specific provider first
-  if (provider === 'openai' && keys.openai) {
-    return createOpenAI({ apiKey: keys.openai })(modelName);
-  }
-  if (provider === 'anthropic' && keys.anthropic) {
-    return createAnthropic({ apiKey: keys.anthropic })(modelName);
-  }
-  if (provider === 'google' && keys.google) {
-    return createGoogleGenerativeAI({ apiKey: keys.google })(modelName);
-  }
-  if (provider === 'xai' && keys.xai) {
-    return createOpenAI({ apiKey: keys.xai, baseURL: 'https://api.x.ai/v1' })(modelName);
-  }
-
-  // Try user's OpenRouter key as fallback
-  if (keys.openrouter) {
-    return createOpenAI({
-      apiKey: keys.openrouter,
-      baseURL: 'https://openrouter.ai/api/v1',
-    })(modelId);
-  }
-
-  // Fall back to server-side routing
-  return getLanguageModel(modelId);
-}
-
-/**
  * Check which providers have direct API keys configured.
  * Used in the UI to show provider status.
  */
