@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { DEFAULT_MODEL_ID, MODEL_MAP } from '@/lib/ai/models';
 
 interface ConversationSummary {
   id: string;
@@ -36,7 +37,7 @@ export const useChatStore = create<ChatStore>()(
   persist(
     (set) => ({
       activeConversationId: null,
-      selectedModel: 'anthropic/claude-sonnet-4-20250514',
+      selectedModel: DEFAULT_MODEL_ID,
       conversations: [],
       sidebarOpen: true,
 
@@ -82,6 +83,15 @@ export const useChatStore = create<ChatStore>()(
         conversations: state.conversations,
         activeConversationId: state.activeConversationId,
       }),
+      // After rehydrating from localStorage, drop a stale selectedModel
+      // (e.g. an id that no longer exists in the curated registry) and
+      // fall back to the current default. Avoids the picker rendering
+      // an unknown model name with no provider colour.
+      onRehydrateStorage: () => (state) => {
+        if (state && !MODEL_MAP.has(state.selectedModel)) {
+          state.selectedModel = DEFAULT_MODEL_ID;
+        }
+      },
     }
   )
 );

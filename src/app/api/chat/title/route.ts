@@ -9,7 +9,7 @@ export async function POST(req: Request) {
     aiResponse: string;
   };
 
-  const extractionModelId = process.env.EXTRACTION_MODEL || 'anthropic/claude-haiku-4-5-20251001';
+  const extractionModelId = process.env.EXTRACTION_MODEL || 'google/gemini-3-flash';
   const model = getLanguageModel(extractionModelId);
 
   try {

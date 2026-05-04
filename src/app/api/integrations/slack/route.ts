@@ -43,7 +43,7 @@ export async function POST(req: Request) {
     const userId = (userResult.rows[0] as { id: string }).id;
 
     // Extract knowledge from the Slack message
-    const extractionModel = process.env.EXTRACTION_MODEL || 'anthropic/claude-haiku-4-5-20251001';
+    const extractionModel = process.env.EXTRACTION_MODEL || 'google/gemini-3-flash';
     const model = getLanguageModel(extractionModel);
 
     try {

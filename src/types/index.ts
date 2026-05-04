@@ -4,7 +4,16 @@
 
 // --- Models & Providers ---
 
-export type ModelProviderId = 'openai' | 'anthropic' | 'google' | 'xai' | 'meta' | 'openrouter';
+export type ModelProviderId =
+  | 'openai'
+  | 'anthropic'
+  | 'google'
+  | 'xai'
+  | 'meta'
+  | 'deepseek'
+  | 'moonshot'
+  | 'alibaba'
+  | 'openrouter';
 
 export interface Model {
   id: string;                    // e.g. "gpt-4o", "claude-sonnet-4-20250514"

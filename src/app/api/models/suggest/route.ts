@@ -29,12 +29,12 @@ export async function GET(req: Request) {
 
   // Task-based recommendation
   const taskModels: Record<string, { model: string; reason: string }> = {
-    code: { model: 'anthropic/claude-sonnet-4-20250514', reason: 'Best for code — high accuracy, follows instructions precisely' },
-    writing: { model: 'openai/gpt-4o', reason: 'Strong creative writing and long-form content' },
-    analysis: { model: 'google/gemini-2.5-pro', reason: '1M context window — ideal for large document analysis' },
-    math: { model: 'anthropic/claude-opus-4-6', reason: 'Strongest reasoning for math and logic problems' },
-    quick: { model: 'anthropic/claude-haiku-4-5-20251001', reason: 'Fastest response at lowest cost' },
-    general: { model: 'anthropic/claude-sonnet-4-20250514', reason: 'Best all-around model for general tasks' },
+    code: { model: 'qwen/qwen-3.6-max-preview', reason: 'Tops six coding benchmarks — best for code-on-knowledge tasks' },
+    writing: { model: 'openai/gpt-5.5', reason: 'Strong long-form writing and creative output' },
+    analysis: { model: 'google/gemini-3.1-pro', reason: '1M context + native multimodal — ideal for large document analysis' },
+    math: { model: 'openai/gpt-5.5-pro', reason: 'Deep-reasoning variant for the hardest analytical work' },
+    quick: { model: 'google/gemini-3-flash', reason: 'Cost-efficient frontier — fastest at lowest cost' },
+    general: { model: 'anthropic/claude-sonnet-4-6', reason: 'Agentic workhorse — 1M context, strong tool use' },
   };
 
   if (taskModels[detectedTask]) {

@@ -58,7 +58,7 @@ export async function GET() {
     .map((q) => q.content.substring(0, 150))
     .join('\n');
 
-  const extractionModel = process.env.EXTRACTION_MODEL || 'anthropic/claude-haiku-4-5-20251001';
+  const extractionModel = process.env.EXTRACTION_MODEL || 'google/gemini-3-flash';
   const model = getLanguageModel(extractionModel);
 
   try {

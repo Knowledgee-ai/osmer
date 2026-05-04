@@ -58,7 +58,7 @@ export const users = pgTable('users', {
   passwordHash: text('password_hash'),
   role: userRoleEnum('role').notNull().default('member'),
   preferences: jsonb('preferences').default({
-    defaultModel: 'openai/gpt-4o',
+    defaultModel: 'anthropic/claude-opus-4-7',
     theme: 'system',
   }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -104,7 +104,7 @@ export const conversations = pgTable('conversations', {
   teamId: uuid('team_id').references(() => teams.id, { onDelete: 'set null' }),
   title: varchar('title', { length: 500 }).notNull().default('New Conversation'),
   visibility: conversationVisibilityEnum('visibility').notNull().default('private'),
-  modelDefault: varchar('model_default', { length: 255 }).notNull().default('openai/gpt-4o'),
+  modelDefault: varchar('model_default', { length: 255 }).notNull().default('anthropic/claude-opus-4-7'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => [

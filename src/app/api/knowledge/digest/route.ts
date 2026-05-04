@@ -66,7 +66,7 @@ export async function GET() {
   }
 
   // Generate a natural language summary using AI
-  const extractionModel = process.env.EXTRACTION_MODEL || 'anthropic/claude-haiku-4-5-20251001';
+  const extractionModel = process.env.EXTRACTION_MODEL || 'google/gemini-3-flash';
   const model = getLanguageModel(extractionModel);
 
   let aiSummary = "";

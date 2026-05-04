@@ -52,7 +52,7 @@ export async function POST(req: Request) {
     .map((r, i) => `[${i + 1}] (${r.type}, ${(r.confidence * 100).toFixed(0)}% confidence): ${r.content}`)
     .join('\n');
 
-  const model = getLanguageModel(modelId || 'anthropic/claude-sonnet-4-20250514');
+  const model = getLanguageModel(modelId || 'anthropic/claude-sonnet-4-6');
 
   const { text } = await generateText({
     model,

@@ -41,7 +41,7 @@ export async function POST(req: Request) {
           .values({
             userId: session.user.id,
             title: conv.title || 'Imported Chat',
-            modelDefault: 'openai/gpt-4o',
+            modelDefault: 'openai/gpt-5.5',
             visibility: 'private',
           })
           .returning({ id: conversations.id });
@@ -54,7 +54,7 @@ export async function POST(req: Request) {
             conversationId: newConv.id,
             role: m.message!.author.role as 'user' | 'assistant',
             content: m.message!.content.parts?.join('') || '',
-            modelUsed: m.message!.author.role === 'assistant' ? 'openai/gpt-4o' : null,
+            modelUsed: m.message!.author.role === 'assistant' ? 'openai/gpt-5.5' : null,
           }))
           .filter((m) => m.content.length > 0);
 
