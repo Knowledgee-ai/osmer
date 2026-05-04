@@ -310,20 +310,15 @@
    that collapses to just the K when the page scrolls past 32px.
    ============================================================ */
 
+/* Header is visually fixed: a solid paper-coloured strip at all times,
+ * no transitions, no scroll-state. Matches the page background so it
+ * reads as a stable surface (no "bar appearing"), while still masking
+ * content scrolling under. The only motion in the nav is the wordmark
+ * suck-in driven inline by landing-nav.tsx — anything else competes
+ * with it. */
 [data-theme="paper"] .nav-shell {
-  background: transparent;
+  background-color: var(--paper);
   border-bottom: 1px solid transparent;
-  transition:
-    background-color 360ms cubic-bezier(0.32, 0.72, 0, 1),
-    border-color 360ms cubic-bezier(0.32, 0.72, 0, 1),
-    backdrop-filter 360ms cubic-bezier(0.32, 0.72, 0, 1);
-  will-change: background-color, backdrop-filter;
-}
-[data-theme="paper"] .nav-shell[data-scrolled="true"] {
-  background-color: rgba(244, 239, 230, 0.78);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
-  backdrop-filter: blur(18px) saturate(140%);
-  border-bottom-color: var(--hairline);
 }
 
 /* Wordmark: geometric three-bar symbol mark + sans-serif wordmark in

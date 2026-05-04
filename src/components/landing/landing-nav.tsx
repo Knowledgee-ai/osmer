@@ -1,16 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 
 // Scroll distance over which the wordmark is fully drawn into the void.
 // Larger range = slower, more cinematic suck-in.
-const SUCK_RANGE_PX = 160;
-// Background-frosting kicks in as soon as we begin scrolling.
-const SCROLL_THRESHOLD = 6;
+const SUCK_RANGE_PX = 320;
 
 export function LandingNav() {
-  const [scrolled, setScrolled] = useState(false);
   const tailRef = useRef<HTMLSpanElement | null>(null);
   const reduceMotionRef = useRef(false);
 
@@ -59,8 +56,6 @@ export function LandingNav() {
     const update = () => {
       const t = Math.min(1, Math.max(0, scroller.scrollTop / SUCK_RANGE_PX));
       apply(t);
-      const nextScrolled = scroller.scrollTop > SCROLL_THRESHOLD;
-      setScrolled((prev) => (prev === nextScrolled ? prev : nextScrolled));
       ticking = false;
     };
     const onScroll = () => {
@@ -82,10 +77,7 @@ export function LandingNav() {
   };
 
   return (
-    <div
-      className="nav-shell sticky top-0 z-40"
-      data-scrolled={scrolled ? "true" : "false"}
-    >
+    <div className="nav-shell sticky top-0 z-40">
       <nav className="mx-auto grid max-w-[1440px] grid-cols-[1fr_auto_1fr] items-center px-8 pt-7 pb-4 lg:px-14">
         <Link
           href="/"
