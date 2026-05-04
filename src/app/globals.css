@@ -208,6 +208,67 @@ html body {
   font-feature-settings: "ss01", "ss02", "cv01", "cv11";
 }
 
+/* ============================================================
+   Ink theme — warm dark counterpart to paper
+   Used by the workspace (chat shell) when the user picks "dark"
+   in settings. The landing always stays paper.
+   ============================================================ */
+
+[data-theme="ink"] {
+  overscroll-behavior: none;
+
+  /* Semantic palette stays available for code that names colours
+   * directly (text-[var(--ink)], etc.). Values themselves don't flip
+   * — what flips is the shadcn-token mapping below. */
+  --paper: #f4efe6;
+  --paper-deep: #ede5d2;
+  --paper-pale: #faf6ee;
+  --ink: #1a1814;
+  --ink-soft: #3a342c;
+  --ink-mute: #665f54;
+  --ink-faint: #9a9183;
+  --hairline: #2f2a22;
+  --hairline-strong: #4a4136;
+  --clay: #c15f3c;
+  --clay-deep: #d97956;
+  --clay-soft: #8b3a1f;
+
+  /* Shadcn tokens — dark equivalents of paper */
+  --background: #14110d;
+  --foreground: #f4efe6;
+  --card: #1f1c17;
+  --card-foreground: #f4efe6;
+  --popover: #1f1c17;
+  --popover-foreground: #f4efe6;
+  --primary: #f4efe6;
+  --primary-foreground: #14110d;
+  --secondary: #2a2520;
+  --secondary-foreground: #f4efe6;
+  --muted: #2a2520;
+  --muted-foreground: #a39a8a;
+  --accent: #c15f3c;
+  --accent-foreground: #14110d;
+  --destructive: #d97956;
+  --border: #2f2a22;
+  --input: #2f2a22;
+  --ring: #c15f3c;
+
+  --sidebar: #18140f;
+  --sidebar-foreground: #d6cfc0;
+  --sidebar-primary: #f4efe6;
+  --sidebar-primary-foreground: #14110d;
+  --sidebar-accent: #2a2520;
+  --sidebar-accent-foreground: #f4efe6;
+  --sidebar-border: #2f2a22;
+  --sidebar-ring: #c15f3c;
+
+  background-color: #14110d;
+  color: #f4efe6;
+  font-family: var(--font-body), system-ui, sans-serif;
+  letter-spacing: -0.011em;
+  font-feature-settings: "ss01", "ss02", "cv01", "cv11";
+}
+
 /* Subtle paper grain — applied via overlay pseudo */
 [data-theme="paper"] .paper-grain {
   position: relative;

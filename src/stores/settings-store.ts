@@ -22,7 +22,7 @@ export const useSettingsStore = create<SettingsStore>()(
   persist(
     (set) => ({
       apiKeys: {},
-      theme: 'dark',
+      theme: 'system',
 
       setApiKey: (provider, key) =>
         set((state) => ({

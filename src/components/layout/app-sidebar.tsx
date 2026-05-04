@@ -118,7 +118,7 @@ export function AppSidebar({ onOpenSettings }: AppSidebarProps) {
         <div className="flex items-center gap-2">
           <OsmerMark size={26} quiet />
           <span
-            className="text-[15px] tracking-[-0.022em] text-[var(--ink)]"
+            className="text-[15px] tracking-[-0.022em] text-foreground"
             style={{ fontWeight: 600 }}
           >
             Osmer

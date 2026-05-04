@@ -1,13 +1,11 @@
+import { ChatThemeShell } from "@/components/chat/theme-shell";
+
 /**
- * Wraps every `/chat/*` route in the editorial paper theme so the app
- * shell — sidebar, chat panel, knowledge panel, sub-pages — picks up
- * the same ink/clay/paper palette as the landing without each page
- * having to opt in.
+ * Wraps every `/chat/*` route in a theme shell that flips between
+ * paper (light) and ink (dark) based on the user's settings. Falls
+ * back to paper before hydration so the first paint matches the rest
+ * of the app — see ChatThemeShell.
  */
 export default function ChatLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div data-theme="paper" className="h-full bg-background text-foreground">
-      {children}
-    </div>
-  );
+  return <ChatThemeShell>{children}</ChatThemeShell>;
 }

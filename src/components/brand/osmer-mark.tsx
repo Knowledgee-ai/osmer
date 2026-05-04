@@ -39,13 +39,13 @@ export function OsmerMark({
         </radialGradient>
       </defs>
       <circle cx="40" cy="40" r="38" fill={`url(#${gid})`} />
-      <g>
-        <circle cx="40" cy="14" r="1.4" fill="#1a1814" />
-        <circle cx="61" cy="28" r="1" fill="#1a1814" opacity="0.55" />
-        <circle cx="64" cy="50" r="1.2" fill="#1a1814" opacity="0.7" />
-        <circle cx="40" cy="66" r="0.9" fill="#1a1814" opacity="0.5" />
-        <circle cx="19" cy="52" r="1" fill="#1a1814" opacity="0.6" />
-        <circle cx="17" cy="31" r="1.2" fill="#1a1814" opacity="0.7" />
+      <g fill="var(--foreground, #1a1814)">
+        <circle cx="40" cy="14" r="1.4" />
+        <circle cx="61" cy="28" r="1" opacity="0.55" />
+        <circle cx="64" cy="50" r="1.2" opacity="0.7" />
+        <circle cx="40" cy="66" r="0.9" opacity="0.5" />
+        <circle cx="19" cy="52" r="1" opacity="0.6" />
+        <circle cx="17" cy="31" r="1.2" opacity="0.7" />
         <animateTransform
           attributeName="transform"
           type="rotate"
@@ -55,7 +55,7 @@ export function OsmerMark({
           repeatCount="indefinite"
         />
       </g>
-      <circle cx="40" cy="40" r="11" fill="#1a1814" />
+      <circle cx="40" cy="40" r="11" fill="var(--foreground, #1a1814)" />
     </svg>
   );
 }

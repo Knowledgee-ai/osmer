@@ -14,7 +14,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -314,10 +313,10 @@ function ConversationAudienceSelector({ chatId }: { chatId: string }) {
     visibility === 'private'
       ? 'Just you'
       : visibility === 'organization'
-        ? 'Public to org'
+        ? 'Entire organization'
         : inviteCount > 0
-          ? `${inviteCount} invited`
-          : 'Invite teammates';
+          ? `${inviteCount} team member${inviteCount === 1 ? '' : 's'}`
+          : 'Add team member';
 
   return (
     <>
@@ -328,9 +327,9 @@ function ConversationAudienceSelector({ chatId }: { chatId: string }) {
           <ChevronDownIcon className="h-3 w-3 opacity-50" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-60">
-          <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">
+          <div className="px-1.5 pt-1.5 pb-1 text-[10px] uppercase tracking-[0.16em] text-muted-foreground/80 font-normal">
             Conversation audience
-          </DropdownMenuLabel>
+          </div>
           <DropdownMenuItem
             onClick={() => setAudience('private')}
             className="flex items-center justify-between gap-2 cursor-pointer"
@@ -352,11 +351,11 @@ function ConversationAudienceSelector({ chatId }: { chatId: string }) {
             <div className="flex items-center gap-2">
               <AudienceIcon visibility="team" className="h-3.5 w-3.5 opacity-70" />
               <div className="flex flex-col">
-                <span className="text-sm">Invite teammates</span>
+                <span className="text-sm">Add team member</span>
                 <span className="text-[10px] text-muted-foreground">
                   {visibility === 'team' && inviteCount > 0
                     ? `${inviteCount} invited · click to manage`
-                    : 'Pick specific people to collaborate'}
+                    : 'Invite specific people to collaborate'}
                 </span>
               </div>
             </div>
@@ -370,7 +369,7 @@ function ConversationAudienceSelector({ chatId }: { chatId: string }) {
             <div className="flex items-center gap-2">
               <AudienceIcon visibility="organization" className="h-3.5 w-3.5 opacity-70" />
               <div className="flex flex-col">
-                <span className="text-sm">Public to org</span>
+                <span className="text-sm">Make available to entire organization</span>
                 <span className="text-[10px] text-muted-foreground">Anyone in your company can read and chime in</span>
               </div>
             </div>

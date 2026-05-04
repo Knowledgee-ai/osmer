@@ -8,11 +8,9 @@ import { SettingsDialog } from "@/components/settings/settings-dialog";
 import { OnboardingDialog } from "@/components/onboarding/onboarding-dialog";
 import { useHydration } from "@/hooks/use-hydration";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
-import { useTheme } from "@/hooks/use-theme";
 
 export default function ChatPage() {
   const hydrated = useHydration();
-  useTheme();
   const [knowledgePanelOpen, setKnowledgePanelOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
