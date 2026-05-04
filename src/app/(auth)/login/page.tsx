@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { OsmerMark } from "@/components/brand/osmer-mark";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -42,16 +43,21 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-full flex items-center justify-center px-4">
-      <div className="w-full max-w-sm space-y-6">
-        <div className="text-center">
-          <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center mx-auto mb-4">
-            <span className="text-primary-foreground font-bold">o</span>
+    <div data-theme="paper" className="min-h-full flex items-center justify-center px-4 bg-background text-foreground">
+      <div className="w-full max-w-sm space-y-8">
+        <div className="text-center space-y-5">
+          <OsmerMark className="mx-auto" size={44} />
+          <div className="space-y-1">
+            <h1
+              className="text-3xl text-[var(--ink)]"
+              style={{ fontFamily: "var(--font-display), Georgia, serif", letterSpacing: "-0.02em" }}
+            >
+              Welcome back
+            </h1>
+            <p className="mono text-xs text-[var(--ink-mute)]">
+              Sign in to your Osmer account
+            </p>
           </div>
-          <h1 className="text-2xl font-bold">Welcome back</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Sign in to your Osmer account
-          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">

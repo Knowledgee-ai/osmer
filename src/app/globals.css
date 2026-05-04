@@ -165,19 +165,36 @@ html:has([data-theme="paper"]) body {
   --clay-deep: #8b3a1f;
   --clay-soft: #e9b89e;
 
-  /* Override shadcn variables within this scope */
+  /* Override every shadcn token used by app components so the same
+   * primitives (Dialog, DropdownMenu, ScrollArea, Sidebar, Button…)
+   * render in editorial paper mode without per-component changes. */
   --background: var(--paper);
   --foreground: var(--ink);
   --card: var(--paper-pale);
   --card-foreground: var(--ink);
-  --muted: var(--paper-deep);
-  --muted-foreground: var(--ink-mute);
-  --border: var(--hairline);
+  --popover: var(--paper-pale);
+  --popover-foreground: var(--ink);
   --primary: var(--ink);
   --primary-foreground: var(--paper);
-  --accent: var(--clay);
-  --accent-foreground: var(--paper);
+  --secondary: var(--paper-deep);
+  --secondary-foreground: var(--ink);
+  --muted: var(--paper-deep);
+  --muted-foreground: var(--ink-mute);
+  --accent: var(--clay-soft);
+  --accent-foreground: var(--ink);
+  --destructive: var(--clay-deep);
+  --border: var(--hairline);
+  --input: var(--hairline);
   --ring: var(--clay);
+
+  --sidebar: var(--paper-pale);
+  --sidebar-foreground: var(--ink-soft);
+  --sidebar-primary: var(--ink);
+  --sidebar-primary-foreground: var(--paper);
+  --sidebar-accent: var(--paper-deep);
+  --sidebar-accent-foreground: var(--ink);
+  --sidebar-border: var(--hairline);
+  --sidebar-ring: var(--clay-soft);
 
   background-color: var(--paper);
   color: var(--ink);

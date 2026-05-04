@@ -6,6 +6,7 @@ import { useChatStore } from "@/stores/chat-store";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { OsmerMark } from "@/components/brand/osmer-mark";
 
 interface AppSidebarProps {
   onOpenSettings?: () => void;
@@ -115,10 +116,13 @@ export function AppSidebar({ onOpenSettings }: AppSidebarProps) {
       {/* Header */}
       <div className="flex items-center justify-between p-3 border-b border-border">
         <div className="flex items-center gap-2">
-          <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground text-xs font-bold">o</span>
-          </div>
-          <span className="font-semibold text-sm">Osmer</span>
+          <OsmerMark size={26} quiet />
+          <span
+            className="text-[15px] tracking-[-0.022em] text-[var(--ink)]"
+            style={{ fontWeight: 600 }}
+          >
+            Osmer
+          </span>
         </div>
         <div className="flex gap-1">
           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleNewChat}>
