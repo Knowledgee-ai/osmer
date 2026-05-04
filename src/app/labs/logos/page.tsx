@@ -17,16 +17,44 @@ const CANDIDATES: Candidate[] = [
   {
     id: "aperture",
     name: "01 / Aperture",
-    tagline: "A boundary, with one atom across it",
+    tagline: "An accretion disc, slowly turning",
     adopted: true,
     rationale:
-      "A solid ink disk (the membrane, the system of record) with a smaller clay disk offset to the upper-right — a single atom of knowledge passing across the boundary. Reads as cell, portal, lens, planet. Reductive osmotic figure that holds at favicon scale and pairs cleanly with the Osmer wordmark.",
-    Mark: () => (
-      <svg viewBox="0 0 80 80" className="block h-full w-full">
-        <circle cx="40" cy="40" r="28" fill="#1a1814" />
-        <circle cx="50" cy="30" r="6" fill="#D85728" />
-      </svg>
-    ),
+      "A small accretion disc: a clay-toned glow ring with drifting particles orbiting an ink void at the centre. The disc is a soft radial gradient (no hard edge); the ring rotates slowly so the mark feels alive in the nav and footer without demanding attention. Inverts cleanly into a static frame for favicons and apple-icon. Brand metaphor: knowledge orbiting a permeable boundary, drawn inward.",
+    Mark: () => {
+      const gid = `osmer-aperture-lab-${Math.random().toString(36).slice(2, 7)}`;
+      return (
+        <svg viewBox="0 0 80 80" className="block h-full w-full">
+          <defs>
+            <radialGradient id={gid} cx="50%" cy="50%" r="50%">
+              <stop offset="22%" stopColor="#1a1814" stopOpacity="0" />
+              <stop offset="40%" stopColor="#D85728" stopOpacity="0" />
+              <stop offset="58%" stopColor="#D85728" stopOpacity="0.95" />
+              <stop offset="78%" stopColor="#D85728" stopOpacity="0.28" />
+              <stop offset="100%" stopColor="#D85728" stopOpacity="0" />
+            </radialGradient>
+          </defs>
+          <circle cx="40" cy="40" r="38" fill={`url(#${gid})`} />
+          <g>
+            <circle cx="40" cy="14" r="1.4" fill="#1a1814" />
+            <circle cx="61" cy="28" r="1" fill="#1a1814" opacity="0.55" />
+            <circle cx="64" cy="50" r="1.2" fill="#1a1814" opacity="0.7" />
+            <circle cx="40" cy="66" r="0.9" fill="#1a1814" opacity="0.5" />
+            <circle cx="19" cy="52" r="1" fill="#1a1814" opacity="0.6" />
+            <circle cx="17" cy="31" r="1.2" fill="#1a1814" opacity="0.7" />
+            <animateTransform
+              attributeName="transform"
+              type="rotate"
+              from="0 40 40"
+              to="360 40 40"
+              dur="36s"
+              repeatCount="indefinite"
+            />
+          </g>
+          <circle cx="40" cy="40" r="11" fill="#1a1814" />
+        </svg>
+      );
+    },
   },
   {
     id: "halo",
