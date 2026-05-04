@@ -66,12 +66,14 @@ export function useOsmerChat({
         .then((res) => (res.ok ? res.json() : null))
         .then((data) => {
           if (data?.messages?.length > 0 && conversationIdRef.current === conversationId) {
-            const dbMessages: StoredMessage[] = data.messages.map((m: { id: string; role: string; content: string; modelUsed: string | null; createdAt: string }) => ({
+            const dbMessages: StoredMessage[] = data.messages.map((m: { id: string; role: string; content: string; modelUsed: string | null; createdAt: string; userId?: string | null; senderName?: string | null }) => ({
               id: m.id,
               role: m.role as 'user' | 'assistant',
               content: m.content,
               modelUsed: m.modelUsed || undefined,
               createdAt: m.createdAt,
+              userId: m.userId ?? null,
+              senderName: m.senderName ?? null,
             }));
             setMessages(dbMessages);
             saveMessages(conversationId, dbMessages); // Update cache

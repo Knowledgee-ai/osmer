@@ -8,6 +8,10 @@ export interface StoredMessage {
   content: string;
   modelUsed?: string;
   createdAt: string;
+  // Sender attribution for multi-user conversations. Null for assistant
+  // turns and for legacy messages that predate user attribution.
+  userId?: string | null;
+  senderName?: string | null;
 }
 
 const STORAGE_KEY = 'osmer-messages';

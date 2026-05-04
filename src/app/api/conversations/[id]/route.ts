@@ -1,9 +1,11 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { conversations, teamMembers } from "@/lib/db/schema";
+import { conversations } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 
-// PATCH /api/conversations/[id] — update conversation (title, audience)
+// PATCH /api/conversations/[id] — update conversation (title, audience).
+// 'team' visibility uses the conversation_participants table — no
+// teamId is required (per-conversation membership replaces fixed teams).
 export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -17,31 +19,15 @@ export async function PATCH(
   const body = await req.json() as {
     title?: string;
     visibility?: 'private' | 'team' | 'organization';
-    teamId?: string | null;
   };
 
   const updates: Record<string, unknown> = {};
   if (body.title !== undefined) updates.title = body.title;
-
   if (body.visibility !== undefined) {
-    if (body.visibility === 'team') {
-      if (!body.teamId) {
-        return Response.json({ error: "teamId required for team visibility" }, { status: 400 });
-      }
-      const [membership] = await db
-        .select({ teamId: teamMembers.teamId })
-        .from(teamMembers)
-        .where(and(eq(teamMembers.teamId, body.teamId), eq(teamMembers.userId, session.user.id)))
-        .limit(1);
-      if (!membership) {
-        return Response.json({ error: "Not a member of that team" }, { status: 403 });
-      }
-      updates.visibility = 'team';
-      updates.teamId = body.teamId;
-    } else {
-      updates.visibility = body.visibility;
-      updates.teamId = null;
-    }
+    updates.visibility = body.visibility;
+    // We no longer pin conversations to a fixed team; participants are
+    // per-conversation. Clear any legacy teamId on visibility change.
+    updates.teamId = null;
   }
 
   if (Object.keys(updates).length === 0) {
@@ -68,7 +54,8 @@ export async function PATCH(
   return Response.json({ conversation: conv });
 }
 
-// DELETE /api/conversations/[id] — delete conversation and messages
+// DELETE /api/conversations/[id] — delete conversation and messages.
+// Owner-only; cascade handles messages and participants.
 export async function DELETE(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -80,7 +67,6 @@ export async function DELETE(
 
   const { id } = await params;
 
-  // Cascade delete handles messages
   await db
     .delete(conversations)
     .where(

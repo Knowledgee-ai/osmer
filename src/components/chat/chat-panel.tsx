@@ -18,6 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { TeammatePicker } from "./teammate-picker";
 
 interface ChatPanelProps {
   onToggleKnowledge?: () => void;
@@ -273,104 +274,118 @@ export function ChatPanel({ onToggleKnowledge }: ChatPanelProps) {
   );
 }
 
-interface TeamOption { id: string; name: string }
-
 function ConversationAudienceSelector({ chatId }: { chatId: string }) {
   const { conversations, setConversationAudience } = useChatStore();
-  const [teams, setTeams] = useState<TeamOption[]>([]);
   const conv = conversations.find((c) => c.id === chatId);
   const visibility = conv?.visibility ?? 'private';
-  const teamId = conv?.teamId ?? null;
   const isPersisted = Boolean(conv) && !chatId.startsWith('pending-');
 
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [inviteCount, setInviteCount] = useState(0);
+
+  // Refresh invite count when this becomes a real conversation
   useEffect(() => {
-    let cancelled = false;
-    fetch('/api/teams')
+    if (!isPersisted || visibility !== 'team') return;
+    fetch(`/api/conversations/${chatId}/participants`)
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
-        if (cancelled) return;
-        setTeams((d?.teams || []).map((t: { id: string; name: string }) => ({ id: t.id, name: t.name })));
+        if (d?.participants) setInviteCount(d.participants.length);
       })
       .catch(() => {});
-    return () => { cancelled = true; };
-  }, []);
+  }, [chatId, isPersisted, visibility]);
 
-  const setAudience = (vis: 'private' | 'team' | 'organization', tid: string | null) => {
-    setConversationAudience(chatId, vis, tid);
+  const setAudience = (vis: 'private' | 'team' | 'organization') => {
+    setConversationAudience(chatId, vis, null);
     if (isPersisted) {
       fetch(`/api/conversations/${chatId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ visibility: vis, teamId: tid }),
+        body: JSON.stringify({ visibility: vis }),
       }).catch(() => {});
     }
   };
 
+  const onSelectTeam = () => {
+    setAudience('team');
+    if (isPersisted) setPickerOpen(true);
+  };
+
   const currentLabel =
     visibility === 'private'
-      ? 'Just me'
+      ? 'Just you'
       : visibility === 'organization'
-        ? 'Company-wide'
-        : teams.find((t) => t.id === teamId)?.name ?? 'Team';
+        ? 'Public to org'
+        : inviteCount > 0
+          ? `${inviteCount} invited`
+          : 'Invite teammates';
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md border border-input bg-background px-3 h-8 text-xs font-normal shadow-xs hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
-        <AudienceIcon visibility={visibility} className="h-3 w-3 opacity-70" />
-        <span>{currentLabel}</span>
-        <ChevronDownIcon className="h-3 w-3 opacity-50" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-56">
-        <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">
-          Conversation audience
-        </DropdownMenuLabel>
-        <DropdownMenuItem
-          onClick={() => setAudience('private', null)}
-          className="flex items-center justify-between gap-2 cursor-pointer"
-        >
-          <div className="flex items-center gap-2">
-            <AudienceIcon visibility="private" className="h-3.5 w-3.5 opacity-70" />
-            <span className="text-sm">Just me</span>
-          </div>
-          {visibility === 'private' && <CheckIcon className="h-3.5 w-3.5 text-primary" />}
-        </DropdownMenuItem>
-        {teams.length > 0 && (
-          <>
-            <DropdownMenuSeparator />
-            <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground/70 font-normal">
-              Teams
-            </DropdownMenuLabel>
-            {teams.map((team) => {
-              const active = visibility === 'team' && teamId === team.id;
-              return (
-                <DropdownMenuItem
-                  key={team.id}
-                  onClick={() => setAudience('team', team.id)}
-                  className="flex items-center justify-between gap-2 cursor-pointer"
-                >
-                  <div className="flex items-center gap-2">
-                    <AudienceIcon visibility="team" className="h-3.5 w-3.5 opacity-70" />
-                    <span className="text-sm">{team.name}</span>
-                  </div>
-                  {active && <CheckIcon className="h-3.5 w-3.5 text-primary" />}
-                </DropdownMenuItem>
-              );
-            })}
-          </>
-        )}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={() => setAudience('organization', null)}
-          className="flex items-center justify-between gap-2 cursor-pointer"
-        >
-          <div className="flex items-center gap-2">
-            <AudienceIcon visibility="organization" className="h-3.5 w-3.5 opacity-70" />
-            <span className="text-sm">Company-wide</span>
-          </div>
-          {visibility === 'organization' && <CheckIcon className="h-3.5 w-3.5 text-primary" />}
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md border border-input bg-background px-3 h-8 text-xs font-normal shadow-xs hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+          <AudienceIcon visibility={visibility} className="h-3 w-3 opacity-70" />
+          <span>{currentLabel}</span>
+          <ChevronDownIcon className="h-3 w-3 opacity-50" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-60">
+          <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">
+            Conversation audience
+          </DropdownMenuLabel>
+          <DropdownMenuItem
+            onClick={() => setAudience('private')}
+            className="flex items-center justify-between gap-2 cursor-pointer"
+          >
+            <div className="flex items-center gap-2">
+              <AudienceIcon visibility="private" className="h-3.5 w-3.5 opacity-70" />
+              <div className="flex flex-col">
+                <span className="text-sm">Just you</span>
+                <span className="text-[10px] text-muted-foreground">Private — only you can see this thread</span>
+              </div>
+            </div>
+            {visibility === 'private' && <CheckIcon className="h-3.5 w-3.5 text-primary" />}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={onSelectTeam}
+            className="flex items-center justify-between gap-2 cursor-pointer"
+          >
+            <div className="flex items-center gap-2">
+              <AudienceIcon visibility="team" className="h-3.5 w-3.5 opacity-70" />
+              <div className="flex flex-col">
+                <span className="text-sm">Invite teammates</span>
+                <span className="text-[10px] text-muted-foreground">
+                  {visibility === 'team' && inviteCount > 0
+                    ? `${inviteCount} invited · click to manage`
+                    : 'Pick specific people to collaborate'}
+                </span>
+              </div>
+            </div>
+            {visibility === 'team' && <CheckIcon className="h-3.5 w-3.5 text-primary" />}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={() => setAudience('organization')}
+            className="flex items-center justify-between gap-2 cursor-pointer"
+          >
+            <div className="flex items-center gap-2">
+              <AudienceIcon visibility="organization" className="h-3.5 w-3.5 opacity-70" />
+              <div className="flex flex-col">
+                <span className="text-sm">Public to org</span>
+                <span className="text-[10px] text-muted-foreground">Anyone in your company can read and chime in</span>
+              </div>
+            </div>
+            {visibility === 'organization' && <CheckIcon className="h-3.5 w-3.5 text-primary" />}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <TeammatePicker
+        open={pickerOpen}
+        conversationId={chatId}
+        onClose={() => setPickerOpen(false)}
+        onChange={setInviteCount}
+      />
+    </>
   );
 }
 

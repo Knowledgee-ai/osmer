@@ -21,6 +21,14 @@ export function MessageList({ messages, isLoading, error, onSendPrompt }: Messag
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading, error]);
 
+  // Show sender names only when more than one human is talking. For
+  // single-user threads we keep the cleaner unattributed bubble.
+  const distinctSenders = new Set<string>();
+  for (const m of messages) {
+    if (m.role === 'user' && m.userId) distinctSenders.add(m.userId);
+  }
+  const showSenders = distinctSenders.size >= 2;
+
   if (messages.length === 0 && !error) {
     return <EmptyState onSendPrompt={onSendPrompt} />;
   }
@@ -29,7 +37,7 @@ export function MessageList({ messages, isLoading, error, onSendPrompt }: Messag
     <div className="flex-1 overflow-y-auto">
       <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
         {messages.map((message) => (
-          <MessageBubble key={message.id} message={message} />
+          <MessageBubble key={message.id} message={message} showSender={showSenders} />
         ))}
         {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
           <LoadingIndicator />
@@ -41,9 +49,10 @@ export function MessageList({ messages, isLoading, error, onSendPrompt }: Messag
   );
 }
 
-const MessageBubble = memo(function MessageBubble({ message }: { message: StoredMessage }) {
+const MessageBubble = memo(function MessageBubble({ message, showSender }: { message: StoredMessage; showSender: boolean }) {
   const isUser = message.role === "user";
   const text = message.content;
+  const senderInitial = (message.senderName?.[0] || 'U').toUpperCase();
 
   return (
     <div className={cn("flex gap-3", isUser && "justify-end")}>
@@ -70,6 +79,11 @@ const MessageBubble = memo(function MessageBubble({ message }: { message: Stored
             </div>
           ) : null;
         })()}
+        {isUser && showSender && message.senderName && (
+          <div className="text-[10px] text-muted-foreground mb-0.5 mr-1 font-medium">
+            {message.senderName}
+          </div>
+        )}
         <div
           className={cn(
             "rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
@@ -87,7 +101,11 @@ const MessageBubble = memo(function MessageBubble({ message }: { message: Stored
       </div>
       {isUser && (
         <div className="h-7 w-7 rounded-full bg-primary/20 flex items-center justify-center shrink-0 mt-0.5">
-          <UserIcon className="h-3.5 w-3.5 text-primary" />
+          {showSender && message.senderName ? (
+            <span className="text-[10px] font-semibold text-primary">{senderInitial}</span>
+          ) : (
+            <UserIcon className="h-3.5 w-3.5 text-primary" />
+          )}
         </div>
       )}
     </div>

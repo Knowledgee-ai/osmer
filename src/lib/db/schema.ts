@@ -130,6 +130,9 @@ export const conversationParticipants = pgTable('conversation_participants', {
 export const messages = pgTable('messages', {
   id: uuid('id').primaryKey().defaultRandom(),
   conversationId: uuid('conversation_id').references(() => conversations.id, { onDelete: 'cascade' }).notNull(),
+  // Sender for role='user' in multi-participant conversations. Nullable
+  // for assistant turns and for legacy messages predating this column.
+  userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
   role: messageRoleEnum('role').notNull(),
   content: text('content').notNull(),
   modelUsed: varchar('model_used', { length: 255 }),
@@ -140,6 +143,7 @@ export const messages = pgTable('messages', {
 }, (table) => [
   index('msg_conv_idx').on(table.conversationId),
   index('msg_created_idx').on(table.conversationId, table.createdAt),
+  index('msg_user_idx').on(table.userId),
 ]);
 
 // ============================================================

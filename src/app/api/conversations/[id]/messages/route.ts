@@ -1,9 +1,10 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { messages, conversations } from "@/lib/db/schema";
-import { eq, and, asc } from "drizzle-orm";
+import { messages, conversations, users } from "@/lib/db/schema";
+import { eq, asc } from "drizzle-orm";
+import { getConversationAccess, canRead, canWrite } from "@/lib/conversations/access";
 
-// GET /api/conversations/[id]/messages — load messages for a conversation
+// GET /api/conversations/[id]/messages — load messages + sender attribution.
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -14,36 +15,32 @@ export async function GET(
   }
 
   const { id } = await params;
+  const access = await getConversationAccess(id, session.user.id);
+  if (!access) return Response.json({ error: "Not found" }, { status: 404 });
+  if (!canRead(access)) return Response.json({ error: "Forbidden" }, { status: 403 });
 
-  // Verify the user owns this conversation
-  const [conv] = await db
-    .select({ id: conversations.id })
-    .from(conversations)
-    .where(
-      and(eq(conversations.id, id), eq(conversations.userId, session.user.id))
-    )
-    .limit(1);
-
-  if (!conv) {
-    return Response.json({ error: "Conversation not found" }, { status: 404 });
-  }
-
-  const convMessages = await db
+  // Left-join users for sender attribution. Returns null for assistant
+  // turns and for legacy messages without a userId.
+  const rows = await db
     .select({
       id: messages.id,
       role: messages.role,
       content: messages.content,
       modelUsed: messages.modelUsed,
       createdAt: messages.createdAt,
+      userId: messages.userId,
+      senderName: users.name,
     })
     .from(messages)
+    .leftJoin(users, eq(users.id, messages.userId))
     .where(eq(messages.conversationId, id))
     .orderBy(asc(messages.createdAt));
 
-  return Response.json({ messages: convMessages });
+  return Response.json({ messages: rows });
 }
 
-// POST /api/conversations/[id]/messages — save a message
+// POST /api/conversations/[id]/messages — save a message. Persists the
+// sender's userId so multi-user conversations can attribute later.
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -54,6 +51,10 @@ export async function POST(
   }
 
   const { id: conversationId } = await params;
+  const access = await getConversationAccess(conversationId, session.user.id);
+  if (!access) return Response.json({ error: "Not found" }, { status: 404 });
+  if (!canWrite(access)) return Response.json({ error: "Forbidden" }, { status: 403 });
+
   const { id, role, content, modelUsed } = await req.json() as {
     id?: string;
     role: 'user' | 'assistant';
@@ -69,6 +70,8 @@ export async function POST(
       role,
       content,
       modelUsed,
+      // Only attribute user turns; assistant turns are model-authored.
+      userId: role === 'user' ? session.user.id : null,
     })
     .returning({
       id: messages.id,
@@ -76,9 +79,9 @@ export async function POST(
       content: messages.content,
       modelUsed: messages.modelUsed,
       createdAt: messages.createdAt,
+      userId: messages.userId,
     });
 
-  // Update conversation's updatedAt
   await db
     .update(conversations)
     .set({ updatedAt: new Date() })
