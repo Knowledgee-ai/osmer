@@ -129,6 +129,17 @@
   }
 }
 
+/* When a paper-themed page is mounted (the editorial landing), repaint
+ * html + body in the same paper colour as the inner scroller. Without
+ * this the OS overscroll bounce at the top exposes the dark theme bg
+ * behind and reads as a "black bar appearing" — fighting the wordmark
+ * suck-into-the-void animation. The literal hex matches --paper inside
+ * [data-theme="paper"] (which can't cascade up to html / body). */
+html:has([data-theme="paper"]),
+html:has([data-theme="paper"]) body {
+  background-color: #f4efe6;
+}
+
 /* ============================================================
    Landing — "Paper" theme
    Editorial cream palette scoped to [data-theme="paper"].
