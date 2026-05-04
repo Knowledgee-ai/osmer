@@ -1,7 +1,7 @@
 "use client";
 
 import { useChatStore } from "@/stores/chat-store";
-import { getModelsGroupedByProvider, PROVIDER_COLORS } from "@/lib/ai/models";
+import { getModelsGroupedByProvider } from "@/lib/ai/models";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MODEL_MAP } from "@/lib/ai/models";
+import { ProviderMark } from "@/components/brand/provider-mark";
 
 export function ModelSelector() {
   const { selectedModel, setSelectedModel } = useChatStore();
@@ -21,10 +22,7 @@ export function ModelSelector() {
     <DropdownMenu>
       <DropdownMenuTrigger className="inline-flex items-center gap-2 whitespace-nowrap text-[0.82rem] text-foreground hover:text-[var(--clay-deep)] transition-colors focus-visible:outline-none">
         {currentModel && (
-          <span
-            className="h-1.5 w-1.5 rounded-full"
-            style={{ backgroundColor: PROVIDER_COLORS[currentModel.provider] || '#888' }}
-          />
+          <ProviderMark provider={currentModel.provider} size={13} />
         )}
         <span style={{ fontFamily: "var(--font-display), Georgia, serif", letterSpacing: "-0.012em" }}>
           {currentModel?.name || selectedModel}
@@ -44,14 +42,11 @@ export function ModelSelector() {
                 onClick={() => setSelectedModel(model.id)}
                 className="flex items-center justify-between gap-2 cursor-pointer"
               >
-                <div className="flex items-center gap-2">
-                  <span
-                    className="h-1.5 w-1.5 rounded-full shrink-0"
-                    style={{ backgroundColor: PROVIDER_COLORS[model.provider] || '#888' }}
-                  />
-                  <span className="text-[0.85rem]">{model.name}</span>
+                <div className="flex items-center gap-2 min-w-0">
+                  <ProviderMark provider={model.provider} size={14} />
+                  <span className="text-[0.85rem] truncate">{model.name}</span>
                 </div>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 shrink-0">
                   <span className="mono text-muted-foreground/70">{model.category}</span>
                   {selectedModel === model.id && (
                     <CheckIcon className="h-3 w-3 text-[var(--clay)]" />

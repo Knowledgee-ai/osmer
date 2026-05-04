@@ -2,10 +2,11 @@
 
 import { useEffect, useRef, memo } from "react";
 import type { StoredMessage } from "@/lib/messages/store";
-import { MODEL_MAP, PROVIDER_COLORS } from "@/lib/ai/models";
+import { MODEL_MAP } from "@/lib/ai/models";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
+import { ProviderMark } from "@/components/brand/provider-mark";
 
 interface MessageListProps {
   messages: StoredMessage[];
@@ -71,10 +72,11 @@ const MessageBubble = memo(function MessageBubble({ message, showSender }: { mes
           </div>
         ) : (
           <div className="h-6 w-6 rounded-full border border-border bg-background flex items-center justify-center shrink-0">
-            <span
-              className="h-1.5 w-1.5 rounded-full"
-              style={{ backgroundColor: model ? PROVIDER_COLORS[model.provider] || '#888' : 'var(--muted-foreground)' }}
-            />
+            {model ? (
+              <ProviderMark provider={model.provider} size={12} />
+            ) : (
+              <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
+            )}
           </div>
         )}
       </div>
