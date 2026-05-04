@@ -38,9 +38,10 @@ export function ChatInput({ value, onChange, onSubmit, isLoading, onStop }: Chat
 
   return (
     <div className="border-t border-border/60 bg-background">
-      <div className="mx-auto max-w-2xl px-8 pt-4 pb-3">
-        <div className="flex items-end gap-3 border border-border/80 px-3 py-2 transition-colors focus-within:border-foreground/40">
-          <Textarea
+      <div className="mx-auto max-w-2xl px-8 pt-6 pb-3">
+        <div className="osmer-aura">
+          <div className="osmer-aura-inner flex items-end gap-3 px-3 py-2">
+            <Textarea
             ref={textareaRef}
             value={value}
             onChange={(e) => onChange(e.target.value)}
@@ -49,31 +50,32 @@ export function ChatInput({ value, onChange, onSubmit, isLoading, onStop }: Chat
             className="flex-1 min-h-[24px] max-h-[200px] resize-none border-0 bg-transparent p-0 text-[0.95rem] leading-[1.55] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60"
             rows={1}
           />
-          {isLoading ? (
-            <button
-              onClick={onStop}
-              aria-label="Stop generating"
-              className="mono inline-flex shrink-0 items-center gap-1.5 px-2.5 py-1.5 border border-border/80 text-foreground/80 hover:text-foreground hover:border-foreground/40 transition-colors"
-            >
-              <span className="h-2 w-2 bg-[var(--clay)]" />
-              <span>Stop</span>
-            </button>
-          ) : (
-            <button
-              onClick={onSubmit}
-              disabled={!canSend}
-              aria-label="Send message"
-              className={cn(
-                "mono inline-flex shrink-0 items-center gap-1.5 px-2.5 py-1.5 border transition-colors",
-                canSend
-                  ? "border-foreground bg-foreground text-background hover:bg-[var(--clay-deep)] hover:border-[var(--clay-deep)]"
-                  : "border-border/60 text-muted-foreground/60 cursor-not-allowed"
-              )}
-            >
-              <span>Send</span>
-              <ArrowEastIcon className="h-2.5 w-2.5" />
-            </button>
-          )}
+            {isLoading ? (
+              <button
+                onClick={onStop}
+                aria-label="Stop generating"
+                className="mono inline-flex shrink-0 items-center gap-1.5 px-2.5 py-1.5 border border-border/80 text-foreground/80 hover:text-foreground hover:border-foreground/40 transition-colors"
+              >
+                <span className="h-2 w-2 bg-[var(--clay)]" />
+                <span>Stop</span>
+              </button>
+            ) : (
+              <button
+                onClick={onSubmit}
+                disabled={!canSend}
+                aria-label="Send message"
+                className={cn(
+                  "mono inline-flex shrink-0 items-center gap-1.5 px-2.5 py-1.5 border transition-colors",
+                  canSend
+                    ? "border-foreground bg-foreground text-background hover:bg-[var(--clay-deep)] hover:border-[var(--clay-deep)]"
+                    : "border-border/60 text-muted-foreground/60 cursor-not-allowed"
+                )}
+              >
+                <span>Send</span>
+                <ArrowEastIcon className="h-2.5 w-2.5" />
+              </button>
+            )}
+          </div>
         </div>
         <p
           className="mt-3 text-center text-[0.7rem] tracking-[0.02em] text-muted-foreground/70"

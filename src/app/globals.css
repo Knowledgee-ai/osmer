@@ -338,6 +338,80 @@ html body {
   margin: 0;
 }
 
+/* ============================================================
+   Osmer Aura — a single clay comet sweeping around the chat input.
+   The wrapper paints a conic-gradient with one bright clay arc and
+   a long faint dark side; the inner element holds the actual UI.
+   A blurred ::before mirrors the gradient as a soft halo outside
+   the box. CSS Houdini's @property lets us animate the conic
+   start angle smoothly. Reduced-motion freezes the comet at 0deg.
+   ============================================================ */
+
+@property --osmer-aura-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes osmer-aura-spin {
+  to { --osmer-aura-angle: 360deg; }
+}
+
+.osmer-aura {
+  position: relative;
+  --osmer-aura-angle: 0deg;
+  padding: 1.5px;
+  /* Continuous clay loop: a bright clay arc on the leading edge
+   * fades through clay-soft to a dimmer clay tint on the trailing
+   * side. The line is visible all the way around — what changes is
+   * the brightness of the comet's head as it sweeps. */
+  background:
+    conic-gradient(
+      from var(--osmer-aura-angle),
+      var(--clay) 0deg,
+      var(--clay-soft) 30deg,
+      color-mix(in oklab, var(--clay) 35%, transparent) 120deg,
+      color-mix(in oklab, var(--clay) 25%, transparent) 240deg,
+      var(--clay-soft) 330deg,
+      var(--clay) 360deg
+    );
+  animation: osmer-aura-spin 6s linear infinite;
+  isolation: isolate;
+}
+
+.osmer-aura::before {
+  content: "";
+  position: absolute;
+  inset: -14px;
+  z-index: -1;
+  background:
+    conic-gradient(
+      from var(--osmer-aura-angle),
+      var(--clay) 0deg,
+      var(--clay-soft) 30deg,
+      transparent 130deg,
+      transparent 230deg,
+      var(--clay-soft) 330deg,
+      var(--clay) 360deg
+    );
+  filter: blur(22px);
+  opacity: 0.7;
+  pointer-events: none;
+  animation: osmer-aura-spin 6s linear infinite;
+}
+
+.osmer-aura-inner {
+  background-color: var(--background);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .osmer-aura,
+  .osmer-aura::before {
+    animation: none;
+    --osmer-aura-angle: 320deg;
+  }
+}
+
 /* Sticky scroll-reveal — staggered fade up */
 @keyframes paper-rise {
   from {
