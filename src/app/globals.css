@@ -360,44 +360,45 @@ html body {
 .osmer-aura {
   position: relative;
   --osmer-aura-angle: 0deg;
-  padding: 1.5px;
-  /* Continuous clay loop: a bright clay arc on the leading edge
-   * fades through clay-soft to a dimmer clay tint on the trailing
-   * side. The line is visible all the way around — what changes is
-   * the brightness of the comet's head as it sweeps. */
+  padding: 1px;
+  /* The LINE — primary effect. A continuously visible clay-tinted
+   * ring with a brighter leading arc that sweeps. The trailing
+   * side is a faint clay tint so the loop reads as one unbroken
+   * thread, not a comet starting and stopping. */
   background:
     conic-gradient(
       from var(--osmer-aura-angle),
       var(--clay) 0deg,
-      var(--clay-soft) 30deg,
-      color-mix(in oklab, var(--clay) 35%, transparent) 120deg,
-      color-mix(in oklab, var(--clay) 25%, transparent) 240deg,
-      var(--clay-soft) 330deg,
+      var(--clay-soft) 18deg,
+      color-mix(in oklab, var(--clay) 16%, transparent) 70deg,
+      color-mix(in oklab, var(--clay) 16%, transparent) 290deg,
+      var(--clay-soft) 342deg,
       var(--clay) 360deg
     );
-  animation: osmer-aura-spin 6s linear infinite;
+  animation: osmer-aura-spin 7s linear infinite;
   isolation: isolate;
 }
 
+/* The GLOW — a quiet halo that hugs only the comet's bright head,
+ * so it reads as a shadow following the line rather than a second
+ * independent effect. */
 .osmer-aura::before {
   content: "";
   position: absolute;
-  inset: -14px;
+  inset: -6px;
   z-index: -1;
   background:
     conic-gradient(
       from var(--osmer-aura-angle),
       var(--clay) 0deg,
-      var(--clay-soft) 30deg,
-      transparent 130deg,
-      transparent 230deg,
-      var(--clay-soft) 330deg,
+      transparent 50deg,
+      transparent 310deg,
       var(--clay) 360deg
     );
-  filter: blur(22px);
-  opacity: 0.7;
+  filter: blur(10px);
+  opacity: 0.32;
   pointer-events: none;
-  animation: osmer-aura-spin 6s linear infinite;
+  animation: osmer-aura-spin 7s linear infinite;
 }
 
 .osmer-aura-inner {
