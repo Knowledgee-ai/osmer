@@ -147,6 +147,11 @@ html:has([data-theme="paper"]) body {
    ============================================================ */
 
 [data-theme="paper"] {
+  /* Hard-stop at top and bottom — no rubber-band bounce. The bounce
+   * was distracting at the top of the suck-into-the-void animation
+   * and at the footer. */
+  overscroll-behavior: none;
+
   --paper: #f4efe6;
   --paper-deep: #ede5d2;
   --paper-pale: #faf6ee;
