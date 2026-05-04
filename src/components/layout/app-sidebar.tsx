@@ -32,11 +32,13 @@ export function AppSidebar({ onOpenSettings }: AppSidebarProps) {
       .then((data) => {
         if (data?.conversations?.length > 0) {
           setConversations(
-            data.conversations.map((c: { id: string; title: string; modelDefault: string; updatedAt: string }) => ({
+            data.conversations.map((c: { id: string; title: string; modelDefault: string; updatedAt: string; visibility?: 'private' | 'team' | 'organization'; teamId?: string | null }) => ({
               id: c.id,
               title: c.title,
               modelDefault: c.modelDefault,
               updatedAt: c.updatedAt,
+              visibility: c.visibility ?? 'private',
+              teamId: c.teamId ?? null,
             }))
           );
         }
@@ -114,9 +116,9 @@ export function AppSidebar({ onOpenSettings }: AppSidebarProps) {
       <div className="flex items-center justify-between p-3 border-b border-border">
         <div className="flex items-center gap-2">
           <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground text-xs font-bold">K</span>
+            <span className="text-primary-foreground text-xs font-bold">o</span>
           </div>
-          <span className="font-semibold text-sm">Knowledge HQ</span>
+          <span className="font-semibold text-sm">Osmer</span>
         </div>
         <div className="flex gap-1">
           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleNewChat}>

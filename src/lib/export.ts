@@ -9,7 +9,7 @@ export function exportConversationAsMarkdown(
 
   lines.push(`# ${title}`);
   lines.push('');
-  lines.push(`*Exported from Knowledge HQ on ${new Date().toLocaleDateString()}*`);
+  lines.push(`*Exported from Osmer on ${new Date().toLocaleDateString()}*`);
   lines.push('');
   lines.push('---');
   lines.push('');

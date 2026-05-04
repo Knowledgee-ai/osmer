@@ -27,6 +27,7 @@ export async function GET() {
         title: conversations.title,
         modelDefault: conversations.modelDefault,
         visibility: conversations.visibility,
+        teamId: conversations.teamId,
         updatedAt: conversations.updatedAt,
         userId: conversations.userId,
       })
@@ -49,6 +50,7 @@ export async function GET() {
         title: conversations.title,
         modelDefault: conversations.modelDefault,
         visibility: conversations.visibility,
+        teamId: conversations.teamId,
         updatedAt: conversations.updatedAt,
         userId: conversations.userId,
       })
@@ -77,9 +79,27 @@ export async function POST(req: Request) {
     id?: string;
     title: string;
     modelDefault: string;
-    teamId?: string;
-    visibility?: 'private' | 'team';
+    teamId?: string | null;
+    visibility?: 'private' | 'team' | 'organization';
   };
+
+  const audience: 'private' | 'team' | 'organization' = visibility ?? 'private';
+  let resolvedTeamId: string | null = null;
+
+  if (audience === 'team') {
+    if (!teamId) {
+      return Response.json({ error: "teamId required for team visibility" }, { status: 400 });
+    }
+    const [membership] = await db
+      .select({ teamId: teamMembers.teamId })
+      .from(teamMembers)
+      .where(and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, session.user.id)))
+      .limit(1);
+    if (!membership) {
+      return Response.json({ error: "Not a member of that team" }, { status: 403 });
+    }
+    resolvedTeamId = teamId;
+  }
 
   const [conv] = await db
     .insert(conversations)
@@ -88,14 +108,15 @@ export async function POST(req: Request) {
       userId: session.user.id,
       title,
       modelDefault,
-      teamId: teamId || null,
-      visibility: visibility || "private",
+      teamId: resolvedTeamId,
+      visibility: audience,
     })
     .returning({
       id: conversations.id,
       title: conversations.title,
       modelDefault: conversations.modelDefault,
       visibility: conversations.visibility,
+      teamId: conversations.teamId,
       updatedAt: conversations.updatedAt,
     });
 

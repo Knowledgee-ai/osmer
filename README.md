@@ -1,8 +1,8 @@
-# Knowledge HQ
+# Osmer
 
-**Your team's HQ for knowledgee.** Chat with GPT-4o, Claude, Gemini, Grok, and Llama in one place. Every conversation builds your organization's knowledge base -- automatically extracted, always available, compounding with every chat.
+**Your team's knowledge HQ.** Chat with GPT-4o, Claude, Gemini, Grok, and Llama in one place. Every conversation builds your organization's knowledge base -- automatically extracted, always available, compounding with every chat.
 
-**Live:** [knowledgee-olive.vercel.app](https://knowledgee-olive.vercel.app)
+**Live:** [osmer.ai](https://osmer.ai) (landing) · `app.osmer.ai/{company}` (workspace)
 
 ---
 
@@ -16,7 +16,7 @@ Companies use multiple AI tools (ChatGPT, Claude, Gemini, Grok) but knowledge is
 
 ## The Solution
 
-Knowledge HQ captures knowledge from every AI conversation and makes it available across the organization:
+Osmer captures knowledge from every AI conversation and makes it available across the organization:
 
 1. **Chat naturally** with any AI model
 2. **Knowledge is extracted** automatically (facts, decisions, solutions, relationships)
@@ -111,7 +111,7 @@ Neon Postgres (pgvector):
 ```bash
 # Clone and install
 git clone <repo-url>
-cd knowledgee
+cd osmer
 npm install
 
 # Configure environment

@@ -38,7 +38,7 @@ export function LandingNav() {
       <nav className="mx-auto grid max-w-[1440px] grid-cols-[1fr_auto_1fr] items-center px-8 pt-7 pb-4 lg:px-14">
         <Link
           href="/"
-          aria-label="Knowledge HQ, home"
+          aria-label="Osmer, home"
           className="logo-collapsible justify-self-start"
           data-collapsed={collapsed ? "true" : "false"}
         >
@@ -46,9 +46,9 @@ export function LandingNav() {
             <SymbolMark />
           </span>
           <span className="tail-clip" aria-hidden="true">
-            <span className="logo-tail">Knowledge&nbsp;HQ</span>
+            <span className="logo-tail">Osmer</span>
           </span>
-          <span className="sr-only">Knowledge HQ</span>
+          <span className="sr-only">Osmer</span>
         </Link>
 
         <div className="hidden items-center gap-10 justify-self-center md:flex">
@@ -99,13 +99,12 @@ function ArrowEast() {
 }
 
 /**
- * Knowledge HQ symbol mark — Stacked Archive.
+ * Osmer symbol mark — Aperture.
  *
- * Three filled rectangles offset rightward, like papers in a filing
- * cabinet pulled forward in sequence. The top (smallest) sheet is the
- * Personal tier in clay terracotta; the middle and bottom sheets are
- * the Team and Organisation tiers in ink. Visible edges hint at depth
- * and accumulation — knowledge compounding over time.
+ * A solid ink disk (the membrane, the boundary, the system of record)
+ * with a smaller clay disk offset to the upper-right (a single atom of
+ * knowledge passing across the boundary). Reads as cell, portal, lens,
+ * planet — a reductive osmotic figure that holds at favicon scale.
  */
 function SymbolMark() {
   return (
@@ -116,9 +115,8 @@ function SymbolMark() {
       aria-hidden="true"
       className="block"
     >
-      <rect x="12" y="20" width="42" height="13" rx="2" fill="#D85728" />
-      <rect x="16" y="35" width="46" height="13" rx="2" fill="#1a1814" />
-      <rect x="20" y="50" width="50" height="13" rx="2" fill="#1a1814" />
+      <circle cx="40" cy="40" r="28" fill="#1a1814" />
+      <circle cx="50" cy="30" r="6" fill="#D85728" />
     </svg>
   );
 }

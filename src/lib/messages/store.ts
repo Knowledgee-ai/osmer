@@ -10,7 +10,7 @@ export interface StoredMessage {
   createdAt: string;
 }
 
-const STORAGE_KEY = 'knowledgee-messages';
+const STORAGE_KEY = 'osmer-messages';
 
 function getStore(): Record<string, StoredMessage[]> {
   if (typeof window === 'undefined') return {};

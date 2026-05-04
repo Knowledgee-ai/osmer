@@ -19,7 +19,7 @@ export default function ChatPage() {
 
   // Check if onboarding is needed (no knowledge atoms yet)
   useEffect(() => {
-    const onboardingDone = localStorage.getItem("knowledgee-onboarding-done");
+    const onboardingDone = localStorage.getItem("osmer-onboarding-done");
     if (onboardingDone) return;
 
     fetch("/api/knowledge/atoms")
@@ -34,7 +34,7 @@ export default function ChatPage() {
 
   const handleOnboardingClose = () => {
     setShowOnboarding(false);
-    localStorage.setItem("knowledgee-onboarding-done", "true");
+    localStorage.setItem("osmer-onboarding-done", "true");
   };
 
   const toggleKnowledge = useCallback(

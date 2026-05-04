@@ -6,6 +6,8 @@ interface ConversationSummary {
   title: string;
   modelDefault: string;
   updatedAt: string;
+  visibility: 'private' | 'team' | 'organization';
+  teamId: string | null;
 }
 
 interface ChatStore {
@@ -28,6 +30,7 @@ interface ChatStore {
   setConversations: (conversations: ConversationSummary[]) => void;
   addConversation: (conversation: ConversationSummary) => void;
   updateConversationTitle: (id: string, title: string) => void;
+  setConversationAudience: (id: string, visibility: ConversationSummary['visibility'], teamId: string | null) => void;
   removeConversation: (id: string) => void;
 }
 
@@ -62,6 +65,13 @@ export const useChatStore = create<ChatStore>()(
           ),
         })),
 
+      setConversationAudience: (id, visibility, teamId) =>
+        set((state) => ({
+          conversations: state.conversations.map((c) =>
+            c.id === id ? { ...c, visibility, teamId } : c
+          ),
+        })),
+
       removeConversation: (id) =>
         set((state) => ({
           conversations: state.conversations.filter((c) => c.id !== id),
@@ -70,7 +80,7 @@ export const useChatStore = create<ChatStore>()(
         })),
     }),
     {
-      name: 'knowledgee-chat',
+      name: 'osmer-chat',
       partialize: (state) => ({
         selectedModel: state.selectedModel,
         knowledgeMode: state.knowledgeMode,

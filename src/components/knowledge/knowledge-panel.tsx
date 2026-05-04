@@ -33,11 +33,6 @@ interface KnowledgeStats {
   byType: Array<{ type: string; count: number }>;
 }
 
-interface TeamInfo {
-  id: string;
-  name: string;
-}
-
 export function KnowledgePanel({ open, onClose }: KnowledgePanelProps) {
   const [atoms, setAtoms] = useState<LocalKnowledgeAtom[]>([]);
   const [search, setSearch] = useState("");
@@ -45,7 +40,6 @@ export function KnowledgePanel({ open, onClose }: KnowledgePanelProps) {
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<KnowledgeStats | null>(null);
   const [showStats, setShowStats] = useState(false);
-  const [teams, setTeams] = useState<TeamInfo[]>([]);
 
   const refreshAtoms = useCallback(async () => {
     // Try DB first, fall back to localStorage
@@ -90,23 +84,12 @@ export function KnowledgePanel({ open, onClose }: KnowledgePanelProps) {
     } catch {}
   }, []);
 
-  const refreshTeams = useCallback(async () => {
-    try {
-      const res = await fetch("/api/teams");
-      if (res.ok) {
-        const data = await res.json();
-        setTeams((data.teams || []).map((t: { id: string; name: string }) => ({ id: t.id, name: t.name })));
-      }
-    } catch {}
-  }, []);
-
   useEffect(() => {
     if (open) {
       refreshAtoms();
       refreshStats();
-      refreshTeams();
     }
-  }, [open, refreshAtoms, refreshStats, refreshTeams]);
+  }, [open, refreshAtoms, refreshStats]);
 
   const filtered = atoms.filter((atom) => {
     if (filterType && atom.type !== filterType) return false;
@@ -312,16 +295,7 @@ export function KnowledgePanel({ open, onClose }: KnowledgePanelProps) {
               <KnowledgeAtomCard
                 key={atom.id}
                 atom={atom}
-                teams={teams}
                 onDelete={() => handleDelete(atom.id)}
-                onPromote={async (teamId) => {
-                  await fetch(`/api/knowledge/atoms/${atom.id}/promote`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ teamId }),
-                  });
-                  refreshAtoms();
-                }}
               />
             ))
           )}
@@ -356,18 +330,13 @@ export function KnowledgePanel({ open, onClose }: KnowledgePanelProps) {
 
 function KnowledgeAtomCard({
   atom,
-  teams,
   onDelete,
-  onPromote,
 }: {
   atom: LocalKnowledgeAtom;
-  teams: TeamInfo[];
   onDelete: () => void;
-  onPromote: (teamId: string) => Promise<void>;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [timeline, setTimeline] = useState<Array<{ id: string; content: string; version: number; status: string; createdAt: string }> | null>(null);
-  const isTeamScoped = atom.scope === "team";
 
   const loadTimeline = async () => {
     if (timeline) return; // Already loaded
@@ -384,10 +353,7 @@ function KnowledgeAtomCard({
 
   return (
     <div
-      className={cn(
-        "group rounded-lg border p-2.5 hover:border-border transition-colors cursor-pointer",
-        isTeamScoped ? "border-primary/20 bg-primary/5" : "border-border/50"
-      )}
+      className="group rounded-lg border border-border/50 p-2.5 hover:border-border transition-colors cursor-pointer"
       onClick={() => { setExpanded(!expanded); if (!expanded) loadTimeline(); }}
     >
       <div className="flex items-start justify-between gap-2">
@@ -399,11 +365,6 @@ function KnowledgeAtomCard({
             >
               {atom.type}
             </Badge>
-            {isTeamScoped && (
-              <Badge variant="outline" className="text-[9px] px-1.5 py-0 font-normal bg-primary/10 text-primary border-primary/20">
-                team
-              </Badge>
-            )}
             <span className="text-[9px] text-muted-foreground">
               {(atom.confidence * 100).toFixed(0)}%
             </span>
@@ -454,25 +415,6 @@ function KnowledgeAtomCard({
           <div className="text-[9px] text-muted-foreground/50">
             Extracted {new Date(atom.createdAt).toLocaleDateString()} via {atom.extractedBy?.split('/').pop() || 'unknown'}
           </div>
-          {/* Share to team */}
-          {!isTeamScoped && teams.length > 0 && (
-            <div className="pt-1">
-              <div className="flex flex-wrap gap-1">
-                {teams.map((team) => (
-                  <button
-                    key={team.id}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onPromote(team.id);
-                    }}
-                    className="text-[9px] text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 rounded px-2 py-0.5 transition-colors"
-                  >
-                    Share to {team.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
           {/* Knowledge Replay Timeline */}
           {timeline && timeline.length > 1 && (
             <div className="pt-1.5">

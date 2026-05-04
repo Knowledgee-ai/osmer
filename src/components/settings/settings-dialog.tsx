@@ -44,7 +44,7 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
 
   const handleClearAllKnowledge = () => {
     if (confirm("Clear all extracted knowledge? This cannot be undone.")) {
-      localStorage.removeItem("knowledgee-knowledge");
+      localStorage.removeItem("osmer-knowledge");
       window.location.reload();
     }
   };
@@ -274,8 +274,8 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
           {/* About Section */}
           <div className="pt-2 border-t border-border">
             <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>Knowledge HQ v0.1.0</span>
-              <span>Your team&apos;s HQ for knowledgee</span>
+              <span>Osmer v0.1.0</span>
+              <span>Your team&apos;s knowledge HQ</span>
             </div>
           </div>
         </div>

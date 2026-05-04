@@ -51,7 +51,7 @@ function Hero() {
             style={{ animationDelay: "640ms" }}
           >
             Every conversation your team has with an AI generates knowledge that today
-            evaporates the moment the tab closes. Knowledge HQ is the system of record for
+            evaporates the moment the tab closes. Osmer is the system of record for
             the work your colleagues do <em className="display-italic">with</em> machines.
             Captured, refined, and passed forward.
           </p>
@@ -124,7 +124,7 @@ function Manifesto() {
         <p className="mono mb-10 text-[var(--clay-deep)]">A note on the work</p>
         <p className="display text-[clamp(2rem,4.4vw,3.6rem)] leading-[1.12] text-[var(--ink)]">
           Before Salesforce, customer knowledge lived in individual notebooks and heads.
-          When someone left, it walked out the door. Knowledge HQ proposes the same
+          When someone left, it walked out the door. Osmer proposes the same
           inflection for the knowledge that flows through{" "}
           <span className="display-italic text-[var(--clay-deep)]">
             every AI conversation
@@ -214,7 +214,7 @@ function ThreeTiers() {
             Organisation.
           </h2>
           <p className="mt-8 max-w-[44ch] text-[1.05rem] leading-[1.65] text-[var(--ink-soft)]">
-            Memory in Knowledge HQ is structured as a three-tier protocol. A fact you
+            Memory in Osmer is structured as a three-tier protocol. A fact you
             discover in a private conversation belongs to you. A decision your team makes
             belongs to the team. A truth about the company belongs to the organisation.
             Each atom carries provenance, confidence, and a decay function. Knowledge,
@@ -501,7 +501,7 @@ function MultiModel() {
             </h3>
             <p className="mt-6 max-w-[58ch] text-[1.05rem] leading-[1.65] text-[var(--paper)]/70">
               A second opinion is one keystroke away. Open a thread with Claude,
-              ask GPT the next question, then send the result to Gemini. Knowledge HQ
+              ask GPT the next question, then send the result to Gemini. Osmer
               keeps the entire context coherent across providers.
             </p>
           </div>
@@ -524,7 +524,7 @@ function SwitchDemo() {
   return (
     <div className="rounded-[2px] border border-[var(--paper)]/15 bg-[var(--paper)]/5 p-6">
       <div className="mono mb-5 flex items-center justify-between text-[var(--paper)]/50">
-        <span>Knowledge HQ · thread #4421</span>
+        <span>Osmer · thread #4421</span>
         <span className="flex items-center gap-1.5">
           <Pulse soft /> live
         </span>
@@ -567,7 +567,7 @@ function ProductTheatre() {
           {/* Top rail */}
           <div className="flex items-center justify-between border-b border-[var(--ink)] bg-[var(--ink)] px-6 py-3 text-[var(--paper)]">
             <div className="mono flex items-center gap-2 text-[var(--paper)]/60">
-              <span>knowledge-hq</span>
+              <span>osmer</span>
               <span className="text-[var(--paper)]/30">/</span>
               <span>workspace</span>
               <span className="text-[var(--paper)]/30">/</span>
@@ -619,7 +619,7 @@ function ProductTheatre() {
                   <p>How would we shard the events table for the new region?</p>
                 </div>
                 <div>
-                  <div className="mono mb-1.5 text-[var(--clay-deep)]">Knowledge HQ</div>
+                  <div className="mono mb-1.5 text-[var(--clay-deep)]">Osmer</div>
                   <p>
                     Given the team&rsquo;s prior decision (March &rsquo;26) to standardise on{" "}
                     <em className="display-italic">hash-by-tenant_id, range-by-week</em>,
@@ -717,11 +717,10 @@ function Footer() {
             style={{ fontFamily: "var(--font-body), system-ui, sans-serif" }}
           >
             <svg width="28" height="28" viewBox="0 0 80 80" aria-hidden="true">
-              <rect x="12" y="20" width="42" height="13" rx="2" fill="#D85728" />
-              <rect x="16" y="35" width="46" height="13" rx="2" fill="#1a1814" />
-              <rect x="20" y="50" width="50" height="13" rx="2" fill="#1a1814" />
+              <circle cx="40" cy="40" r="28" fill="#1a1814" />
+              <circle cx="50" cy="30" r="6" fill="#D85728" />
             </svg>
-            Knowledge HQ
+            Osmer
           </Link>
           <p className="mt-4 max-w-[40ch] text-[0.95rem] leading-[1.6]">
             The Organizational Memory Protocol. The workspace that implements it.
@@ -749,7 +748,7 @@ function Footer() {
           </p>
         </div>
         <div className="col-span-12 mt-8 flex items-center justify-between border-t border-[var(--hairline)] pt-6 text-[0.8rem]">
-          <span className="mono">© Knowledge HQ {new Date().getFullYear()}</span>
+          <span className="mono">© Osmer {new Date().getFullYear()}</span>
           <span className="mono text-[var(--ink-faint)]">v1 · issue 01</span>
         </div>
       </div>

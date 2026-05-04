@@ -39,7 +39,7 @@ export const useSettingsStore = create<SettingsStore>()(
       setTheme: (theme) => set({ theme }),
     }),
     {
-      name: 'knowledgee-settings',
+      name: 'osmer-settings',
     }
   )
 );

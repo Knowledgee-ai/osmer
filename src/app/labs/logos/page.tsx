@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Logo candidates · Knowledge HQ",
+  title: "Logo candidates · Osmer",
 };
 
 type Candidate = {
@@ -9,93 +9,91 @@ type Candidate = {
   name: string;
   tagline: string;
   rationale: string;
+  adopted?: boolean;
   Mark: () => React.ReactElement;
 };
 
 const CANDIDATES: Candidate[] = [
   {
-    id: "monolith",
-    name: "01 / HQ Monolith",
-    tagline: "HQ + three tiers, in one solid form",
+    id: "aperture",
+    name: "01 / Aperture",
+    tagline: "A boundary, with one atom across it",
+    adopted: true,
     rationale:
-      "A solid filled square — the headquarters, the archive, the stamp — with three negative-space slits dividing it into Personal / Team / Organisation. A clay dot sits at the upper-right corner like a wax seal. Reads as a brand mark, not a diagram. Holds up at 16px.",
+      "A solid ink disk (the membrane, the system of record) with a smaller clay disk offset to the upper-right — a single atom of knowledge passing across the boundary. Reads as cell, portal, lens, planet. Reductive osmotic figure that holds at favicon scale and pairs cleanly with the Osmer wordmark.",
     Mark: () => (
       <svg viewBox="0 0 80 80" className="block h-full w-full">
-        <rect x="12" y="12" width="56" height="56" rx="3" fill="#1a1814" />
-        {/* Top tier-slit in clay (Personal/Team boundary) */}
-        <rect x="14" y="31.5" width="52" height="3" rx="1.5" fill="#D85728" />
-        {/* Bottom tier-slit cuts through to cream paper (Team/Organisation boundary) */}
-        <rect x="14" y="47.5" width="52" height="3" rx="1.5" fill="#F4EFE6" />
-        {/* Corner wax-seal */}
-        <circle cx="68" cy="12" r="6" fill="#D85728" />
+        <circle cx="40" cy="40" r="28" fill="#1a1814" />
+        <circle cx="50" cy="30" r="6" fill="#D85728" />
       </svg>
     ),
   },
   {
-    id: "convergence",
-    name: "02 / Inward Convergence",
-    tagline: "Three tiers feeding one source of truth",
+    id: "halo",
+    name: "02 / Halo",
+    tagline: "Iris, target, cell — perfectly centred",
     rationale:
-      "Three triangular wedges pointing inward — the inverse of Anthropic's outward asterisk. Anthropic radiates (generative). Knowledge HQ converges (capture). The clay dot at the geometric center is the atom; the wedges are the three tiers feeding it.",
+      "A thin ink ring with a clay nucleus dead-centre. Pure cell-and-iris symmetry, calmer than Aperture, less metaphor-loaded. Risks reading as a generic record/play button at very small sizes; works best when locked up beside the wordmark.",
     Mark: () => (
       <svg viewBox="0 0 80 80" className="block h-full w-full">
-        <g fill="#1a1814">
-          <polygon points="24,8 56,8 40,32" />
-          <g transform="rotate(120 40 40)">
-            <polygon points="24,8 56,8 40,32" />
-          </g>
-          <g transform="rotate(240 40 40)">
-            <polygon points="24,8 56,8 40,32" />
-          </g>
-        </g>
-        <circle cx="40" cy="40" r="4.5" fill="#C15F3C" />
+        <circle cx="40" cy="40" r="28" fill="none" stroke="#1a1814" strokeWidth="3" />
+        <circle cx="40" cy="40" r="7" fill="#D85728" />
       </svg>
     ),
   },
   {
-    id: "bracket",
-    name: "03 / Bracket-Atom",
-    tagline: "The protocol frames a single atom",
+    id: "crescent",
+    name: "03 / Crescent",
+    tagline: "Light entering at the membrane",
     rationale:
-      "Four corner brackets like registration marks on a magazine spread, framing a single clay atom at the geometric center. The brackets are the OMP protocol; the dot is the atom. Maximally minimal — has a publishing / archival feel that matches the editorial body.",
+      "A solid ink disk with a clay crescent hugging its right edge — knowledge entering at the boundary, the moment of permeation. More lyrical than Aperture, slightly less identifiable at 16px because the crescent thins to a sliver. A brand mark that needs a wordmark beside it.",
     Mark: () => (
       <svg viewBox="0 0 80 80" className="block h-full w-full">
-        <g stroke="#1a1814" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M 14 28 V 14 H 28" />
-          <path d="M 52 14 H 66 V 28" />
-          <path d="M 14 52 V 66 H 28" />
-          <path d="M 52 66 H 66 V 52" />
-        </g>
-        <circle cx="40" cy="40" r="5" fill="#C15F3C" />
+        <defs>
+          <mask id="crescent-cut">
+            <rect width="80" height="80" fill="white" />
+            <circle cx="34" cy="40" r="28" fill="black" />
+          </mask>
+        </defs>
+        <circle cx="40" cy="40" r="28" fill="#1a1814" />
+        <circle cx="40" cy="40" r="28" fill="#D85728" mask="url(#crescent-cut)" />
       </svg>
     ),
   },
   {
-    id: "archive",
-    name: "04 / Stacked Archive",
-    tagline: "Layered records, accumulating",
+    id: "tier-aperture",
+    name: "04 / Tier Aperture",
+    tagline: "Three tiers, sealed inside one membrane",
     rationale:
-      "Three filled rectangles offset rightward, like papers in a filing cabinet pulled forward in sequence. Visible edges hint at depth and accumulation. Architectural file-cabinet feel. Closer to Notion / Perplexity territory than the others, so a slightly safer pick.",
+      "An ink disk with three concentric inner discs visible against cream — Personal (clay) at the centre, Team and Organisation outward. Encodes the OMP three-tier protocol inside the osmotic figure. Densest with meaning, slightly busier — works well as a 200px display mark, a hair fussy at 16px.",
     Mark: () => (
       <svg viewBox="0 0 80 80" className="block h-full w-full">
-        {/* Top sheet (smallest, Personal tier) in clay */}
-        <rect x="12" y="20" width="42" height="13" rx="2" fill="#D85728" />
-        <rect x="16" y="35" width="46" height="13" rx="2" fill="#1a1814" />
-        <rect x="20" y="50" width="50" height="13" rx="2" fill="#1a1814" />
+        <circle cx="40" cy="40" r="28" fill="#1a1814" />
+        <circle cx="40" cy="40" r="20" fill="#F4EFE6" />
+        <circle cx="40" cy="40" r="13" fill="#1a1814" />
+        <circle cx="40" cy="40" r="6" fill="#D85728" />
       </svg>
     ),
   },
   {
-    id: "k-vault",
-    name: "05 / Geometric K-Vault",
-    tagline: "An architectural K, not a font letter",
+    id: "wordmark",
+    name: "05 / Wordmark · o.",
+    tagline: "Just the name, set carefully",
     rationale:
-      "A K constructed from geometric solids (like Vercel's triangle is a 'V' only by abstraction). Vertical spine, upper diagonal in ink, lower diagonal in clay — the asymmetry is the brand mark. Direct branding via the K, but feels like a tech logo rather than a serif wordmark.",
+      "Lowercase Fraunces ‘o’ followed by a clay period — no separate symbol. Leans on the strength of the Osmer wordmark itself. Most editorial, most Anthropic-adjacent. Doesn't give you a favicon-scale glyph, so it pairs best with one of the disc marks above for that role.",
     Mark: () => (
       <svg viewBox="0 0 80 80" className="block h-full w-full">
-        <rect x="14" y="12" width="11" height="56" rx="1.5" fill="#1a1814" />
-        <polygon points="25,40 60,12 64,12 64,22 38,40" fill="#1a1814" />
-        <polygon points="25,40 60,68 64,68 64,58 38,40" fill="#C15F3C" />
+        <text
+          x="14"
+          y="60"
+          fontSize="64"
+          fontFamily="var(--font-display), Georgia, serif"
+          fontStyle="italic"
+          fill="#1a1814"
+        >
+          o
+        </text>
+        <circle cx="62" cy="58" r="5" fill="#D85728" />
       </svg>
     ),
   },
@@ -109,25 +107,35 @@ export default function LogoLabPage() {
           <Link href="/" className="mono link-underline text-[var(--ink-soft)]">
             ← Back to landing
           </Link>
-          <span className="mono text-[var(--clay-deep)]">Logo candidates · v1</span>
+          <span className="mono text-[var(--clay-deep)]">Logo candidates · Osmer · v1</span>
         </div>
       </header>
 
       <section className="mx-auto max-w-[1280px] px-8 pt-20 pb-14 lg:px-14">
-        <p className="mono mb-8 text-[var(--clay-deep)]">Logo lab · pick one</p>
+        <p className="mono mb-8 text-[var(--clay-deep)]">Logo lab · Osmer · pick or confirm</p>
         <h1
           className="text-[clamp(3rem,6vw,5rem)] leading-[0.98] text-[var(--ink)]"
           style={{ fontFamily: "var(--font-display), Georgia, serif", letterSpacing: "-0.025em" }}
         >
           Five marks for{" "}
-          <span style={{ fontStyle: "italic", color: "var(--clay-deep)" }}>Knowledge HQ</span>.
+          <span style={{ fontStyle: "italic", color: "var(--clay-deep)" }}>Osmer</span>.
         </h1>
         <p className="mt-8 max-w-[60ch] text-[1.05rem] leading-[1.65] text-[var(--ink-soft)]">
-          Each candidate encodes a different concept from the brief: HQ + tiers,
-          convergence vs. radiation, capture / framing, archival accumulation, or
-          a direct architectural K. All five rendered at the size they&rsquo;d
-          appear in the nav, on a billboard, and at favicon scale, so you can pick
-          on real visual evidence rather than a sketch.
+          Osmer is the system of record for the work your team does with machines.
+          The brand metaphor is osmosis — knowledge passing across a membrane and
+          accumulating inside the organisation. Each candidate encodes that idea
+          differently: a single atom across a boundary, a centred nucleus, a glowing
+          edge, three tiers nested inside, or a pure wordmark. All five are rendered
+          at the size they’d appear in the nav, on a billboard, and at favicon scale,
+          so you can pick on real visual evidence rather than a sketch.
+        </p>
+        <p className="mt-6 max-w-[60ch] text-[0.95rem] leading-[1.6] text-[var(--ink-mute)]">
+          <span className="mono text-[var(--clay-deep)]">01 / Aperture</span> is currently
+          adopted across the app, landing, and favicon. Confirm or swap with{" "}
+          <span className="mono text-[var(--clay-deep)]">02</span>,{" "}
+          <span className="mono text-[var(--clay-deep)]">03</span>,{" "}
+          <span className="mono text-[var(--clay-deep)]">04</span>, or{" "}
+          <span className="mono text-[var(--clay-deep)]">05</span>.
         </p>
       </section>
 
@@ -137,7 +145,14 @@ export default function LogoLabPage() {
             <li key={c.id} className="grid grid-cols-12 gap-x-6 gap-y-10 py-16">
               {/* Header column */}
               <div className="col-span-12 lg:col-span-3">
-                <div className="mono mb-5 text-[var(--clay-deep)]">{c.name}</div>
+                <div className="mono mb-5 flex items-center gap-3 text-[var(--clay-deep)]">
+                  <span>{c.name}</span>
+                  {c.adopted && (
+                    <span className="inline-flex items-center rounded-full border border-[var(--ink)] bg-[var(--ink)] px-2 py-0.5 text-[10px] uppercase tracking-[0.18em] text-[var(--paper)]">
+                      Adopted
+                    </span>
+                  )}
+                </div>
                 <div
                   className="text-[1.5rem] leading-[1.1] text-[var(--ink)]"
                   style={{
@@ -177,7 +192,7 @@ export default function LogoLabPage() {
                         letterSpacing: "-0.022em",
                       }}
                     >
-                      Knowledge&nbsp;HQ
+                      Osmer
                     </span>
                   </div>
                   <span className="mono mt-4 text-[var(--ink-faint)]">Nav · 36px + wordmark</span>
@@ -216,12 +231,13 @@ export default function LogoLabPage() {
 
         <div className="mt-20 flex flex-wrap items-center justify-between gap-6 border-t border-[var(--hairline)] pt-12">
           <p className="text-[1rem] leading-[1.6] text-[var(--ink-soft)]">
-            When you&rsquo;ve picked, tell me <span className="mono text-[var(--clay-deep)]">01</span>,{" "}
+            Confirm or swap by telling me{" "}
+            <span className="mono text-[var(--clay-deep)]">01</span>,{" "}
             <span className="mono text-[var(--clay-deep)]">02</span>,{" "}
             <span className="mono text-[var(--clay-deep)]">03</span>,{" "}
             <span className="mono text-[var(--clay-deep)]">04</span>, or{" "}
-            <span className="mono text-[var(--clay-deep)]">05</span> and I&rsquo;ll wire it
-            across nav, footer, favicon, and Apple-icon.
+            <span className="mono text-[var(--clay-deep)]">05</span>. I&rsquo;ll re-wire
+            nav, footer, favicon, and Apple-icon to match.
           </p>
           <Link
             href="/"

@@ -3,13 +3,21 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useChatStore } from "@/stores/chat-store";
 import { useSettingsStore } from "@/stores/settings-store";
-import { useKnowledgeeChat } from "@/hooks/use-knowledgee-chat";
+import { useOsmerChat } from "@/hooks/use-osmer-chat";
 import { searchKnowledge, addKnowledgeAtoms, getKnowledgeAtoms } from "@/lib/knowledge/store";
 import { exportConversationAsMarkdown, downloadMarkdown } from "@/lib/export";
 import { ModelSelector } from "./model-selector";
 import { MessageList } from "./message-list";
 import { ChatInput } from "./chat-input";
 import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ChatPanelProps {
   onToggleKnowledge?: () => void;
@@ -28,6 +36,7 @@ export function ChatPanel({ onToggleKnowledge }: ChatPanelProps) {
     updateConversationTitle,
     addConversation,
     setActiveConversation,
+    conversations,
     knowledgeMode,
   } = useChatStore();
   const { apiKeys } = useSettingsStore();
@@ -67,7 +76,7 @@ export function ChatPanel({ onToggleKnowledge }: ChatPanelProps) {
     return Object.keys(keys).length > 0 ? keys : undefined;
   }, [apiKeys]);
 
-  const { messages, status, error, sendMessage, stop } = useKnowledgeeChat({
+  const { messages, status, error, sendMessage, stop } = useOsmerChat({
     conversationId: chatId,
     modelId: selectedModel,
     knowledgeContext: knowledgeContext.length > 0 ? knowledgeContext : undefined,
@@ -161,22 +170,31 @@ export function ChatPanel({ onToggleKnowledge }: ChatPanelProps) {
   const createConversationIfNeeded = useCallback((messageText: string) => {
     if (!activeConversationId) {
       const title = messageText.slice(0, 50) + (messageText.length > 50 ? "..." : "");
-      // Add to local state immediately
-      addConversation({
-        id: chatId,
-        title,
-        modelDefault: selectedModel,
-        updatedAt: new Date().toISOString(),
-      });
+      const pendingEntry = conversations.find((c) => c.id === chatId);
+      const visibility = pendingEntry?.visibility ?? 'private';
+      const teamId = pendingEntry?.teamId ?? null;
+      // Add to local state immediately (or keep existing pending entry if user already set audience)
+      if (!pendingEntry) {
+        addConversation({
+          id: chatId,
+          title,
+          modelDefault: selectedModel,
+          updatedAt: new Date().toISOString(),
+          visibility,
+          teamId,
+        });
+      } else {
+        updateConversationTitle(chatId, title);
+      }
       setActiveConversation(chatId);
       // Persist to DB (fire-and-forget)
       fetch("/api/conversations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: chatId, title, modelDefault: selectedModel }),
+        body: JSON.stringify({ id: chatId, title, modelDefault: selectedModel, visibility, teamId }),
       }).catch(() => {});
     }
-  }, [activeConversationId, chatId, selectedModel, addConversation, setActiveConversation]);
+  }, [activeConversationId, chatId, selectedModel, conversations, addConversation, updateConversationTitle, setActiveConversation]);
 
   const onSubmit = () => {
     if (!input.trim() || isLoading) return;
@@ -191,19 +209,11 @@ export function ChatPanel({ onToggleKnowledge }: ChatPanelProps) {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Ask Company banner */}
-      {knowledgeMode === "company" && (
-        <div className="px-4 py-1.5 bg-primary/5 border-b border-primary/10 text-center">
-          <span className="text-[11px] text-primary font-medium">
-            Ask the Company — AI answers only from your knowledge base
-          </span>
-        </div>
-      )}
-
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-border">
         <div className="flex items-center gap-3">
           <ModelSelector />
+          <ConversationAudienceSelector chatId={chatId} />
           {knowledgeContext.length > 0 && !isLoading && (
             <Badge variant="secondary" className="text-[10px] gap-1 font-normal">
               <BrainIcon className="h-3 w-3" />
@@ -241,7 +251,6 @@ export function ChatPanel({ onToggleKnowledge }: ChatPanelProps) {
               {knowledgeCount} atoms
             </button>
           )}
-          <KnowledgeModeIndicator />
         </div>
       </div>
 
@@ -272,31 +281,151 @@ export function ChatPanel({ onToggleKnowledge }: ChatPanelProps) {
   );
 }
 
-function KnowledgeModeIndicator() {
-  const { knowledgeMode, setKnowledgeMode } = useChatStore();
+interface TeamOption { id: string; name: string }
 
-  const modes = [
-    { value: "personal" as const, label: "Personal", icon: "\u{1F464}", desc: "Knowledge stays private" },
-    { value: "team" as const, label: "Team", icon: "\u{1F465}", desc: "Shared with team" },
-    { value: "company" as const, label: "Ask Company", icon: "\u{1F3E2}", desc: "Answers from knowledge base only" },
-    { value: "locked" as const, label: "Locked", icon: "\u{1F512}", desc: "No knowledge extraction" },
-  ];
+function ConversationAudienceSelector({ chatId }: { chatId: string }) {
+  const { conversations, setConversationAudience } = useChatStore();
+  const [teams, setTeams] = useState<TeamOption[]>([]);
+  const conv = conversations.find((c) => c.id === chatId);
+  const visibility = conv?.visibility ?? 'private';
+  const teamId = conv?.teamId ?? null;
+  const isPersisted = Boolean(conv) && !chatId.startsWith('pending-');
 
-  const current = modes.find((m) => m.value === knowledgeMode) || modes[0];
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/teams')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (cancelled) return;
+        setTeams((d?.teams || []).map((t: { id: string; name: string }) => ({ id: t.id, name: t.name })));
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
+  const setAudience = (vis: 'private' | 'team' | 'organization', tid: string | null) => {
+    setConversationAudience(chatId, vis, tid);
+    if (isPersisted) {
+      fetch(`/api/conversations/${chatId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ visibility: vis, teamId: tid }),
+      }).catch(() => {});
+    }
+  };
+
+  const currentLabel =
+    visibility === 'private'
+      ? 'Just me'
+      : visibility === 'organization'
+        ? 'Company-wide'
+        : teams.find((t) => t.id === teamId)?.name ?? 'Team';
 
   return (
-    <button
-      onClick={() => {
-        const idx = modes.findIndex((m) => m.value === knowledgeMode);
-        const next = modes[(idx + 1) % modes.length];
-        setKnowledgeMode(next.value);
-      }}
-      className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted/50"
-      title={`Knowledge mode: ${current.label}. Click to cycle.`}
-    >
-      <span>{current.icon}</span>
-      <span>{current.label}</span>
-    </button>
+    <DropdownMenu>
+      <DropdownMenuTrigger className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md border border-input bg-background px-3 h-8 text-xs font-normal shadow-xs hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+        <AudienceIcon visibility={visibility} className="h-3 w-3 opacity-70" />
+        <span>{currentLabel}</span>
+        <ChevronDownIcon className="h-3 w-3 opacity-50" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-56">
+        <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">
+          Conversation audience
+        </DropdownMenuLabel>
+        <DropdownMenuItem
+          onClick={() => setAudience('private', null)}
+          className="flex items-center justify-between gap-2 cursor-pointer"
+        >
+          <div className="flex items-center gap-2">
+            <AudienceIcon visibility="private" className="h-3.5 w-3.5 opacity-70" />
+            <span className="text-sm">Just me</span>
+          </div>
+          {visibility === 'private' && <CheckIcon className="h-3.5 w-3.5 text-primary" />}
+        </DropdownMenuItem>
+        {teams.length > 0 && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground/70 font-normal">
+              Teams
+            </DropdownMenuLabel>
+            {teams.map((team) => {
+              const active = visibility === 'team' && teamId === team.id;
+              return (
+                <DropdownMenuItem
+                  key={team.id}
+                  onClick={() => setAudience('team', team.id)}
+                  className="flex items-center justify-between gap-2 cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <AudienceIcon visibility="team" className="h-3.5 w-3.5 opacity-70" />
+                    <span className="text-sm">{team.name}</span>
+                  </div>
+                  {active && <CheckIcon className="h-3.5 w-3.5 text-primary" />}
+                </DropdownMenuItem>
+              );
+            })}
+          </>
+        )}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onClick={() => setAudience('organization', null)}
+          className="flex items-center justify-between gap-2 cursor-pointer"
+        >
+          <div className="flex items-center gap-2">
+            <AudienceIcon visibility="organization" className="h-3.5 w-3.5 opacity-70" />
+            <span className="text-sm">Company-wide</span>
+          </div>
+          {visibility === 'organization' && <CheckIcon className="h-3.5 w-3.5 text-primary" />}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+function AudienceIcon({ visibility, className }: { visibility: 'private' | 'team' | 'organization'; className?: string }) {
+  if (visibility === 'private') {
+    return (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+      </svg>
+    );
+  }
+  if (visibility === 'team') {
+    return (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </svg>
+    );
+  }
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <rect width="16" height="20" x="4" y="2" rx="2" />
+      <path d="M9 22v-4h6v4" />
+      <path d="M8 6h.01" /><path d="M16 6h.01" />
+      <path d="M12 6h.01" /><path d="M12 10h.01" /><path d="M12 14h.01" />
+      <path d="M16 10h.01" /><path d="M16 14h.01" />
+      <path d="M8 10h.01" /><path d="M8 14h.01" />
+    </svg>
+  );
+}
+
+function ChevronDownIcon({ className }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  );
+}
+
+function CheckIcon({ className }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M20 6 9 17l-5-5" />
+    </svg>
   );
 }
 

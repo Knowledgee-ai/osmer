@@ -46,11 +46,11 @@ export default function LoginPage() {
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center">
           <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center mx-auto mb-4">
-            <span className="text-primary-foreground font-bold">K</span>
+            <span className="text-primary-foreground font-bold">o</span>
           </div>
           <h1 className="text-2xl font-bold">Welcome back</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Sign in to your Knowledge HQ account
+            Sign in to your Osmer account
           </p>
         </div>
 

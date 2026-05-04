@@ -100,7 +100,7 @@ function buildSystemPrompt(modelId: string, knowledgeContext?: string[], isAskCo
 
   // "Ask the Company" mode — answer ONLY from knowledge base
   if (isAskCompany && knowledgeContext && knowledgeContext.length > 0) {
-    return `You are the "Ask the Company" assistant in Knowledge HQ. You answer questions ONLY using the organizational knowledge base provided below.
+    return `You are the "Ask the Company" assistant in Osmer. You answer questions ONLY using the organizational knowledge base provided below.
 
 CRITICAL RULES:
 1. ONLY answer using the knowledge provided below. Do NOT use any external knowledge.
@@ -117,7 +117,7 @@ ${knowledgeContext.map((k, i) => `[${i + 1}] ${k}`).join('\n')}`;
     return `You are the "Ask the Company" assistant. The knowledge base is currently empty. Tell the user to chat normally first to build up the knowledge base, then switch to "Ask Company" mode to query it.`;
   }
 
-  let prompt = `You are a helpful AI assistant powered by ${modelName}, accessed through Knowledge HQ, a multi-model AI platform with organizational memory.
+  let prompt = `You are a helpful AI assistant powered by ${modelName}, accessed through Osmer, a multi-model AI platform with organizational memory.
 
 Be concise, accurate, and helpful. If you're unsure about something, say so rather than guessing.`;
 

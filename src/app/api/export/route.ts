@@ -55,7 +55,7 @@ export async function GET() {
 
   const exportData = {
     exportedAt: new Date().toISOString(),
-    platform: "Knowledge HQ",
+    platform: "Osmer",
     version: "0.1.0",
     user: userData[0] || null,
     conversations: convData.rows,
@@ -69,7 +69,7 @@ export async function GET() {
   return new Response(JSON.stringify(exportData, null, 2), {
     headers: {
       "Content-Type": "application/json",
-      "Content-Disposition": `attachment; filename="knowledge-hq-export-${new Date().toISOString().split('T')[0]}.json"`,
+      "Content-Disposition": `attachment; filename="osmer-export-${new Date().toISOString().split('T')[0]}.json"`,
     },
   });
 }

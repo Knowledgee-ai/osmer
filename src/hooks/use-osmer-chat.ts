@@ -37,7 +37,7 @@ function persistMessageToDb(conversationId: string, msg: StoredMessage) {
   });
 }
 
-export function useKnowledgeeChat({
+export function useOsmerChat({
   conversationId,
   modelId,
   knowledgeContext,

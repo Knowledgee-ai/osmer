@@ -28,9 +28,9 @@ const interTight = Inter_Tight({
 });
 
 export const metadata: Metadata = {
-  title: "Knowledge HQ · your team's HQ for knowledgee",
+  title: "Osmer · your team's knowledge HQ",
   description:
-    "Every AI conversation in your company generates knowledge that today evaporates. Knowledge HQ captures it, refines it, and makes it the property of the organization, not the inbox of one employee.",
+    "Every AI conversation in your company generates knowledge that today evaporates. Osmer captures it, refines it, and makes it the property of the organization, not the inbox of one employee.",
 };
 
 export default function RootLayout({

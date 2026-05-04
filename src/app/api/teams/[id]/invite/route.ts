@@ -39,7 +39,7 @@ export async function POST(
 
   if (!invitee) {
     return Response.json({
-      error: "User not found. They need to create a Knowledge HQ account first.",
+      error: "User not found. They need to create an Osmer account first.",
     }, { status: 404 });
   }
 

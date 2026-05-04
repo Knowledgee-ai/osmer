@@ -17,7 +17,7 @@ export interface LocalKnowledgeAtom {
   affirmedCount: number;
 }
 
-const STORAGE_KEY = 'knowledgee-knowledge';
+const STORAGE_KEY = 'osmer-knowledge';
 
 export function getKnowledgeAtoms(): LocalKnowledgeAtom[] {
   if (typeof window === 'undefined') return [];
