@@ -1,5 +1,8 @@
-import { streamText } from 'ai';
+import { generateText } from 'ai';
 import { auth } from '@/lib/auth';
+import { db } from '@/lib/db';
+import { teamMembers } from '@/lib/db/schema';
+import { eq } from 'drizzle-orm';
 import { getLanguageModel } from '@/lib/ai/router';
 import { searchKnowledgeByVector } from '@/lib/knowledge/db-store';
 
@@ -8,8 +11,7 @@ export const maxDuration = 30;
 /**
  * POST /api/knowledge/ask
  *
- * "Ask the Company" mode — answers ONLY from the knowledge base.
- * Zero hallucination, full citations.
+ * Grounded knowledge-base query. Returns a single answer with citation sources.
  */
 export async function POST(req: Request) {
   const session = await auth();
@@ -19,41 +21,63 @@ export async function POST(req: Request) {
 
   const { question, modelId } = await req.json() as {
     question: string;
-    modelId: string;
+    modelId?: string;
   };
 
-  // Search for relevant knowledge
-  const results = await searchKnowledgeByVector(question, session.user.id, 15);
+  if (!question?.trim()) {
+    return Response.json({ error: "Missing question" }, { status: 400 });
+  }
+
+  const userTeams = await db
+    .select({ teamId: teamMembers.teamId })
+    .from(teamMembers)
+    .where(eq(teamMembers.userId, session.user.id));
+  const teamIds = userTeams.map((t) => t.teamId);
+
+  const results = await searchKnowledgeByVector(
+    question,
+    session.user.id,
+    15,
+    teamIds.length > 0 ? teamIds : undefined,
+  );
 
   if (results.length === 0) {
     return Response.json({
-      answer: "No relevant knowledge found in the knowledge base. Try chatting about this topic first to build up your organizational knowledge.",
+      answer: "Nothing in the knowledge base touches on that yet. Discuss it in a chat to seed it.",
       sources: [],
     });
   }
 
-  // Format knowledge for the prompt
   const knowledgeBlock = results
     .map((r, i) => `[${i + 1}] (${r.type}, ${(r.confidence * 100).toFixed(0)}% confidence): ${r.content}`)
     .join('\n');
 
-  const model = getLanguageModel(modelId);
+  const model = getLanguageModel(modelId || 'anthropic/claude-sonnet-4-20250514');
 
-  const result = streamText({
+  const { text } = await generateText({
     model,
-    system: `You are a knowledge base assistant for the "Ask the Company" feature in Osmer.
+    system: `You answer strictly from the knowledge base provided below.
 
-CRITICAL RULES:
-1. You must ONLY answer using the knowledge provided below. Do NOT use any other knowledge.
-2. If the knowledge base doesn't contain enough information to answer, say so clearly.
-3. Cite your sources using [1], [2], etc. references.
+Rules:
+1. Use only the knowledge supplied. Never use outside knowledge.
+2. If the knowledge is insufficient, say so plainly.
+3. Cite supporting items with [1], [2], etc.
 4. Be concise and direct.
-5. Never fabricate or guess information not in the knowledge base.
 
 ## Knowledge Base:
 ${knowledgeBlock}`,
     messages: [{ role: 'user', content: question }],
   });
 
-  return result.toUIMessageStreamResponse();
+  return Response.json({
+    answer: text,
+    sources: results.map((r, i) => ({
+      n: i + 1,
+      id: r.id,
+      content: r.content,
+      type: r.type,
+      confidence: r.confidence,
+      similarity: r.similarity,
+    })),
+  });
 }

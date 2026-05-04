@@ -18,7 +18,6 @@ interface UseChatOptions {
   modelId: string;
   knowledgeContext?: string[];
   apiKeys?: Record<string, string>;
-  knowledgeMode?: string;
 }
 
 // Persist a message to the DB (fire-and-forget)
@@ -42,7 +41,6 @@ export function useOsmerChat({
   modelId,
   knowledgeContext,
   apiKeys,
-  knowledgeMode,
 }: UseChatOptions): UseChatReturn {
   const [messages, setMessages] = useState<StoredMessage[]>(() =>
     getMessages(conversationId)
@@ -137,7 +135,6 @@ export function useOsmerChat({
             modelId,
             conversationId,
             knowledgeContext,
-            knowledgeMode,
           }),
         });
 
@@ -227,7 +224,7 @@ export function useOsmerChat({
         abortRef.current = null;
       }
     },
-    [messages, modelId, conversationId, knowledgeContext, apiKeys, knowledgeMode]
+    [messages, modelId, conversationId, knowledgeContext, apiKeys]
   );
 
   return { messages, status, error, sendMessage, stop };

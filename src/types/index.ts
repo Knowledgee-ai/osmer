@@ -76,7 +76,6 @@ export interface Conversation {
   title: string;
   visibility: ConversationVisibility;
   modelDefault: string;         // model ID
-  knowledgeMode: 'personal' | 'team' | 'company' | 'locked';
   createdAt: Date;
   updatedAt: Date;
 }
@@ -110,7 +109,6 @@ export interface User {
 
 export interface UserPreferences {
   defaultModel: string;
-  defaultKnowledgeMode: 'personal' | 'team' | 'company' | 'locked';
   theme: 'light' | 'dark' | 'system';
 }
 
@@ -157,5 +155,4 @@ export interface AppState {
   activeConversationId: string | null;
   selectedModel: string;
   sidebarOpen: boolean;
-  knowledgeMode: 'personal' | 'team' | 'company' | 'locked';
 }

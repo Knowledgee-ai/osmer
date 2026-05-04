@@ -118,13 +118,18 @@ export function KnowledgePanel({ open, onClose }: KnowledgePanelProps) {
       const res = await fetch("/api/knowledge/reconcile", { method: "POST" });
       if (res.ok) {
         const { report } = await res.json();
-        alert(
-          `Reconciliation complete:\n` +
-          `- ${report.decayedCount} atoms decayed\n` +
-          `- ${report.staleCount} marked stale\n` +
-          `- ${report.conflictsFound} conflicts found\n` +
-          `- ${report.totalAtoms} total atoms`
-        );
+        const lines = [
+          `Reconciliation complete:`,
+          `- ${report.decayedCount} atoms decayed`,
+          `- ${report.staleCount} marked stale`,
+          `- ${report.conflictsFound} conflicts found`,
+          `- ${report.totalAtoms} total atoms`,
+        ];
+        if (report.promotedToTeam || report.promotedToOrg) {
+          lines.push(`- ${report.promotedToTeam || 0} promoted personal→team`);
+          lines.push(`- ${report.promotedToOrg || 0} promoted team→org`);
+        }
+        alert(lines.join("\n"));
         refreshAtoms();
       }
     } catch {

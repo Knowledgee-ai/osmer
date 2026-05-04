@@ -21,14 +21,11 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json();
-  const { modelId, conversationId, knowledgeContext: clientContext, knowledgeMode } = body as {
+  const { modelId, conversationId, knowledgeContext: clientContext } = body as {
     modelId: string;
     conversationId: string | null;
     knowledgeContext?: string[];
-    knowledgeMode?: string;
   };
-
-  const isAskCompany = knowledgeMode === "company";
 
   const rawMessages: Array<{ role: string; parts?: Array<{ type: string; text?: string }>; content?: string }> = body.messages || [];
 
@@ -64,7 +61,7 @@ export async function POST(req: Request) {
     ? getLanguageModelWithKeys(modelId, byokKeys)
     : getLanguageModel(modelId);
 
-  const systemPrompt = buildSystemPrompt(modelId, knowledgeContext, isAskCompany);
+  const systemPrompt = buildSystemPrompt(modelId, knowledgeContext);
 
   const result = streamText({
     model: languageModel,
@@ -94,28 +91,9 @@ export async function POST(req: Request) {
   return result.toUIMessageStreamResponse();
 }
 
-function buildSystemPrompt(modelId: string, knowledgeContext?: string[], isAskCompany?: boolean): string {
+function buildSystemPrompt(modelId: string, knowledgeContext?: string[]): string {
   const model = getModel(modelId);
   const modelName = model?.name || modelId;
-
-  // "Ask the Company" mode — answer ONLY from knowledge base
-  if (isAskCompany && knowledgeContext && knowledgeContext.length > 0) {
-    return `You are the "Ask the Company" assistant in Osmer. You answer questions ONLY using the organizational knowledge base provided below.
-
-CRITICAL RULES:
-1. ONLY answer using the knowledge provided below. Do NOT use any external knowledge.
-2. If the knowledge base doesn't contain enough information, say "This isn't in our knowledge base yet."
-3. Cite sources using [1], [2], etc. numbers matching the knowledge items.
-4. Be concise and direct.
-5. Never fabricate or guess information not in the knowledge base.
-
-## Organizational Knowledge Base:
-${knowledgeContext.map((k, i) => `[${i + 1}] ${k}`).join('\n')}`;
-  }
-
-  if (isAskCompany) {
-    return `You are the "Ask the Company" assistant. The knowledge base is currently empty. Tell the user to chat normally first to build up the knowledge base, then switch to "Ask Company" mode to query it.`;
-  }
 
   let prompt = `You are a helpful AI assistant powered by ${modelName}, accessed through Osmer, a multi-model AI platform with organizational memory.
 

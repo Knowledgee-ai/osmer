@@ -37,7 +37,6 @@ export function ChatPanel({ onToggleKnowledge }: ChatPanelProps) {
     addConversation,
     setActiveConversation,
     conversations,
-    knowledgeMode,
   } = useChatStore();
   const { apiKeys } = useSettingsStore();
 
@@ -61,11 +60,10 @@ export function ChatPanel({ onToggleKnowledge }: ChatPanelProps) {
 
   // Smart knowledge context
   const knowledgeContext = useMemo(() => {
-    if (knowledgeMode === "locked") return [];
     const query = input || "";
     const relevant = searchKnowledge(query, 8);
     return relevant.map((a) => a.content);
-  }, [knowledgeMode, input]);
+  }, [input]);
 
   // Filter to only non-empty API keys
   const activeKeys = useMemo(() => {
@@ -81,7 +79,6 @@ export function ChatPanel({ onToggleKnowledge }: ChatPanelProps) {
     modelId: selectedModel,
     knowledgeContext: knowledgeContext.length > 0 ? knowledgeContext : undefined,
     apiKeys: activeKeys,
-    knowledgeMode,
   });
 
   const isLoading = status === "streaming" || status === "submitted";
@@ -150,9 +147,7 @@ export function ChatPanel({ onToggleKnowledge }: ChatPanelProps) {
   const prevStatusRef = useRef(status);
   useEffect(() => {
     if (prevStatusRef.current === "streaming" && status === "ready") {
-      if (knowledgeMode !== "locked") {
-        triggerExtraction();
-      }
+      triggerExtraction();
       // Generate title after first exchange
       if (messages.length === 2) {
         const userMsg = messages[0]?.content || "";
@@ -161,7 +156,7 @@ export function ChatPanel({ onToggleKnowledge }: ChatPanelProps) {
       }
     }
     prevStatusRef.current = status;
-  }, [status, knowledgeMode, triggerExtraction, generateTitle, messages, chatId]);
+  }, [status, triggerExtraction, generateTitle, messages, chatId]);
 
   useEffect(() => {
     setKnowledgeCount(getKnowledgeAtoms().length);
@@ -201,9 +196,6 @@ export function ChatPanel({ onToggleKnowledge }: ChatPanelProps) {
     const messageText = input;
     setInput("");
     createConversationIfNeeded(messageText);
-
-    // knowledgeMode is passed to the API via the chat hook
-    // "company" mode triggers "Ask the Company" behavior server-side
     sendMessage(messageText);
   };
 

@@ -14,7 +14,6 @@ interface ChatStore {
   // Active state
   activeConversationId: string | null;
   selectedModel: string;
-  knowledgeMode: 'personal' | 'team' | 'company' | 'locked';
 
   // Conversations list (sidebar)
   conversations: ConversationSummary[];
@@ -25,7 +24,6 @@ interface ChatStore {
   // Actions
   setActiveConversation: (id: string | null) => void;
   setSelectedModel: (modelId: string) => void;
-  setKnowledgeMode: (mode: ChatStore['knowledgeMode']) => void;
   setSidebarOpen: (open: boolean) => void;
   setConversations: (conversations: ConversationSummary[]) => void;
   addConversation: (conversation: ConversationSummary) => void;
@@ -39,15 +37,12 @@ export const useChatStore = create<ChatStore>()(
     (set) => ({
       activeConversationId: null,
       selectedModel: 'anthropic/claude-sonnet-4-20250514',
-      knowledgeMode: 'personal',
       conversations: [],
       sidebarOpen: true,
 
       setActiveConversation: (id) => set({ activeConversationId: id }),
 
       setSelectedModel: (modelId) => set({ selectedModel: modelId }),
-
-      setKnowledgeMode: (mode) => set({ knowledgeMode: mode }),
 
       setSidebarOpen: (open) => set({ sidebarOpen: open }),
 
@@ -83,7 +78,6 @@ export const useChatStore = create<ChatStore>()(
       name: 'osmer-chat',
       partialize: (state) => ({
         selectedModel: state.selectedModel,
-        knowledgeMode: state.knowledgeMode,
         sidebarOpen: state.sidebarOpen,
         conversations: state.conversations,
         activeConversationId: state.activeConversationId,

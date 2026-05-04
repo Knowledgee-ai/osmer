@@ -22,7 +22,6 @@ export const userRoleEnum = pgEnum('user_role', ['owner', 'admin', 'member']);
 export const planEnum = pgEnum('plan', ['free', 'pro', 'team', 'business', 'enterprise']);
 export const teamRoleEnum = pgEnum('team_role', ['lead', 'member']);
 export const conversationVisibilityEnum = pgEnum('conversation_visibility', ['private', 'team', 'organization']);
-export const knowledgeModeEnum = pgEnum('knowledge_mode', ['personal', 'team', 'company', 'locked']);
 export const messageRoleEnum = pgEnum('message_role', ['user', 'assistant', 'system']);
 export const knowledgeTypeEnum = pgEnum('knowledge_type', ['fact', 'decision', 'preference', 'solution', 'relationship', 'process', 'context']);
 export const knowledgeScopeEnum = pgEnum('knowledge_scope', ['personal', 'team', 'organization']);
@@ -60,7 +59,6 @@ export const users = pgTable('users', {
   role: userRoleEnum('role').notNull().default('member'),
   preferences: jsonb('preferences').default({
     defaultModel: 'openai/gpt-4o',
-    defaultKnowledgeMode: 'personal',
     theme: 'system',
   }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -107,7 +105,6 @@ export const conversations = pgTable('conversations', {
   title: varchar('title', { length: 500 }).notNull().default('New Conversation'),
   visibility: conversationVisibilityEnum('visibility').notNull().default('private'),
   modelDefault: varchar('model_default', { length: 255 }).notNull().default('openai/gpt-4o'),
-  knowledgeMode: knowledgeModeEnum('knowledge_mode').notNull().default('personal'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => [
