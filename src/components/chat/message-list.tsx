@@ -35,7 +35,7 @@ export function MessageList({ messages, isLoading, error, onSendPrompt }: Messag
 
   return (
     <div className="flex-1 overflow-y-auto">
-      <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
+      <div className="max-w-2xl mx-auto px-8 py-10 space-y-9">
         {messages.map((message) => (
           <MessageBubble key={message.id} message={message} showSender={showSenders} />
         ))}
@@ -53,45 +53,41 @@ const MessageBubble = memo(function MessageBubble({ message, showSender }: { mes
   const isUser = message.role === "user";
   const text = message.content;
   const senderInitial = (message.senderName?.[0] || 'U').toUpperCase();
+  const model = !isUser && message.modelUsed ? MODEL_MAP.get(message.modelUsed!) : null;
 
+  // Editorial layout: a left rail carries the speaker (model dot or
+  // user initial) and the body sits in a hairline-bordered passage with
+  // a small mono caption above. No rounded balloons — closer to a
+  // printed exchange than a chat app.
   return (
-    <div className={cn("flex gap-3", isUser && "justify-end")}>
-      {!isUser && (
-        <div className="h-7 w-7 rounded-full bg-muted flex items-center justify-center shrink-0 mt-0.5">
-          <SparklesIcon className="h-3.5 w-3.5 text-muted-foreground" />
-        </div>
-      )}
-      <div
-        className={cn(
-          "flex flex-col gap-1 max-w-[85%]",
-          isUser && "items-end"
-        )}
-      >
-        {!isUser && message.modelUsed && (() => {
-          const model = MODEL_MAP.get(message.modelUsed!);
-          return model ? (
-            <div className="flex items-center gap-1.5 mb-0.5 ml-1">
-              <span
-                className="h-1.5 w-1.5 rounded-full"
-                style={{ backgroundColor: PROVIDER_COLORS[model.provider] || '#888' }}
-              />
-              <span className="text-[10px] text-muted-foreground">{model.name}</span>
-            </div>
-          ) : null;
-        })()}
-        {isUser && showSender && message.senderName && (
-          <div className="text-[10px] text-muted-foreground mb-0.5 mr-1 font-medium">
-            {message.senderName}
+    <article className="grid grid-cols-[28px_1fr] gap-x-4 items-start">
+      {/* Left rail */}
+      <div className="flex flex-col items-center pt-[3px]">
+        {isUser ? (
+          <div className="h-6 w-6 rounded-full border border-foreground/80 bg-foreground flex items-center justify-center shrink-0">
+            <span className="text-[9px] font-semibold tracking-[0.05em] text-background">
+              {showSender && message.senderName ? senderInitial : 'You'.slice(0, 1)}
+            </span>
+          </div>
+        ) : (
+          <div className="h-6 w-6 rounded-full border border-border bg-background flex items-center justify-center shrink-0">
+            <span
+              className="h-1.5 w-1.5 rounded-full"
+              style={{ backgroundColor: model ? PROVIDER_COLORS[model.provider] || '#888' : 'var(--muted-foreground)' }}
+            />
           </div>
         )}
-        <div
-          className={cn(
-            "rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
-            isUser
-              ? "bg-primary text-primary-foreground"
-              : "bg-muted/50"
-          )}
-        >
+      </div>
+
+      {/* Body */}
+      <div className="min-w-0">
+        <div className="mono mb-1.5 text-muted-foreground/80">
+          {isUser ? (showSender && message.senderName ? message.senderName : 'You') : (model?.name ?? 'Assistant')}
+        </div>
+        <div className={cn(
+          "text-[0.95rem] leading-[1.6]",
+          isUser ? "text-foreground" : "text-foreground/90"
+        )}>
           {isUser ? (
             <div className="whitespace-pre-wrap break-words">{text}</div>
           ) : (
@@ -99,16 +95,7 @@ const MessageBubble = memo(function MessageBubble({ message, showSender }: { mes
           )}
         </div>
       </div>
-      {isUser && (
-        <div className="h-7 w-7 rounded-full bg-primary/20 flex items-center justify-center shrink-0 mt-0.5">
-          {showSender && message.senderName ? (
-            <span className="text-[10px] font-semibold text-primary">{senderInitial}</span>
-          ) : (
-            <UserIcon className="h-3.5 w-3.5 text-primary" />
-          )}
-        </div>
-      )}
-    </div>
+    </article>
   );
 });
 
@@ -199,21 +186,21 @@ function ErrorMessage({ error }: { error: Error }) {
   const isApiKeyError = message.toLowerCase().includes("api key") || message.toLowerCase().includes("authentication");
 
   return (
-    <div className="flex gap-3">
-      <div className="h-7 w-7 rounded-full bg-destructive/10 flex items-center justify-center shrink-0 mt-0.5">
-        <AlertIcon className="h-3.5 w-3.5 text-destructive" />
-      </div>
-      <div className="flex flex-col gap-1 max-w-[85%]">
-        <div className="rounded-2xl px-4 py-2.5 text-sm bg-destructive/5 border border-destructive/20">
-          <p className="font-medium text-destructive text-xs mb-1">
-            {isApiKeyError ? "API Key Error" : "Error"}
-          </p>
-          <p className="text-muted-foreground text-xs">
-            {isApiKeyError
-              ? "The API key for this model is invalid or expired. Try switching to a different model, or update your API keys in settings."
-              : message}
-          </p>
+    <div className="grid grid-cols-[28px_1fr] gap-x-4 items-start">
+      <div className="flex flex-col items-center pt-[3px]">
+        <div className="h-6 w-6 rounded-full border border-[var(--clay)] bg-background flex items-center justify-center shrink-0">
+          <span className="h-1.5 w-1.5 rounded-full bg-[var(--clay)]" />
         </div>
+      </div>
+      <div className="min-w-0">
+        <div className="mono mb-1.5 text-[var(--clay)]">
+          {isApiKeyError ? "API key" : "Error"}
+        </div>
+        <p className="text-[0.95rem] leading-[1.6] text-foreground/90">
+          {isApiKeyError
+            ? "The API key for this model is invalid or expired. Try switching to a different model, or update your API keys in settings."
+            : message}
+        </p>
       </div>
     </div>
   );
@@ -221,56 +208,86 @@ function ErrorMessage({ error }: { error: Error }) {
 
 function LoadingIndicator() {
   return (
-    <div className="flex gap-3">
-      <div className="h-7 w-7 rounded-full bg-muted flex items-center justify-center shrink-0 mt-0.5">
-        <SparklesIcon className="h-3.5 w-3.5 text-muted-foreground" />
+    <div className="grid grid-cols-[28px_1fr] gap-x-4 items-start">
+      <div className="flex flex-col items-center pt-[3px]">
+        <div className="h-6 w-6 rounded-full border border-border bg-background flex items-center justify-center shrink-0">
+          <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50 animate-pulse" />
+        </div>
       </div>
-      <div className="flex items-center gap-1.5 py-2">
-        <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40 animate-pulse" />
-        <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40 animate-pulse [animation-delay:150ms]" />
-        <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40 animate-pulse [animation-delay:300ms]" />
+      <div className="min-w-0 pt-1">
+        <div className="flex items-center gap-1.5">
+          <span className="h-1 w-1 rounded-full bg-foreground/50 animate-pulse" />
+          <span className="h-1 w-1 rounded-full bg-foreground/50 animate-pulse [animation-delay:160ms]" />
+          <span className="h-1 w-1 rounded-full bg-foreground/50 animate-pulse [animation-delay:320ms]" />
+        </div>
       </div>
     </div>
   );
 }
 
 const STARTER_PROMPTS = [
-  { icon: "\u{1F4BB}", label: "Explain our tech stack", prompt: "What technologies and frameworks are we using in our project?" },
-  { icon: "\u{1F9E0}", label: "What do we know?", prompt: "What knowledge has been captured from our previous conversations?" },
-  { icon: "\u{1F4DD}", label: "Draft a document", prompt: "Help me draft a technical document for our project" },
-  { icon: "\u{1F680}", label: "Deployment help", prompt: "What's the best way to deploy our application?" },
+  { num: "01", label: "Explain our tech stack", prompt: "What technologies and frameworks are we using in our project?" },
+  { num: "02", label: "What do we know?", prompt: "What knowledge has been captured from our previous conversations?" },
+  { num: "03", label: "Draft a document", prompt: "Help me draft a technical document for our project" },
+  { num: "04", label: "Deployment help", prompt: "What's the best way to deploy our application?" },
 ];
 
 function EmptyState({ onSendPrompt }: { onSendPrompt?: (text: string) => void }) {
   return (
-    <div className="flex-1 flex items-center justify-center">
-      <div className="text-center space-y-6 max-w-lg px-4">
-        <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
-          <SparklesIcon className="h-8 w-8 text-primary/60" />
-        </div>
-        <div>
-          <h2 className="text-lg font-semibold">Welcome to Osmer</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Chat with any AI model. Your knowledge compounds with every conversation.
-          </p>
-        </div>
-        <div className="grid grid-cols-2 gap-2">
+    <div className="flex-1 overflow-y-auto">
+      <div className="mx-auto max-w-2xl px-8 pt-20 pb-16">
+        <p className="mono text-muted-foreground/80 mb-8">§ 00 / Begin</p>
+        <h1
+          className="display text-[clamp(2.4rem,5vw,3.6rem)] text-foreground"
+        >
+          Ask the room.
+          <br />
+          <span className="display-italic">Keep what matters.</span>
+        </h1>
+        <p className="mt-7 max-w-[44ch] text-[1rem] leading-[1.65] text-foreground/75">
+          Talk to any model. Atoms of knowledge — facts, decisions,
+          processes — are quietly extracted and added to your team&rsquo;s
+          memory. Future answers are sharper because the room remembers.
+        </p>
+
+        <hr className="rule my-12" />
+
+        <p className="mono text-muted-foreground/80 mb-5">A few openings</p>
+        <ul className="divide-y divide-border/60 border-y border-border/60">
           {STARTER_PROMPTS.map((item) => (
-            <button
-              key={item.label}
-              onClick={() => onSendPrompt?.(item.prompt)}
-              className="flex items-start gap-2.5 text-left p-3 rounded-xl border border-border/50 hover:border-border hover:bg-muted/30 transition-all group"
-            >
-              <span className="text-lg mt-0.5">{item.icon}</span>
-              <div>
-                <p className="text-sm font-medium group-hover:text-foreground transition-colors">{item.label}</p>
-                <p className="text-[11px] text-muted-foreground/70 mt-0.5 line-clamp-1">{item.prompt}</p>
-              </div>
-            </button>
+            <li key={item.num}>
+              <button
+                onClick={() => onSendPrompt?.(item.prompt)}
+                className="group grid w-full grid-cols-[36px_1fr_18px] items-baseline gap-4 py-4 text-left transition-colors hover:bg-muted/40 -mx-2 px-2"
+              >
+                <span className="mono text-muted-foreground/70 group-hover:text-[var(--clay)] transition-colors">
+                  {item.num}
+                </span>
+                <div className="min-w-0">
+                  <div className="text-[1.05rem] leading-tight text-foreground" style={{ fontFamily: "var(--font-display), Georgia, serif", letterSpacing: "-0.02em" }}>
+                    {item.label}
+                  </div>
+                  <div className="text-[0.82rem] text-muted-foreground/80 mt-1.5 line-clamp-1">
+                    {item.prompt}
+                  </div>
+                </div>
+                <span className="text-muted-foreground/50 group-hover:text-foreground transition-colors">
+                  <ArrowEastIcon className="h-3 w-3" />
+                </span>
+              </button>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
     </div>
+  );
+}
+
+function ArrowEastIcon({ className }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M2 7h10" /><path d="m8 3 4 4-4 4" />
+    </svg>
   );
 }
 

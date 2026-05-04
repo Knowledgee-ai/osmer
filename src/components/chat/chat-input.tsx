@@ -2,7 +2,6 @@
 
 import { useRef, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface ChatInputProps {
@@ -16,7 +15,6 @@ interface ChatInputProps {
 export function ChatInput({ value, onChange, onSubmit, isLoading, onStop }: ChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Auto-resize textarea
   useEffect(() => {
     const textarea = textareaRef.current;
     if (textarea) {
@@ -25,7 +23,6 @@ export function ChatInput({ value, onChange, onSubmit, isLoading, onStop }: Chat
     }
   }, [value]);
 
-  // Focus on mount
   useEffect(() => {
     textareaRef.current?.focus();
   }, []);
@@ -33,70 +30,66 @@ export function ChatInput({ value, onChange, onSubmit, isLoading, onStop }: Chat
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      if (!isLoading && value.trim()) {
-        onSubmit();
-      }
+      if (!isLoading && value.trim()) onSubmit();
     }
   };
 
+  const canSend = !!value.trim() && !isLoading;
+
   return (
-    <div className="border-t border-border bg-background">
-      <div className="max-w-3xl mx-auto px-4 py-3">
-        <div className="relative flex items-end gap-2 bg-muted/30 rounded-xl border border-border/50 px-3 py-2 focus-within:border-ring/50 transition-colors">
+    <div className="border-t border-border/60 bg-background">
+      <div className="mx-auto max-w-2xl px-8 pt-4 pb-3">
+        <div className="flex items-end gap-3 border border-border/80 px-3 py-2 transition-colors focus-within:border-foreground/40">
           <Textarea
             ref={textareaRef}
             value={value}
             onChange={(e) => onChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Send a message..."
-            className="flex-1 min-h-[24px] max-h-[200px] resize-none border-0 bg-transparent p-0 text-sm focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/50"
+            placeholder="Ask the room…"
+            className="flex-1 min-h-[24px] max-h-[200px] resize-none border-0 bg-transparent p-0 text-[0.95rem] leading-[1.55] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60"
             rows={1}
           />
           {isLoading ? (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 shrink-0"
+            <button
               onClick={onStop}
+              aria-label="Stop generating"
+              className="mono inline-flex shrink-0 items-center gap-1.5 px-2.5 py-1.5 border border-border/80 text-foreground/80 hover:text-foreground hover:border-foreground/40 transition-colors"
             >
-              <StopIcon className="h-4 w-4" />
-            </Button>
+              <span className="h-2 w-2 bg-[var(--clay)]" />
+              <span>Stop</span>
+            </button>
           ) : (
-            <Button
-              variant="ghost"
-              size="icon"
-              className={cn(
-                "h-7 w-7 shrink-0 transition-opacity",
-                value.trim() ? "opacity-100" : "opacity-30"
-              )}
-              disabled={!value.trim()}
+            <button
               onClick={onSubmit}
+              disabled={!canSend}
+              aria-label="Send message"
+              className={cn(
+                "mono inline-flex shrink-0 items-center gap-1.5 px-2.5 py-1.5 border transition-colors",
+                canSend
+                  ? "border-foreground bg-foreground text-background hover:bg-[var(--clay-deep)] hover:border-[var(--clay-deep)]"
+                  : "border-border/60 text-muted-foreground/60 cursor-not-allowed"
+              )}
             >
-              <SendIcon className="h-4 w-4" />
-            </Button>
+              <span>Send</span>
+              <ArrowEastIcon className="h-2.5 w-2.5" />
+            </button>
           )}
         </div>
-        <p className="text-[10px] text-muted-foreground/50 text-center mt-2">
-          Knowledge is extracted from conversations to build your organizational memory.
+        <p
+          className="mt-3 text-center text-[0.7rem] tracking-[0.02em] text-muted-foreground/70"
+          style={{ fontStyle: "italic", fontFamily: "var(--font-display), Georgia, serif" }}
+        >
+          Knowledge is extracted from conversations to build your organisation&rsquo;s memory.
         </p>
       </div>
     </div>
   );
 }
 
-function SendIcon({ className }: { className?: string }) {
+function ArrowEastIcon({ className }: { className?: string }) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z" />
-      <path d="m21.854 2.147-10.94 10.939" />
-    </svg>
-  );
-}
-
-function StopIcon({ className }: { className?: string }) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
-      <rect x="6" y="6" width="12" height="12" rx="2" />
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M2 7h10" /><path d="m8 3 4 4-4 4" />
     </svg>
   );
 }
