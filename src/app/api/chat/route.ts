@@ -2,7 +2,8 @@ import { streamText, type ModelMessage } from 'ai';
 import { getLanguageModel, estimateCost } from '@/lib/ai/router';
 import { getModel } from '@/lib/ai/models';
 import { auth } from '@/lib/auth';
-import { searchKnowledgeByVector } from '@/lib/knowledge/db-store';
+import { retrieve } from '@/lib/memory/retrieve';
+import { ingestSource } from '@/lib/memory/ingest';
 import { db } from '@/lib/db';
 import { modelUsage, messages as messagesTable, users } from '@/lib/db/schema';
 import { eq, asc } from 'drizzle-orm';
@@ -118,42 +119,55 @@ export async function POST(req: Request) {
     }
   }
 
-  // Server-side semantic knowledge search
+  // Resolve current user's org for tenant-scoped retrieval + ingestion
+  let myOrgId: string | undefined;
+  if (session?.user?.id) {
+    const [me] = await db
+      .select({ orgId: users.orgId })
+      .from(users)
+      .where(eq(users.id, session.user.id))
+      .limit(1);
+    myOrgId = me?.orgId ?? undefined;
+  }
+
+  // Server-side hybrid memory retrieval (semantic + lexical + entity, reranked)
   let knowledgeContext = clientContext;
-  if (session?.user?.id && !knowledgeContext) {
-    const lastUserMessage = modelMessages.filter(m => m.role === 'user').pop();
+  if (session?.user?.id && myOrgId && !knowledgeContext) {
+    const lastUserMessage = modelMessages.filter((m) => m.role === 'user').pop();
     if (lastUserMessage) {
       try {
-        const results = await searchKnowledgeByVector(
-          lastUserMessage.content as string,
-          session.user.id,
-          8
-        );
+        const results = await retrieve({
+          query: lastUserMessage.content as string,
+          scope: { userId: session.user.id, teamIds: [], orgId: myOrgId, includeOrg: true },
+          topN: 8,
+        });
         if (results.length > 0) {
-          knowledgeContext = results.map(r => r.content);
+          knowledgeContext = results.map((r) => r.content);
         }
       } catch {
-        // Knowledge search is best-effort
+        // Retrieval is best-effort; chat keeps working with no memory
       }
     }
   }
 
   const languageModel = getLanguageModel(modelId);
-
   const systemPrompt = buildSystemPrompt(modelId, knowledgeContext, { multiUser });
+
+  // Capture last user turn so we can ingest the (user, assistant) pair after streaming.
+  const lastUserContent = (modelMessages.filter((m) => m.role === 'user').pop()?.content as string | undefined) ?? '';
 
   const result = streamText({
     model: languageModel,
     system: systemPrompt,
     messages: modelMessages,
-    onFinish: async ({ usage }) => {
-      if (usage && session?.user?.id) {
-        const u = usage as unknown as Record<string, number>;
+    onFinish: async ({ usage, text }) => {
+      if (session?.user?.id) {
+        const u = (usage as unknown as Record<string, number>) ?? {};
         const tokensIn = u.inputTokens || u.promptTokens || 0;
         const tokensOut = u.outputTokens || u.completionTokens || 0;
         const cost = estimateCost(modelId, tokensIn, tokensOut);
 
-        // Persist to model_usage table
+        // 1. Model usage analytics (best-effort)
         db.insert(modelUsage)
           .values({
             userId: session.user.id,
@@ -162,7 +176,26 @@ export async function POST(req: Request) {
             tokensOut,
             cost,
           })
-          .catch(() => {}); // Best-effort
+          .catch(() => {});
+
+        // 2. Verbatim memory ingest of this turn into source_chunks.
+        // The conversation envelope is the source; chunks share the
+        // conversation id so subsequent turns append to the same source.
+        if (myOrgId && conversationId && !conversationId.startsWith('pending-') && lastUserContent && text) {
+          const baseOrd = Date.now();
+          ingestSource({
+            sourceId: conversationId,
+            orgId: myOrgId,
+            type: 'conversation',
+            ownerUserId: session.user.id,
+            chunks: [
+              { ord: baseOrd,     role: 'user',      speakerUserId: session.user.id, content: lastUserContent },
+              { ord: baseOrd + 1, role: 'assistant', speakerUserId: null,            content: text },
+            ],
+          }).catch((err) => {
+            console.error('[chat] memory ingest failed:', err instanceof Error ? err.message : err);
+          });
+        }
       }
     },
   });
