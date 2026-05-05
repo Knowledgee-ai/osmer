@@ -1,22 +1,23 @@
 import { generateText } from 'ai';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { teamMembers } from '@/lib/db/schema';
+import { teamMembers, users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { getLanguageModel } from '@/lib/ai/router';
-import { searchKnowledgeByVector } from '@/lib/knowledge/db-store';
+import { retrieve } from '@/lib/memory/retrieve';
 
 export const maxDuration = 30;
 
 /**
  * POST /api/knowledge/ask
  *
- * Grounded knowledge-base query. Returns a single answer with citation sources.
+ * Grounded knowledge-base query. Returns a single answer with citation
+ * sources, drawn from the verbatim store via hybrid retrieval.
  */
 export async function POST(req: Request) {
   const session = await auth();
   if (!session?.user?.id) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
+    return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const { question, modelId } = await req.json() as {
@@ -25,8 +26,11 @@ export async function POST(req: Request) {
   };
 
   if (!question?.trim()) {
-    return Response.json({ error: "Missing question" }, { status: 400 });
+    return Response.json({ error: 'Missing question' }, { status: 400 });
   }
+
+  const [me] = await db.select({ orgId: users.orgId }).from(users).where(eq(users.id, session.user.id)).limit(1);
+  if (!me?.orgId) return Response.json({ error: 'No org' }, { status: 400 });
 
   const userTeams = await db
     .select({ teamId: teamMembers.teamId })
@@ -34,22 +38,21 @@ export async function POST(req: Request) {
     .where(eq(teamMembers.userId, session.user.id));
   const teamIds = userTeams.map((t) => t.teamId);
 
-  const results = await searchKnowledgeByVector(
-    question,
-    session.user.id,
-    15,
-    teamIds.length > 0 ? teamIds : undefined,
-  );
+  const results = await retrieve({
+    query: question,
+    scope: { userId: session.user.id, teamIds, orgId: me.orgId, includeOrg: true },
+    topN: 15,
+  });
 
   if (results.length === 0) {
     return Response.json({
-      answer: "Nothing in the knowledge base touches on that yet. Discuss it in a chat to seed it.",
+      answer: 'Nothing in the knowledge base touches on that yet. Discuss it in a chat to seed it.',
       sources: [],
     });
   }
 
   const knowledgeBlock = results
-    .map((r, i) => `[${i + 1}] (${r.type}, ${(r.confidence * 100).toFixed(0)}% confidence): ${r.content}`)
+    .map((r, i) => `[${i + 1}] (score: ${r.finalScore.toFixed(3)}): ${r.content}`)
     .join('\n');
 
   const model = getLanguageModel(modelId || 'anthropic/claude-sonnet-4-6');
@@ -73,11 +76,10 @@ ${knowledgeBlock}`,
     answer: text,
     sources: results.map((r, i) => ({
       n: i + 1,
-      id: r.id,
+      chunkId: r.chunkId,
+      sourceId: r.sourceId,
       content: r.content,
-      type: r.type,
-      confidence: r.confidence,
-      similarity: r.similarity,
+      score: r.finalScore,
     })),
   });
 }
