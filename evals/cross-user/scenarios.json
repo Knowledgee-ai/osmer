@@ -1,0 +1,202 @@
+[
+  {
+    "id": "cu-001",
+    "industry": "consulting",
+    "user_a_sessions": [[
+      { "role": "user", "content": "Acme Industries is renewing in Q3. They've expressed interest in adding the analytics module." },
+      { "role": "assistant", "content": "Noted Acme Industries renewal timing and analytics interest." }
+    ]],
+    "user_b_question": "What do we know about Acme Industries' expansion potential?",
+    "expected_keywords": ["analytics", "Q3", "renew"]
+  },
+  {
+    "id": "cu-002",
+    "industry": "sales",
+    "user_a_sessions": [[
+      { "role": "user", "content": "Met with Sarah Lee at BigCo today. She's the new VP of Operations and our main contact going forward." },
+      { "role": "assistant", "content": "Recorded Sarah Lee as VP of Operations at BigCo." }
+    ]],
+    "user_b_question": "Who is the main contact at BigCo?",
+    "expected_keywords": ["Sarah Lee", "Operations"]
+  },
+  {
+    "id": "cu-003",
+    "industry": "marketing",
+    "user_a_sessions": [[
+      { "role": "user", "content": "Q2 brand campaign budget is $180k. Spending it on LinkedIn and YouTube. Skipping Twitter this quarter." },
+      { "role": "assistant", "content": "Q2 budget plan noted: $180k on LinkedIn + YouTube." }
+    ]],
+    "user_b_question": "What's the Q2 brand campaign budget allocation?",
+    "expected_keywords": ["180k", "LinkedIn", "YouTube"]
+  },
+  {
+    "id": "cu-004",
+    "industry": "consulting",
+    "user_a_sessions": [[
+      { "role": "user", "content": "Globex Industries expanded from 50 to 240 seats after the marketing automation module shipped." },
+      { "role": "assistant", "content": "Globex expansion noted: 50 → 240 seats." }
+    ]],
+    "user_b_question": "How much did Globex grow?",
+    "expected_keywords": ["240", "seats", "expansion"]
+  },
+  {
+    "id": "cu-005",
+    "industry": "sales",
+    "user_a_sessions": [[
+      { "role": "user", "content": "TechCorp deal stalled in legal review. The hold-up is the data residency clause — they need EU storage." },
+      { "role": "assistant", "content": "TechCorp blocker recorded: data residency / EU." }
+    ]],
+    "user_b_question": "Why is the TechCorp deal blocked?",
+    "expected_keywords": ["data residency", "EU", "legal"]
+  },
+  {
+    "id": "cu-006",
+    "industry": "marketing",
+    "user_a_sessions": [[
+      { "role": "user", "content": "We renamed our product from Knowledgee to OsmerOne in March." },
+      { "role": "assistant", "content": "Rename noted: Knowledgee → OsmerOne, March." }
+    ]],
+    "user_b_question": "What's our product called now?",
+    "expected_keywords": ["OsmerOne"]
+  },
+  {
+    "id": "cu-007",
+    "industry": "consulting",
+    "user_a_sessions": [[
+      { "role": "user", "content": "Engagement model: 6-week sprints, biweekly client checkpoints, deliverables in Notion." },
+      { "role": "assistant", "content": "Engagement cadence noted." }
+    ]],
+    "user_b_question": "How long are our standard engagement sprints?",
+    "expected_keywords": ["6-week", "sprint"]
+  },
+  {
+    "id": "cu-008",
+    "industry": "sales",
+    "user_a_sessions": [[
+      { "role": "user", "content": "Our enterprise tier is now $50/seat after the pricing update last month." },
+      { "role": "assistant", "content": "Enterprise pricing updated: $50/seat." }
+    ]],
+    "user_b_question": "What's the current enterprise seat price?",
+    "expected_keywords": ["50", "seat"]
+  },
+  {
+    "id": "cu-009",
+    "industry": "marketing",
+    "user_a_sessions": [[
+      { "role": "user", "content": "Webinar last Thursday: 340 registrants, 180 attended, 12 demos booked." },
+      { "role": "assistant", "content": "Webinar metrics recorded." }
+    ]],
+    "user_b_question": "How did our last webinar perform?",
+    "expected_keywords": ["340", "180", "demo"]
+  },
+  {
+    "id": "cu-010",
+    "industry": "consulting",
+    "user_a_sessions": [[
+      { "role": "user", "content": "Mike handles all customer escalations and credit decisions." },
+      { "role": "assistant", "content": "Escalation owner: Mike." }
+    ]],
+    "user_b_question": "Who handles customer escalations?",
+    "expected_keywords": ["Mike", "escalation"]
+  },
+  {
+    "id": "cu-011",
+    "industry": "sales",
+    "user_a_sessions": [[
+      { "role": "user", "content": "Acme uses Stripe for payments and is migrating to Adyen in Q3 to support LATAM customers." },
+      { "role": "assistant", "content": "Acme payment migration noted." }
+    ]],
+    "user_b_question": "What payment processor is Acme moving to and why?",
+    "expected_keywords": ["Adyen", "LATAM"]
+  },
+  {
+    "id": "cu-012",
+    "industry": "marketing",
+    "user_a_sessions": [[
+      { "role": "user", "content": "Brand voice guide: short sentences, second person, no exclamation marks, no jargon." },
+      { "role": "assistant", "content": "Brand voice rules noted." }
+    ]],
+    "user_b_question": "What's our brand voice style?",
+    "expected_keywords": ["short", "second person"]
+  },
+  {
+    "id": "cu-013",
+    "industry": "consulting",
+    "user_a_sessions": [[
+      { "role": "user", "content": "Our standard project deliverable is a 30-page recommendations memo plus a 20-slide deck." },
+      { "role": "assistant", "content": "Standard deliverable shape noted." }
+    ]],
+    "user_b_question": "What's our typical project deliverable?",
+    "expected_keywords": ["30-page", "memo", "deck"]
+  },
+  {
+    "id": "cu-014",
+    "industry": "sales",
+    "user_a_sessions": [[
+      { "role": "user", "content": "Discovery call template: pain → current solution → cost of inaction → success metric. 45 min max." },
+      { "role": "assistant", "content": "Discovery call template noted." }
+    ]],
+    "user_b_question": "What does our discovery call structure look like?",
+    "expected_keywords": ["pain", "45 min"]
+  },
+  {
+    "id": "cu-015",
+    "industry": "marketing",
+    "user_a_sessions": [[
+      { "role": "user", "content": "Social posting cadence: LinkedIn 3x/week (Tue, Thu, Fri morning), Twitter daily, Instagram 2x/week." },
+      { "role": "assistant", "content": "Social cadence recorded." }
+    ]],
+    "user_b_question": "How often do we post on LinkedIn?",
+    "expected_keywords": ["3x", "LinkedIn"]
+  },
+  {
+    "id": "cu-016",
+    "industry": "consulting",
+    "user_a_sessions": [[
+      { "role": "user", "content": "Globex's renewal is due March 14. Their primary contact is Sarah Lee." },
+      { "role": "assistant", "content": "Globex renewal date + contact noted." }
+    ]],
+    "user_b_question": "When does Globex renew?",
+    "expected_keywords": ["March 14", "Globex"]
+  },
+  {
+    "id": "cu-017",
+    "industry": "sales",
+    "user_a_sessions": [[
+      { "role": "user", "content": "Discount policy: up to 10% for annual commits, 15% for 25+ seats, 20% requires VP approval." },
+      { "role": "assistant", "content": "Discount tiers recorded." }
+    ]],
+    "user_b_question": "What's the maximum discount we can offer without VP approval?",
+    "expected_keywords": ["15%", "25"]
+  },
+  {
+    "id": "cu-018",
+    "industry": "marketing",
+    "user_a_sessions": [[
+      { "role": "user", "content": "Our top three competitors are Manus, Glean, and Notion AI." },
+      { "role": "assistant", "content": "Competitor list noted." }
+    ]],
+    "user_b_question": "Who are our main competitors?",
+    "expected_keywords": ["Manus", "Glean", "Notion"]
+  },
+  {
+    "id": "cu-019",
+    "industry": "consulting",
+    "user_a_sessions": [[
+      { "role": "user", "content": "Knowledge transfer at the end of every engagement: a 60-minute readout + a written summary in Notion." },
+      { "role": "assistant", "content": "KT process noted." }
+    ]],
+    "user_b_question": "How do we hand off engagements to clients?",
+    "expected_keywords": ["readout", "Notion"]
+  },
+  {
+    "id": "cu-020",
+    "industry": "sales",
+    "user_a_sessions": [[
+      { "role": "user", "content": "Cold-email opener that worked best last quarter: 'Saw you posted about X — quick thought.' 14% reply rate." },
+      { "role": "assistant", "content": "Top-performing opener noted." }
+    ]],
+    "user_b_question": "What's our best cold email opener?",
+    "expected_keywords": ["Saw you posted", "14%"]
+  }
+]
