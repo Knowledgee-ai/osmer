@@ -8,6 +8,7 @@ import { db } from '@/lib/db';
 import { modelUsage, messages as messagesTable, users } from '@/lib/db/schema';
 import { eq, asc } from 'drizzle-orm';
 import { getConversationAccess, canWrite } from '@/lib/conversations/access';
+import { assertSpendOk, recordSpend, SpendExceeded } from '@/lib/spend/caps';
 
 export const maxDuration = 60;
 
@@ -150,6 +151,22 @@ export async function POST(req: Request) {
     }
   }
 
+  // Pre-flight spend gate. Estimate based on model's input/output rates
+  // and roughly 1500 output tokens. Exact cost recorded in onFinish.
+  if (myOrgId && session?.user?.id) {
+    const lastMsgChars = (modelMessages[modelMessages.length - 1]?.content as string ?? '').length;
+    const estCents = Math.ceil(estimateCost(modelId, lastMsgChars / 4, 1500) * 100);
+    try {
+      await assertSpendOk(myOrgId, session.user.id, 'user_daily', estCents);
+      await assertSpendOk(myOrgId, session.user.id, 'org_monthly', estCents);
+    } catch (err) {
+      if (err instanceof SpendExceeded) {
+        return Response.json({ error: 'spend_cap_exceeded', scope: err.scope, cap: err.cap, used: err.used }, { status: 402 });
+      }
+      throw err;
+    }
+  }
+
   const languageModel = getLanguageModel(modelId);
   const systemPrompt = buildSystemPrompt(modelId, knowledgeContext, { multiUser });
 
@@ -178,7 +195,13 @@ export async function POST(req: Request) {
           })
           .catch(() => {});
 
-        // 2. Verbatim memory ingest of this turn into source_chunks.
+        // 2. Spend ledger (authoritative for caps)
+        if (myOrgId) {
+          recordSpend(myOrgId, session.user.id, 'chat', Math.round(cost * 100), { modelId, tokensIn, tokensOut })
+            .catch((err) => console.error('[chat] recordSpend failed:', err));
+        }
+
+        // 3. Verbatim memory ingest of this turn into source_chunks.
         // The conversation envelope is the source; chunks share the
         // conversation id so subsequent turns append to the same source.
         if (myOrgId && conversationId && !conversationId.startsWith('pending-') && lastUserContent && text) {

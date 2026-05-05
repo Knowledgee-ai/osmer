@@ -5,6 +5,7 @@ import { eq } from 'drizzle-orm';
 import { extractEntitiesForSource } from '@/lib/memory/entities';
 import { projectAtoms } from '@/lib/memory/projection';
 import { logAudit } from '@/lib/audit';
+import { assertSpendOk, recordSpend, SpendExceeded } from '@/lib/spend/caps';
 
 export const maxDuration = 120;
 
@@ -29,8 +30,26 @@ export async function POST(req: Request) {
   const [me] = await db.select({ orgId: users.orgId }).from(users).where(eq(users.id, session.user.id)).limit(1);
   if (!me?.orgId) return Response.json({ error: 'No org' }, { status: 400 });
 
+  // Pre-flight: extraction + projection together typically cost ~5-30 cents.
+  // Estimate generously and record actual after.
+  const ESTIMATE_CENTS = 30;
+  try {
+    await assertSpendOk(me.orgId, session.user.id, 'user_daily', ESTIMATE_CENTS);
+    await assertSpendOk(me.orgId, session.user.id, 'org_monthly', ESTIMATE_CENTS);
+  } catch (err) {
+    if (err instanceof SpendExceeded) {
+      return Response.json({ error: 'spend_cap_exceeded', scope: err.scope, cap: err.cap, used: err.used }, { status: 402 });
+    }
+    throw err;
+  }
+
   const entities = await extractEntitiesForSource(sourceId, me.orgId);
   const projection = await projectAtoms(me.orgId, session.user.id);
+
+  // Record actual — for now we use the estimate. Real cost tracking
+  // would need to thread token counts through entities.ts + projection.ts.
+  await recordSpend(me.orgId, session.user.id, 'extraction', ESTIMATE_CENTS, { sourceId, entities, projection })
+    .catch((err) => console.error('[extract] recordSpend failed:', err));
 
   logAudit(session.user.id, 'knowledge.extract', 'knowledge', sourceId, { entities, projection });
 
