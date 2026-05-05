@@ -1,0 +1,251 @@
+[
+  {
+    "question_id": "syn-001",
+    "question_type": "single-session-user",
+    "question": "What payment processor does Acme use?",
+    "answer": "Stripe",
+    "haystack_session_ids": ["s0", "s1"],
+    "answer_session_ids": ["s0"],
+    "haystack_sessions": [
+      [
+        { "role": "user", "content": "We just signed Acme as a customer. They use Stripe for payments." },
+        { "role": "assistant", "content": "Got it — noted Acme uses Stripe." }
+      ],
+      [
+        { "role": "user", "content": "I'm planning the office holiday party for December." },
+        { "role": "assistant", "content": "Sounds fun. How many people?" }
+      ]
+    ]
+  },
+  {
+    "question_id": "syn-002",
+    "question_type": "knowledge-update",
+    "question": "What payment processor does Acme use today?",
+    "answer": "Adyen",
+    "haystack_session_ids": ["s0", "s1"],
+    "answer_session_ids": ["s1"],
+    "haystack_sessions": [
+      [
+        { "role": "user", "content": "Acme uses Stripe." },
+        { "role": "assistant", "content": "Noted." }
+      ],
+      [
+        { "role": "user", "content": "Update: Acme migrated from Stripe to Adyen this quarter." },
+        { "role": "assistant", "content": "Updating my notes — Acme is on Adyen now." }
+      ]
+    ]
+  },
+  {
+    "question_id": "syn-003",
+    "question_type": "single-session-user",
+    "question": "What is the SKU of the discontinued accessory?",
+    "answer": "SKU-AC-9912",
+    "haystack_session_ids": ["s0"],
+    "answer_session_ids": ["s0"],
+    "haystack_sessions": [
+      [
+        { "role": "user", "content": "We're discontinuing SKU-AC-9912 next month and replacing it with SKU-AC-9913." },
+        { "role": "assistant", "content": "Got it — 9912 out, 9913 in." }
+      ]
+    ]
+  },
+  {
+    "question_id": "syn-004",
+    "question_type": "multi-session",
+    "question": "What does the marketing team prefer for office coffee?",
+    "answer": "Blue Bottle",
+    "haystack_session_ids": ["s0", "s1", "s2"],
+    "answer_session_ids": ["s1"],
+    "haystack_sessions": [
+      [{ "role": "user", "content": "We need to renew the cleaning contract." }, { "role": "assistant", "content": "Got it." }],
+      [{ "role": "user", "content": "Marketing has been very vocal that they want Blue Bottle for office coffee." }, { "role": "assistant", "content": "Noted: marketing prefers Blue Bottle." }],
+      [{ "role": "user", "content": "Engineering wants Stumptown but I think marketing won." }, { "role": "assistant", "content": "Yes — marketing won, Blue Bottle." }]
+    ]
+  },
+  {
+    "question_id": "syn-005",
+    "question_type": "temporal-reasoning",
+    "question": "What was decided in the last meeting about Q3 priorities?",
+    "answer": "Focus on retention",
+    "haystack_session_ids": ["s0", "s1"],
+    "answer_session_ids": ["s1"],
+    "haystack_sessions": [
+      [{ "role": "user", "content": "Q2 priorities: ship the new dashboard, reduce churn, and onboard 5 enterprise customers." }, { "role": "assistant", "content": "Recorded Q2." }],
+      [{ "role": "user", "content": "Q3 meeting just ended. Decision: focus on retention. Defer the dashboard refresh to Q4." }, { "role": "assistant", "content": "Noted Q3 decision." }]
+    ]
+  },
+  {
+    "question_id": "syn-006",
+    "question_type": "single-session-user",
+    "question": "Who is the main contact at BigCo?",
+    "answer": "Sarah Lee",
+    "haystack_session_ids": ["s0"],
+    "answer_session_ids": ["s0"],
+    "haystack_sessions": [
+      [{ "role": "user", "content": "Met with Sarah Lee at BigCo today — she's our main point of contact going forward." }, { "role": "assistant", "content": "Noted Sarah Lee at BigCo." }]
+    ]
+  },
+  {
+    "question_id": "syn-007",
+    "question_type": "single-session-user",
+    "question": "What is our current pricing model?",
+    "answer": "per-seat with annual commit discount",
+    "haystack_session_ids": ["s0"],
+    "answer_session_ids": ["s0"],
+    "haystack_sessions": [
+      [{ "role": "user", "content": "Current pricing: $30/seat/month, with 20% off for annual commits and 10% off for 25+ seat teams." }, { "role": "assistant", "content": "Got pricing details." }]
+    ]
+  },
+  {
+    "question_id": "syn-008",
+    "question_type": "knowledge-update",
+    "question": "What is the current monthly seat price?",
+    "answer": "50",
+    "haystack_session_ids": ["s0", "s1"],
+    "answer_session_ids": ["s1"],
+    "haystack_sessions": [
+      [{ "role": "user", "content": "Pricing is $30/seat/month." }, { "role": "assistant", "content": "Noted $30/seat." }],
+      [{ "role": "user", "content": "Pricing update: as of this month, $50/seat/month." }, { "role": "assistant", "content": "Updated to $50/seat." }]
+    ]
+  },
+  {
+    "question_id": "syn-009",
+    "question_type": "multi-session",
+    "question": "What is the deal status with TechCorp?",
+    "answer": "stalled in legal review",
+    "haystack_session_ids": ["s0", "s1", "s2"],
+    "answer_session_ids": ["s2"],
+    "haystack_sessions": [
+      [{ "role": "user", "content": "TechCorp signed an NDA last week." }, { "role": "assistant", "content": "Noted." }],
+      [{ "role": "user", "content": "Sent TechCorp the proposal." }, { "role": "assistant", "content": "Got it." }],
+      [{ "role": "user", "content": "TechCorp deal is stalled in legal review on the data-residency clause." }, { "role": "assistant", "content": "Noted: stalled in legal." }]
+    ]
+  },
+  {
+    "question_id": "syn-010",
+    "question_type": "single-session-user",
+    "question": "What CMS does our website run on?",
+    "answer": "WordPress",
+    "haystack_session_ids": ["s0"],
+    "answer_session_ids": ["s0"],
+    "haystack_sessions": [
+      [{ "role": "user", "content": "Our website is on WordPress with a custom theme." }, { "role": "assistant", "content": "Noted." }]
+    ]
+  },
+  {
+    "question_id": "syn-011",
+    "question_type": "temporal-reasoning",
+    "question": "When does the BigCo contract renew?",
+    "answer": "March",
+    "haystack_session_ids": ["s0", "s1"],
+    "answer_session_ids": ["s1"],
+    "haystack_sessions": [
+      [{ "role": "user", "content": "BigCo signed last March for one year." }, { "role": "assistant", "content": "Noted." }],
+      [{ "role": "user", "content": "So BigCo renewal is coming up in March." }, { "role": "assistant", "content": "March renewal noted." }]
+    ]
+  },
+  {
+    "question_id": "syn-012",
+    "question_type": "single-session-user",
+    "question": "What is our refund policy?",
+    "answer": "30 days, no questions asked under $500",
+    "haystack_session_ids": ["s0"],
+    "answer_session_ids": ["s0"],
+    "haystack_sessions": [
+      [{ "role": "user", "content": "Our refund policy: 30 days, no questions asked for refunds under $500. Above that, manager approval required." }, { "role": "assistant", "content": "Refund policy noted." }]
+    ]
+  },
+  {
+    "question_id": "syn-013",
+    "question_type": "multi-session",
+    "question": "Which customer has the highest annual contract value?",
+    "answer": "Globex",
+    "haystack_session_ids": ["s0", "s1", "s2"],
+    "answer_session_ids": ["s1"],
+    "haystack_sessions": [
+      [{ "role": "user", "content": "Acme is at $80k ARR." }, { "role": "assistant", "content": "Noted." }],
+      [{ "role": "user", "content": "Globex just signed at $250k ARR — biggest deal of the year." }, { "role": "assistant", "content": "Noted: Globex at $250k." }],
+      [{ "role": "user", "content": "TechCorp is around $120k ARR." }, { "role": "assistant", "content": "Noted." }]
+    ]
+  },
+  {
+    "question_id": "syn-014",
+    "question_type": "single-session-user",
+    "question": "Who handles customer support escalations?",
+    "answer": "Mike",
+    "haystack_session_ids": ["s0"],
+    "answer_session_ids": ["s0"],
+    "haystack_sessions": [
+      [{ "role": "user", "content": "Mike handles all customer support escalations and has the final say on credit decisions." }, { "role": "assistant", "content": "Got it — Mike on escalations." }]
+    ]
+  },
+  {
+    "question_id": "syn-015",
+    "question_type": "knowledge-update",
+    "question": "What is the current name of our flagship product?",
+    "answer": "OsmerOne",
+    "haystack_session_ids": ["s0", "s1"],
+    "answer_session_ids": ["s1"],
+    "haystack_sessions": [
+      [{ "role": "user", "content": "Our flagship is called Knowledgee." }, { "role": "assistant", "content": "Noted." }],
+      [{ "role": "user", "content": "We renamed Knowledgee to OsmerOne last month." }, { "role": "assistant", "content": "Updated: it's OsmerOne now." }]
+    ]
+  },
+  {
+    "question_id": "syn-016",
+    "question_type": "single-session-user",
+    "question": "What is the Slack channel for engineering on-call?",
+    "answer": "#oncall-eng",
+    "haystack_session_ids": ["s0"],
+    "answer_session_ids": ["s0"],
+    "haystack_sessions": [
+      [{ "role": "user", "content": "Engineering on-call announcements go to #oncall-eng." }, { "role": "assistant", "content": "Channel noted." }]
+    ]
+  },
+  {
+    "question_id": "syn-017",
+    "question_type": "multi-session",
+    "question": "Which hosting provider does the SaaS run on?",
+    "answer": "Vercel",
+    "haystack_session_ids": ["s0", "s1"],
+    "answer_session_ids": ["s1"],
+    "haystack_sessions": [
+      [{ "role": "user", "content": "Considered AWS, GCP, and Vercel for the new product." }, { "role": "assistant", "content": "Noted the options." }],
+      [{ "role": "user", "content": "Decided on Vercel for the SaaS — too much yak-shaving with raw cloud." }, { "role": "assistant", "content": "Vercel chosen." }]
+    ]
+  },
+  {
+    "question_id": "syn-018",
+    "question_type": "temporal-reasoning",
+    "question": "What was last quarter's main objective?",
+    "answer": "ship multi-model chat",
+    "haystack_session_ids": ["s0", "s1"],
+    "answer_session_ids": ["s0"],
+    "haystack_sessions": [
+      [{ "role": "user", "content": "Last quarter's main objective was to ship multi-model chat. We did it on time." }, { "role": "assistant", "content": "Q goal noted." }],
+      [{ "role": "user", "content": "This quarter we're rebuilding memory." }, { "role": "assistant", "content": "Current quarter focus noted." }]
+    ]
+  },
+  {
+    "question_id": "syn-019",
+    "question_type": "single-session-user",
+    "question": "What is the email for billing inquiries?",
+    "answer": "billing@osmer.ai",
+    "haystack_session_ids": ["s0"],
+    "answer_session_ids": ["s0"],
+    "haystack_sessions": [
+      [{ "role": "user", "content": "Send all billing inquiries to billing@osmer.ai. Marcia answers them." }, { "role": "assistant", "content": "Email noted." }]
+    ]
+  },
+  {
+    "question_id": "syn-020",
+    "question_type": "single-session-user",
+    "question": "What is the standard meeting prep duration?",
+    "answer": "15 minutes",
+    "haystack_session_ids": ["s0"],
+    "answer_session_ids": ["s0"],
+    "haystack_sessions": [
+      [{ "role": "user", "content": "Internally we block 15 minutes before every external meeting for prep." }, { "role": "assistant", "content": "Got it." }]
+    ]
+  }
+]
