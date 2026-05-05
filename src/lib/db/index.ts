@@ -7,8 +7,7 @@ import * as schema from './schema';
 // an explicit WebSocket implementation. Inside Vercel Functions the runtime
 // already provides WebSocket; assigning ws is a no-op there.
 if (typeof WebSocket === 'undefined') {
-  // @ts-expect-error neon's Constructor type is narrow
-  neonConfig.webSocketConstructor = ws;
+  neonConfig.webSocketConstructor = ws as unknown as typeof WebSocket;
 }
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL! });
