@@ -1,16 +1,13 @@
-import { embed } from 'ai';
-import { createOpenAI } from '@ai-sdk/openai';
+import { embed as embedV2 } from '@/lib/memory/embed';
 
-// Use OpenRouter for embeddings (supports text-embedding-3-small)
-const openrouter = createOpenAI({
-  apiKey: process.env.OPENROUTER_API_KEY || '',
-  baseURL: 'https://openrouter.ai/api/v1',
-});
-
+/**
+ * @deprecated Use `src/lib/memory/embed.ts`. Removed in M3.
+ *
+ * Kept as a thin shim so any remaining legacy callers continue to
+ * work during the M1→M3 transition. Returns just the vector for
+ * backwards compatibility; the new API returns `{ vector, version }`.
+ */
 export async function generateEmbedding(text: string): Promise<number[]> {
-  const { embedding } = await embed({
-    model: openrouter.embedding('openai/text-embedding-3-small'),
-    value: text,
-  });
-  return embedding;
+  const { vector } = await embedV2(text);
+  return vector;
 }
