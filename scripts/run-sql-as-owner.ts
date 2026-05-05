@@ -23,7 +23,14 @@ async function main() {
 
   const pool = new Pool({ connectionString: url });
   try {
-    const statements = splitTopLevel(sql).map((s) => s.trim()).filter(Boolean);
+    // Strip -- line comments BEFORE splitting on ; (a comment may
+    // contain a semicolon and we do not want to split mid-sentence).
+    const cleaned = sql
+      .split('\n')
+      .map((line) => line.replace(/--.*$/, ''))
+      .join('\n');
+
+    const statements = splitTopLevel(cleaned).map((s) => s.trim()).filter(Boolean);
     for (const stmt of statements) {
       process.stdout.write(`-- ${stmt.slice(0, 80).replace(/\n/g, ' ')}…\n`);
       await pool.query(stmt);
@@ -50,9 +57,8 @@ function splitTopLevel(sql: string): string[] {
     buf += sql[i];
   }
   if (buf.trim().length > 0) out.push(buf.trim());
-  return out
-    .map((s) => s.split('\n').filter((l) => !l.trim().startsWith('--')).join('\n').trim())
-    .filter(Boolean);
+  // (Line comments already stripped by caller.)
+  return out.map((s) => s.trim()).filter(Boolean);
 }
 
 main().catch((err) => { console.error(err); process.exit(1); });
