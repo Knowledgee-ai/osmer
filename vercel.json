@@ -4,6 +4,7 @@
     { "path": "/api/cron/drift",         "schedule": "15 6 * * *" },
     { "path": "/api/cron/disagreement",  "schedule": "0 7 * * 1" },
     { "path": "/api/cron/consolidation", "schedule": "30 7 * * 1" },
-    { "path": "/api/cron/health",        "schedule": "0 8 * * 1" }
+    { "path": "/api/cron/health",        "schedule": "0 8 * * 1" },
+    { "path": "/api/cron/monitor",       "schedule": "0 * * * *" }
   ]
 }

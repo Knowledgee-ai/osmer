@@ -3,6 +3,7 @@ import { runDrift } from '@/lib/memory/cron/drift';
 import { runDisagreement } from '@/lib/memory/cron/disagreement';
 import { runConsolidation } from '@/lib/memory/cron/consolidation';
 import { runHealth } from '@/lib/memory/cron/health';
+import { runMonitor } from '@/lib/agent/cron/monitor';
 
 export const maxDuration = 300;
 
@@ -12,6 +13,7 @@ const HANDLERS: Record<string, () => Promise<unknown>> = {
   disagreement: runDisagreement,
   consolidation: runConsolidation,
   health: runHealth,
+  monitor: runMonitor,
 };
 
 function isAuthorized(req: Request) {
