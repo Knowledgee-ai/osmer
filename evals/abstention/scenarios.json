@@ -1,0 +1,12 @@
+[
+  { "id": "ab-001", "question": "What is our customer support phone number?",  "haystack_unrelated": "We use Stripe and Adyen for payments." },
+  { "id": "ab-002", "question": "Who is the CEO of Acme?",                     "haystack_unrelated": "Acme renewed in Q3 for the analytics module." },
+  { "id": "ab-003", "question": "What is our marketing budget for next year?", "haystack_unrelated": "Our brand voice prefers short sentences." },
+  { "id": "ab-004", "question": "Who handles HR onboarding?",                  "haystack_unrelated": "Mike handles customer escalations." },
+  { "id": "ab-005", "question": "What is Globex's HQ address?",                "haystack_unrelated": "Globex expanded from 50 to 240 seats." },
+  { "id": "ab-006", "question": "What is our refund policy for legacy plans?", "haystack_unrelated": "Our standard refund policy is 30 days." },
+  { "id": "ab-007", "question": "When did we last raise capital?",             "haystack_unrelated": "We deploy on Vercel with weekly cadence." },
+  { "id": "ab-008", "question": "What is the vesting schedule for new hires?", "haystack_unrelated": "New hires use Notion for project tracking." },
+  { "id": "ab-009", "question": "What is our security incident response SLA?", "haystack_unrelated": "We use Sentry for error monitoring." },
+  { "id": "ab-010", "question": "What is the dial-in for the all-hands?",       "haystack_unrelated": "All-hands happens biweekly on Fridays." }
+]

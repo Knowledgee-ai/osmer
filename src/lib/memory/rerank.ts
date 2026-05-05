@@ -36,6 +36,19 @@ export async function rerank({ query, candidates, topN = 8 }: RerankOpts): Promi
   return rrfFuse(candidates, merged, topN);
 }
 
+/**
+ * Recency boost: a chunk's score is multiplied by `(0.7 + 0.3 * decay)`
+ * where decay = exp(-days_since / 60). At 0 days it's 1.0; at 60 days
+ * it's ~0.81; at 6 months it's ~0.74. Strong enough to break ties
+ * between v1 / v2 versions of the same fact, weak enough not to bury
+ * historically important chunks.
+ */
+function recencyMultiplier(validAt: Date): number {
+  const daysAgo = Math.max(0, (Date.now() - new Date(validAt).getTime()) / 86_400_000);
+  const decay = Math.exp(-daysAgo / 60);
+  return 0.7 + 0.3 * decay;
+}
+
 async function rerankCohere(
   query: string,
   merged: Array<{ chunkId: string; sigs: RetrievalCandidate[]; sample: RetrievalCandidate }>,
@@ -45,24 +58,28 @@ async function rerankCohere(
   const r = await fetch('https://api.cohere.com/v2/rerank', {
     method: 'POST',
     headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.COHERE_API_KEY}` },
-    body: JSON.stringify({ model: RERANK_MODEL, query, documents: docs, top_n: topN }),
+    body: JSON.stringify({ model: RERANK_MODEL, query, documents: docs, top_n: docs.length }),
   });
   if (!r.ok) throw new Error(`cohere rerank ${r.status}`);
   const j = await r.json() as { results: Array<{ index: number; relevance_score: number }> };
 
-  return j.results.map((res) => {
+  // Apply recency boost on top of Cohere relevance, then re-sort + slice.
+  const out = j.results.map((res) => {
     const m = merged[res.index];
+    const boost = recencyMultiplier(m.sample.validAt);
     return {
       chunkId: m.chunkId,
       sourceId: m.sample.sourceId,
       content: m.sample.content,
-      finalScore: res.relevance_score,
+      finalScore: res.relevance_score * boost,
       signals: m.sigs.map((s) => ({ kind: s.signal, score: s.rawScore })),
       speakerUserId: m.sample.speakerUserId,
       validAt: m.sample.validAt,
       meta: m.sample.meta,
     };
   });
+  out.sort((a, b) => b.finalScore - a.finalScore);
+  return out.slice(0, topN);
 }
 
 function rrfFuse(
@@ -88,7 +105,7 @@ function rrfFuse(
       chunkId: m.chunkId,
       sourceId: m.sample.sourceId,
       content: m.sample.content,
-      finalScore: score,
+      finalScore: score * recencyMultiplier(m.sample.validAt),
       signals: m.sigs.map((s) => ({ kind: s.signal, score: s.rawScore })),
       speakerUserId: m.sample.speakerUserId,
       validAt: m.sample.validAt,
