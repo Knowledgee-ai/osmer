@@ -44,6 +44,8 @@ These are non-negotiable. Anything that violates one needs to be rejected, not a
 6. **Self-serve PLG, sales-followed.** Activation in the first 60 seconds matters more than enterprise polish. SOC 2, SSO, on-prem, and admin compliance surfaces come later, driven by paying customers asking for them.
 7. **Mobile from the start.** Sales/consulting/marketing users live on phones between meetings. Expo/React Native shell ships in the same wave as the web rebuild, not as a year-end project.
 8. **Evals before features.** Retrieval recall and AI Employee output quality are measured before any change ships. Without numbers, every architectural decision is faith-based.
+9. **Memory is captured automatically — never asked for.** Every chat turn, every uploaded document, every interview transcript, every successful AI Employee run feeds the verbatim store without the user lifting a finger. The user's job is to talk, write, and work; the system's job is to remember. Users opt *out* (lock a conversation) rather than opt *in*. If someone has to click a "save to memory" button, we've failed the design.
+10. **The memory has a face.** A live, interactive Memory Map renders the asset as it grows — topics, atoms, sources, entities, contributors. It's both a working navigation surface and the demo screenshot every customer takes back to their team. Section 3 covers the spec.
 
 ---
 
@@ -237,6 +239,61 @@ No "cleanup" or "orphan archival" — verbatim chunks stay forever (subject to u
 - **Locked conversation**: never extracted, never projected, never indexed beyond the user's own retrieval.
 
 Scope checks run on every retrieval query at the database level. A locked conversation is invisible to projections and to other users' retrievals. Ever.
+
+### The Memory Map
+
+Memory is the company asset. We make that asset *visible*. The Memory Map is a live, interactive visualization of the memory layer — every topic, every atom, every source, every entity, every contributor — rendered as a graph the user can explore, filter, and navigate.
+
+**Two views, one data model.**
+
+- **2D working view (in-app).** Force-directed graph (react-force-graph). Filterable by node type, searchable, clickable. Selecting a node opens the underlying chunks and lets the user jump into the source conversation, document, or interview. This is the daily-use surface.
+- **3D hero view (homepage, login, admin dashboard).** Same data, three.js renderer (react-three-fiber). Slow rotation, depth, light, animated growth. This is the marketing asset and the screenshot a partner takes back to the firm. Not the working surface — the *proof* surface.
+
+**What's in the graph.**
+
+| Node type | What it represents | Sized by |
+|---|---|---|
+| Topic | Cluster of related chunks (HDBSCAN over embeddings) | Total chunks in cluster |
+| Atom | A projection (fact / decision / preference) | `affirmed_count` |
+| Source | A document, conversation, interview, or crawled page | Number of chunks |
+| Entity | A person, customer, product, or competitor mentioned across sources | Mention frequency |
+| Contributor | An employee who authored sources or whose sources back atoms | Total contribution score |
+
+Edges connect: atom → backed-by → source chunks; atom → about → entity; source → authored-by → contributor; topic → contains → atoms; atom → supersedes → prior atom (version chains).
+
+**Contributor visibility, by design.**
+
+Every node knows who contributed to it. The user can filter "show me Sarah's footprint" — Sarah-derived atoms and topics light up, the rest dim. A leaderboard pins to the side ("Top contributors this week"). Admins can toggle anonymous mode for cultures where attribution feels surveillance-coded.
+
+This is not a vanity metric. Knowing whose work feeds the company memory makes the asset feel earned, not extracted — and gives the team a healthy social loop around contributing rather than hoarding knowledge in private chats.
+
+**Computation and freshness.**
+
+The graph is a projection, not a stored shape. A scheduled job (`memory.map.snapshot`, daily) recomputes topics, edges, and contributor weights from the verbatim store and writes a snapshot to a `memory_snapshots` cache table. The 2D view loads the snapshot, then layers a "what changed today" overlay (new topics, growing atoms, new entities). Live force-directed layout per chunk insert is too expensive — daily snapshots plus diff overlays give the live-feel at sane cost.
+
+**Schema additions.**
+
+The graph derives from existing tables (`source_chunks`, `memory_atoms`, `users`, `sources`) plus two new lightweight ones:
+
+```sql
+memory_entities (
+  id, org_id, name, type,        -- person | customer | product | competitor | concept
+  canonical_name, alias_count,
+  embedding vector(1536),
+  mention_count, last_seen,
+  created_at
+)
+
+memory_snapshots (
+  id, org_id, computed_at,
+  nodes jsonb,                   -- precomputed nodes with sizes + positions
+  edges jsonb,                   -- precomputed edges
+  contributor_weights jsonb,
+  topic_clusters jsonb
+)
+```
+
+Entities are extracted by a projection job (NER prompt over recent chunks, dedupe via fuzzy match + embedding similarity into existing entities). The snapshot table is throwaway cache — we can rebuild any snapshot from the source chunks.
 
 ---
 
@@ -543,29 +600,35 @@ Generic agent shell on Sandbox + WDK. Tool registry: memory r/w, web search, bro
 
 Proves: the headline feature exists and works for at least three real use cases (account brief, proposal draft, follow-up writer).
 
-### M5 — Mobile shell (Expo)
+### M5 — Memory Map (2D + 3D)
 
-Voice input, memory query, conversation read, AI Employee trigger, push notifications. App Store + Play Store submission in parallel as a process track.
+Entity extraction projection job. Daily `memory.map.snapshot` cron. 2D in-app force-directed graph with filters, search, click-through to source. Contributor sizing + leaderboard + filter-by-contributor. 3D hero renderer for the homepage and admin dashboard. Anonymous-mode admin toggle.
+
+Proves: the asset is visible; the marketing screenshot is real; daily users have a way to navigate memory besides chat search.
+
+### M6 — Mobile shell (Expo)
+
+Voice input, memory query, conversation read, AI Employee trigger, push notifications. App Store + Play Store submission in parallel as a process track. Memory Map is web-only in V1 — mobile gets a flat list view of recent atoms instead.
 
 Proves: mobile parity for consumption is real.
 
-### M6 — Voice onboarding (Tier 3)
+### M7 — Voice onboarding (Tier 3)
 
-Founder/admin interview flow. Per-employee voice intros. OpenAI Realtime or ElevenLabs Conversational AI integration. Conversational design + structured extraction prompt.
+Founder/admin interview flow. Per-employee voice intros. OpenAI Realtime or ElevenLabs Conversational AI integration. Conversational design + structured extraction prompt. Voice transcripts feed the same verbatim store; the Memory Map shows the new contributors automatically.
 
 Proves: the demo magic; the activation moment that closes self-serve users.
 
-### M7 — Public launch
+### M8 — Public launch
 
 Three-tier onboarding live. AI Employees with five seeds. Mobile shell live. Pricing live. Eval harness gating every change. Memory evolution running on schedule.
 
 Proves: we're a real product. First 100 paying users.
 
-### M8+ — Sequencing driven by paying customers
+### M9+ — Sequencing driven by paying customers
 
 Admin dashboard depth, audit log surfaces, SSO, more tools in the runtime, marketplace for AI Employees, integrations (Slack, Drive, Salesforce, HubSpot), SOC 2, multi-employee orchestration ("a team of AI Employees collaborating on a single deliverable").
 
-What ships first in M8+ is whatever the cohort tells us is blocking expansion.
+What ships first in M9+ is whatever the cohort tells us is blocking expansion.
 
 ---
 
@@ -574,7 +637,9 @@ What ships first in M8+ is whatever the cohort tells us is blocking expansion.
 These were in the original plan or have come up since. They are not coming back without a strong, evidence-based reason.
 
 - **OMP as a published protocol.** Federation, RFC, ecosystem. Maybe a 2028 concern. Not now.
-- **Knowledge graph visualization.** Pretty, useless to the buyer.
+- **Manual graph editing.** The Memory Map is a projection — users navigate it, they don't author it. They edit underlying sources and atoms; the graph re-derives.
+- **User-curated graph layouts.** Layout is automatic (force-directed). No save-my-arrangement. No node pinning beyond filter.
+- **Public-share-a-graph.** Memory Maps are private to the org. Phase-3 idea at earliest.
 - **Weekly knowledge digest as a feature.** Internal admin metric only.
 - **Model arbitrage intelligence.** Premature optimization for a pricing problem we don't have.
 - **"Ask the Company" as a separate mode.** It's just chat with the right context. Memory is always on.
@@ -617,6 +682,7 @@ We're not building a smarter ChatGPT. We're building the company asset that comp
 - **Cron:** `vercel.ts` (replaces vercel.json)
 - **Storage:** Vercel Blob (documents, employee outputs, voice recordings)
 - **Mobile:** Expo / React Native
+- **Memory Map:** react-force-graph (2D in-app), react-three-fiber + three.js (3D hero), HDBSCAN for topic clustering
 - **State:** Zustand (web), TanStack Query for server state
 - **Voice:** OpenAI Realtime (primary) / ElevenLabs Conversational AI (fallback)
 - **Web search:** Tavily or Exa (decided per cost benchmark)
@@ -631,8 +697,9 @@ Implementation specs live under `docs/specs/`. Each milestone (M1-M7 above) gets
 - `docs/specs/M2-onboarding-docs-crawl.md`
 - `docs/specs/M3-eval-harness.md`
 - `docs/specs/M4-ai-employees-runtime.md`
-- `docs/specs/M5-mobile-expo-shell.md`
-- `docs/specs/M6-voice-onboarding.md`
-- `docs/specs/M7-public-launch-readiness.md`
+- `docs/specs/M5-memory-map.md`
+- `docs/specs/M6-mobile-expo-shell.md`
+- `docs/specs/M7-voice-onboarding.md`
+- `docs/specs/M8-public-launch-readiness.md`
 
 These are written one at a time, in order, so each is informed by what shipped before it.
