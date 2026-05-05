@@ -182,7 +182,9 @@ export async function POST(req: Request) {
         // The conversation envelope is the source; chunks share the
         // conversation id so subsequent turns append to the same source.
         if (myOrgId && conversationId && !conversationId.startsWith('pending-') && lastUserContent && text) {
-          const baseOrd = Date.now();
+          // ord is int32; use seconds-since-epoch (fits until 2038) so
+          // chunks stay monotonic across appended turns of one conversation.
+          const baseOrd = Math.floor(Date.now() / 1000);
           ingestSource({
             sourceId: conversationId,
             orgId: myOrgId,
