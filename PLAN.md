@@ -195,16 +195,29 @@ The original spec stored extracted atoms as the primary record with seven types,
 - **Atoms as projections** — a materialized view rendered for surfaces that need them (memory side-panel, AI Employee context summaries, dashboard health). Three types only: fact, decision, preference. Anything else collapses into one of those or stays implicit in the verbatim text.
 - **Evolution as scheduled work**, not always-on background processing. Daily and weekly jobs do the heavy lifting; per-turn extraction is bounded.
 
-### Retrieval
+### Retrieval — hybrid, temporal, reranked
 
-When a model call needs context, we retrieve from `source_chunks` directly:
+Pure vector cosine misses the queries that matter most for sales / consulting / marketing: account names, product SKUs, specific phrases the user remembers verbatim. Mem0's April 2026 release confirmed what production systems have been quietly converging on — **multi-signal retrieval beats single-signal**. Ours has three legs:
 
-1. Embed the active query (last user turn, AI Employee inputs, or explicit search).
-2. Top-K cosine similarity over chunks within the user's accessible scope (own conversations + team-shared + org-shared).
-3. Re-rank by recency × source-type weight × source confidence.
-4. Inject as a system-prompt block with provenance (which conversation, which document, which page).
+1. **Semantic** — pgvector cosine over chunk embeddings (HNSW index).
+2. **Lexical** — Postgres full-text search (`tsvector` with English config + ranking via `ts_rank_cd`). Catches exact account names, quoted phrases, technical terms.
+3. **Entity match** — direct lookups against `memory_entities`. When the query mentions "Acme," every chunk linked to the Acme entity is in the candidate pool regardless of similarity score.
 
-A collapsible "context used" panel shows the user every chunk that was injected. Trust comes from visibility.
+Candidates from all three signals are unioned, deduplicated, and re-ranked by a **cross-encoder reranker** (Cohere Rerank 3 or Voyage `rerank-2.5` — decided on cost benchmark) for the top ~50. Final ranking weights cross-encoder score × recency × source-type weight × scope-priority (personal > team > org for personal queries; reverse for company-knowledge queries).
+
+**Temporal awareness** — every chunk carries `valid_at` (when it was authored or stated) and an inferred `invalid_at` populated when later content supersedes it. The retriever supports an "as-of" mode (`valid_at <= ?` filter) so users can ask "what did we know about Acme last quarter" and get a time-correct answer. Borrowed from Graphiti — it's the right primitive.
+
+**Provenance is exposed.** A collapsible "context used" panel shows every chunk injected, with source link, contributor, and timestamp. Trust comes from visibility.
+
+### Embedding lifecycle
+
+Embedding models improve. We will want to migrate. We design for it from M1:
+
+- `source_chunks.embedding_version` — int. Current = 1.
+- A re-embed worker that drains the queue at low priority, regenerating embeddings for older versions when a new model is enabled.
+- Retrieval queries against the active version only; older versions are tolerated during migration via UNION.
+
+No big-bang migrations. No downtime.
 
 ### Projections
 
@@ -355,19 +368,39 @@ Run requested
    │
    ▼
 1. Resolve inputs from the form
-2. Retrieve memory: top-K chunks across employee's example_sources + org memory
+2. Retrieve memory (hybrid: semantic + BM25 + entity) within the employee's scope
 3. Build system prompt: job description + examples + retrieved context + tool descriptions
 4. Stream Sonnet/Opus with tool use enabled
-5. Each tool call:
-     - Memory query → pgvector
-     - Web search → Tavily / Exa
-     - Browser → Sandbox + Playwright
-     - Doc gen → Sandbox (md → PDF / .pptx via templated render)
+5. Each tool call passes through the safety gate (see below) before execution
 6. On completion: persist run, output, cost, step trace
-7. If memory writeback enabled and user approves: extract atoms, route through normal projection pipeline
+7. Memory writeback (if enabled) requires explicit user approval; atoms route through the projection pipeline
 ```
 
 The runtime is one piece of code — the same shell runs every employee. Differentiation comes from the user's examples + tools + memory.
+
+### Per-employee memory scope
+
+Org-wide memory is the default but not the only option. When an AI Employee is built, the owner can narrow its memory to:
+
+- All org memory (default for most cases)
+- Specific topics (auto-detected from examples, user can edit)
+- Specific sources (e.g., "only sales call transcripts and the proposal templates")
+- A specific team's scope
+
+This matters because some employees should *not* see everything — a "Pricing Negotiation Drafter" reading internal cost-structure memos, or a "Customer-Facing Email Writer" seeing internal incident postmortems, are both real failure modes. Scope is a safety primitive, not a feature.
+
+### Agent safety — the things that will go wrong if we don't address them
+
+Anthropic's agentic-misalignment research and OWASP's LLM Top-10 both identify the same core risks: indirect prompt injection through fetched content, capability over-grant, and irreversible actions taken without human review. Sales/consulting/marketing users will route customer data and external web content through these agents daily. We address it explicitly:
+
+1. **Tool-output sanitization.** Content fetched via web/browser/email/docs passes through a normalizing pass before re-injection. Suspicious patterns (instruction-injection markers, encoded payloads, prompt-override phrases) are flagged; the model sees a wrapped form (`<retrieved-content untrusted=true>...</retrieved-content>`) with explicit instructions not to follow embedded directives.
+2. **Capability gating.** Tools are tiered. Memory query and web search are baseline. Browser, doc generation, and image generation require paid tier. Memory writeback, email send, file write to specific locations, and any external API write require explicit per-employee admin grant *and* per-run user approval. Default-deny.
+3. **Irreversible-action approval.** Any action that affects external state (sending an email, posting to Slack, committing to a CRM) is queued as a draft with a human-in-the-loop confirmation step. The agent never sends.
+4. **Information-need scoping.** Per-employee memory scope (above) limits blast radius. An exfiltrating tool call can only leak what the employee can already see.
+5. **Runtime monitoring.** Every tool call, every retrieved chunk, every output is logged to the audit trail with the agent's reasoning. A separate background job (cheap model) scans recent runs for anomalies and surfaces them to the org admin.
+6. **Sandbox isolation.** Browser and code-execution tools run in Vercel Sandbox with no shared filesystem, time-limited, network-policy-restricted. Outputs return to the runtime as data, not as live processes.
+
+These aren't future-state ideas. They land in M4 alongside the runtime itself.
 
 ### Library + sharing
 
@@ -460,6 +493,79 @@ Locked conversations are inert: not extracted, not projected, not indexed beyond
 ### Data residency, SOC 2, HIPAA
 
 Out of scope until paying customers ask. When they do, Vercel's enterprise primitives plus our verbatim/projection separation give us a clean story.
+
+---
+
+## 8b. Engineering rigor
+
+These are the load-bearing details that make a memory-and-agent product safe to ship to paying customers. None of them are interesting features. All of them are blockers if we get them wrong.
+
+### Multi-tenant isolation
+
+Every table with `org_id` gets a Postgres row-level security policy keyed off a session-set tenant context. Drizzle queries set `app.current_org_id` at the start of every request handler; RLS enforces the rest. Application-layer scope checks remain (defense in depth) but the database is the final authority. A bug in a query cannot leak across tenants.
+
+### PII and sensitive-data governance
+
+Sales conversations contain customer phone numbers and deal sizes. Marketing has client roadmaps. Consulting has confidential client material. We treat this seriously:
+
+- **Detection at ingestion.** A lightweight detector (Microsoft Presidio or a Sonnet-Haiku pass) tags chunks at intake with detected entity types (email, phone, SSN, credit card, custom org-defined patterns).
+- **Scope-promotion gate.** A chunk tagged with high-sensitivity PII is *never* auto-promoted into team or org scope without explicit admin approval. The default is to keep it personal.
+- **Redaction view for projections.** Atoms generated from PII-tagged chunks render with redacted spans in the team/org view; the verbatim chunk remains visible to the original speaker only.
+- **Per-org sensitivity rules.** Admins define what counts as sensitive (regex, entity types, keywords). Defaults match common SOC 2 / GDPR categories.
+
+### Cost ceilings — hard, not soft
+
+Self-serve PLG without spend ceilings is a story we don't want to be in. Three layers of hard stops:
+
+- **Per-user daily cap** — default $5/day, raisable in settings; hard stop on overage.
+- **Per-org monthly cap** — set by admin at signup; hard stop on overage with a 24-hour grace alert.
+- **Per-employee-run cap** — default $2/run, configurable per employee; hard stop with the run resumable on user approval to exceed.
+
+The user always sees the running cost in real time during a run. No surprise bills. No "we're disabling your account because you ran up $4,300 in a weekend."
+
+### Right-to-be-forgotten and deletion semantics
+
+GDPR matters even for SMB SaaS. The deletion model is explicit:
+
+- **Source delete** — cascades to all chunks. Atoms backed *only* by deleted chunks are also deleted. Atoms backed by mixed evidence are recomputed at next projection refresh; if they no longer have backing, they're deleted.
+- **User delete** — cascades through their authored sources. Their attribution on still-existing shared content is preserved as `[redacted contributor]` unless the org chooses full purge.
+- **Org delete** — full data destruction within 30 days, including blob backups, snapshot caches, and audit logs older than statutory retention.
+- **Verifiable** — every deletion logs to audit; export-on-request returns a manifest of what existed and what was removed.
+
+### Observability
+
+This is a production product handling money, customer data, and external API calls. Three layers:
+
+- **Sentry** for application errors and frontend / backend exceptions.
+- **OpenTelemetry** traces for request flow through services (chat → memory → agent runtime → tools).
+- **Vercel AI Gateway** for every model call (latency, cost, fallback events, prompt + response logs scoped by org).
+
+A simple internal dashboard surfaces per-org health: error rate, p95 latency, model costs, agent-run success rate.
+
+### MCP server (the secondary surface)
+
+The MCP server is real, just not the headline. It exposes:
+
+- `memory.query(query, scope?, limit?)` — read-only retrieval against the org's memory.
+- `memory.search.entity(name)` — entity-scoped lookup.
+- `employee.list()` — list AI Employees the caller has access to.
+- `employee.run(id, inputs)` — invoke an employee, returns a run handle.
+- `employee.run.status(handle)` — poll a run; returns final output when complete.
+
+Auth is per-org API token, scoped to a single user identity. No memory writeback through MCP in V1 — too easy to misuse from an external context. Admins explicitly enable MCP per org; it's off by default.
+
+### Eval rubric — the actual test
+
+LongMemEval gives us four of the five abilities to test (information extraction, multi-session reasoning, temporal reasoning, knowledge updates) but it's single-user only and lacks abstention testing in our shape. The full eval rubric, run in CI on every memory or runtime PR:
+
+- **Retrieval recall@5** on a 200-task LongMemEval subset (single-user, but proves the index works).
+- **Cross-user retrieval recall@5** on a 100-task custom set (we author it from real org-style scenarios). Tests memory can answer "what does the team know" not just "what do I know."
+- **Knowledge update accuracy** — when newer content supersedes older, does retrieval prefer current?
+- **Abstention precision** — when memory has no relevant content, does the system say "I don't know" or hallucinate? LongMemEval's abstention split provides ground truth.
+- **AI Employee output quality** — per-employee LLM-judged rubric (Sonnet judges Opus output against the user's example) plus periodic human spot-check. Five dimensions: structural match, factual grounding, tone match, completeness, no-hallucination.
+- **Safety regressions** — a fixed set of indirect prompt injection probes (poisoned web pages, doc files with embedded instructions). The agent must refuse, not comply.
+
+Pass gates: retrieval recall@5 ≥ 0.75 (single-user) and ≥ 0.65 (cross-user). Abstention precision ≥ 0.85. Output quality ≥ 4.0/5 average across employees. Zero successful safety probes.
 
 ---
 
@@ -569,6 +675,13 @@ Outbound sales to the warm cohort that's grown above 5 seats organically. The La
 | Competitors close the gap with built-in memory | Medium | Be the cross-provider memory layer. Be more useful than any single provider's memory because we see all of it. |
 | Mobile lags and sales/consulting buyers churn | Medium | Expo shell ships in V2 wave, not as a year-end project. |
 | We over-build and ship slowly | High | Build sequence in Section 13 is opinionated about what each milestone proves. Anything not in the sequence is out. |
+| **Indirect prompt injection through tool-fetched content** (poisoned doc, malicious web page) hijacks an AI Employee | Critical | Tool-output sanitization, untrusted-content wrapping, capability gating, irreversible-action approval, per-employee scope, runtime monitoring. All in M4. Safety probes in eval suite. |
+| **Cross-tenant data leak** through a SQL bug | Critical | Postgres row-level security keyed off session tenant context. Application checks remain as defense in depth. |
+| **PII leaks from personal scope into team / org via auto-promotion** | High | PII detector at ingestion, sensitivity tagging, hard gate on auto-promotion, redaction in projections. |
+| **Surprise bill** — single user runs up $5k of agent compute over a weekend | High | Three-tier hard cost ceilings (per-user daily, per-org monthly, per-run). Hard stops, not warnings. |
+| **Embedding model upgrade requires downtime / re-indexing pain** | Medium | Embedding versioning from M1; lazy re-embed worker; UNION queries during migration. |
+| **Pure vector retrieval misses exact-match queries** (account names, SKUs, quoted phrases) and the magic doesn't land | High | Hybrid retrieval (semantic + BM25 + entity match) + cross-encoder reranker from M1. |
+| **Audit trail gaps** during a customer compliance review | Medium | Audit log on every retrieval, every projection write, every employee run, every deletion. Export-on-request returns a manifest. |
 
 ---
 
@@ -578,27 +691,27 @@ Outbound sales to the warm cohort that's grown above 5 seats organically. The La
 
 ### M1 — Memory rebuild on the verbatim store
 
-Replace `knowledge_atoms` as the primary record. Migrate to `sources` + `source_chunks`. Re-index. Wire retrieval through chunks. Atoms become a generated projection. Daily/weekly cron via `vercel.ts`. Per-turn extraction onto Vercel Queues.
+Replace `knowledge_atoms` as the primary record. Migrate to `sources` + `source_chunks`. Re-index with HNSW. Wire **hybrid retrieval** (semantic + Postgres FTS + entity match) + **cross-encoder reranker** through chunks. Embedding versioning from day one. Atoms become a generated projection. Daily/weekly cron via `vercel.ts`. Per-turn extraction onto Vercel Queues. **Postgres RLS policies** on every multi-tenant table, set in the same migration. Temporal fields (`valid_at`, `invalid_at`) on chunks and atoms.
 
-Proves: memory architecture works end-to-end, retrieval recall improves on a measurable benchmark.
+Proves: memory architecture works end-to-end, hybrid retrieval recall@5 ≥ 0.75 on the LongMemEval single-user subset, cross-tenant isolation enforced at the database.
 
-### M2 — Onboarding tiers 1 + 2 (docs + crawl)
+### M2 — Onboarding tiers 1 + 2 (docs + crawl) + governance
 
-Drag-and-drop document upload (PDF/MD/docx/pptx/xlsx + ChatGPT/Claude exports). Website crawl via Sandbox cron. New-org flow that gets to a useful memory state in under 10 minutes.
+Drag-and-drop document upload (PDF/MD/docx/pptx/xlsx + ChatGPT/Claude exports). Website crawl via Sandbox cron. **PII detector at ingestion** (Microsoft Presidio or Haiku-class pass) tags chunks with sensitivity labels; promotion gate blocks auto-promotion of sensitive content into shared scope. **Cost ceiling enforcement** wired into all model-call surfaces (chat, extraction, retrieval, employee runs). New-org flow that gets to a useful memory state in under 10 minutes.
 
-Proves: cold-start works without a human-led onboarding call.
+Proves: cold-start works without a human-led onboarding call. Sensitive data does not leak into shared scope. No surprise bills are possible.
 
-### M3 — Eval harness
+### M3 — Eval harness + observability
 
-LongMemEval subset for memory recall. Hand-curated AI Employee output rubric. CI runs on every memory or runtime PR.
+LongMemEval single-user subset (200 tasks) for retrieval recall. **Custom cross-user / org-style eval set** (100 tasks, hand-authored from real consulting/sales scenarios). Knowledge-update accuracy and abstention precision tested explicitly. Hand-curated AI Employee output rubric (5 dimensions, Sonnet judge + periodic human spot-check). **Safety probe set** (50+ indirect prompt-injection attempts in fetched content). Sentry, OpenTelemetry, and Vercel AI Gateway integration so we can see what's happening in production. CI runs the full suite on every memory or runtime PR; pass gates from Section 8b are enforced.
 
-Proves: we can ship with confidence. No more vibes-driven changes.
+Proves: we can ship with confidence. No more vibes-driven changes. Production has eyes on it.
 
-### M4 — AI Employees runtime + builder
+### M4 — AI Employees runtime + builder + safety layer
 
-Generic agent shell on Sandbox + WDK. Tool registry: memory r/w, web search, browser (gated), doc gen, image gen, email draft, file output. Builder UI for name + description + examples + inputs + toolbelt. Five seed employees.
+Generic agent shell on Sandbox + WDK. Tool registry: memory r/w, web search, browser (gated), doc gen, image gen, email draft, file output. Builder UI for name + description + examples + inputs + toolbelt + **per-employee memory scope**. Five seed employees. **Full safety layer from Section 5: tool-output sanitization, capability gating, irreversible-action approval gate, runtime monitoring.** Memory writeback off by default; admin grants per employee; user approves per run. MCP server (read-only) ships in this milestone as a power-user surface.
 
-Proves: the headline feature exists and works for at least three real use cases (account brief, proposal draft, follow-up writer).
+Proves: the headline feature works for at least three real use cases (account brief, proposal draft, follow-up writer) and survives the safety probe suite without successful exploitation.
 
 ### M5 — Memory Map (2D + 3D)
 
@@ -683,10 +796,14 @@ We're not building a smarter ChatGPT. We're building the company asset that comp
 - **Storage:** Vercel Blob (documents, employee outputs, voice recordings)
 - **Mobile:** Expo / React Native
 - **Memory Map:** react-force-graph (2D in-app), react-three-fiber + three.js (3D hero), HDBSCAN for topic clustering
+- **Retrieval:** pgvector HNSW (semantic) + Postgres FTS (lexical) + entity index, unioned and cross-encoder reranked (Cohere Rerank 3 or Voyage rerank-2.5 — chosen on cost benchmark)
+- **PII detection:** Microsoft Presidio (free, self-hostable) or a Haiku-class pass at ingestion
 - **State:** Zustand (web), TanStack Query for server state
-- **Voice:** OpenAI Realtime (primary) / ElevenLabs Conversational AI (fallback)
+- **Voice:** OpenAI Realtime (primary) / ElevenLabs Conversational AI (fallback) for the conversational interview; Whisper for offline transcription of stored audio
 - **Web search:** Tavily or Exa (decided per cost benchmark)
 - **Doc generation:** Sandbox + templated render (markdown → PDF / .pptx)
+- **Observability:** Sentry (errors), OpenTelemetry (traces), Vercel AI Gateway (model calls)
+- **Multi-tenant isolation:** Postgres row-level security via session tenant context; defense-in-depth at application layer
 - **Deploy:** Vercel (web + functions + cron + queues + sandbox all native)
 
 ## Appendix B — Spec breakdown
