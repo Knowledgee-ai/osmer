@@ -11,8 +11,23 @@ import {
   index,
   uniqueIndex,
   boolean,
+  customType,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
+
+/**
+ * pgvector column type. Stored as `vector(1536)` in Postgres.
+ * Defined in Drizzle so `drizzle-kit push` does not silently drop it.
+ *
+ * Reads/writes go through raw SQL (`embedding <=> $1::vector`,
+ * `UPDATE ... SET embedding = $1::vector`) — Drizzle does not need
+ * to serialize the value because we never use it via the ORM API.
+ */
+export const vector = customType<{ data: number[]; driverData: string }>({
+  dataType() { return 'vector(1536)'; },
+  toDriver(value) { return JSON.stringify(value); },
+  fromDriver(value) { return Array.isArray(value) ? value : JSON.parse(value); },
+});
 
 // ============================================================
 // Enums
@@ -353,8 +368,11 @@ export const sourceChunks = pgTable('source_chunks', {
   content: text('content').notNull(),
   tokenCount: integer('token_count'),
   embeddingVersion: integer('embedding_version').notNull().default(1),
-  // embedding vector(1536) — added via raw SQL in the migration
-  // tsv tsvector — added via raw SQL in the migration
+  embedding: vector('embedding'),
+  // tsv tsvector — generated column added via raw SQL; drizzle-kit
+  // does not understand GENERATED ALWAYS AS, so we keep it out of the
+  // schema definition. NEVER use `drizzle-kit push --force` against
+  // these tables — see drizzle/0001_memory_extras.sql.
   meta: jsonb('meta').default({}),
   validAt: timestamp('valid_at').defaultNow().notNull(),
   invalidAt: timestamp('invalid_at'),
@@ -380,7 +398,7 @@ export const memoryAtoms = pgTable('memory_atoms', {
   supersedesId: uuid('supersedes_id'),
   validAt: timestamp('valid_at').defaultNow().notNull(),
   invalidAt: timestamp('invalid_at'),
-  // embedding vector(1536) — raw SQL
+  embedding: vector('embedding'),
   sourceIds: jsonb('source_ids').notNull().default([]),
   topics: jsonb('topics').notNull().default([]),
   embeddingVersion: integer('embedding_version').notNull().default(1),
@@ -399,7 +417,7 @@ export const memoryEntities = pgTable('memory_entities', {
   name: varchar('name', { length: 255 }).notNull(),
   canonicalName: varchar('canonical_name', { length: 255 }).notNull(),
   type: varchar('type', { length: 32 }).notNull(),
-  // embedding vector(1536) — raw SQL
+  embedding: vector('embedding'),
   mentionCount: integer('mention_count').notNull().default(0),
   lastSeen: timestamp('last_seen').defaultNow().notNull(),
   meta: jsonb('meta').default({}),
@@ -433,4 +451,90 @@ export const memorySnapshots = pgTable('memory_snapshots', {
   topicClusters: jsonb('topic_clusters').notNull(),
 }, (t) => [
   index('snapshots_org_idx').on(t.orgId, t.computedAt),
+]);
+
+// ============================================================
+// Ingestion jobs (M2 — onboarding)
+// ============================================================
+
+export const ingestionStatusEnum = pgEnum('ingestion_status', [
+  'queued', 'parsing', 'embedding', 'complete', 'failed',
+]);
+
+export const ingestionKindEnum = pgEnum('ingestion_kind', [
+  'upload', 'crawl', 'paste', 'export',
+]);
+
+export const ingestionJobs = pgTable('ingestion_jobs', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  ownerUserId: uuid('owner_user_id').references(() => users.id, { onDelete: 'set null' }),
+  kind: ingestionKindEnum('kind').notNull(),
+  filename: varchar('filename', { length: 500 }),
+  blobUrl: text('blob_url'),
+  mimeType: varchar('mime_type', { length: 128 }),
+  byteSize: integer('byte_size'),
+  status: ingestionStatusEnum('status').notNull().default('queued'),
+  sourceId: uuid('source_id').references(() => sources.id, { onDelete: 'set null' }),
+  chunkCount: integer('chunk_count').default(0),
+  errorMessage: text('error_message'),
+  meta: jsonb('meta').default({}),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (t) => [
+  index('ij_org_idx').on(t.orgId),
+  index('ij_status_idx').on(t.status),
+]);
+
+// ============================================================
+// PII labels per chunk (M2)
+// ============================================================
+
+export const piiSeverityEnum = pgEnum('pii_severity', ['none', 'low', 'medium', 'high']);
+
+export const chunkPiiLabels = pgTable('chunk_pii_labels', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  chunkId: uuid('chunk_id').references(() => sourceChunks.id, { onDelete: 'cascade' }).notNull(),
+  orgId: uuid('org_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  severity: piiSeverityEnum('severity').notNull().default('none'),
+  categories: jsonb('categories').notNull().default([]),
+  spans: jsonb('spans').notNull().default([]),
+  detectorVersion: integer('detector_version').notNull().default(1),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (t) => [
+  index('cpl_chunk_idx').on(t.chunkId),
+  index('cpl_severity_idx').on(t.orgId, t.severity),
+]);
+
+// ============================================================
+// Spend caps + ledger (M2)
+// ============================================================
+
+export const spendKindEnum = pgEnum('spend_kind', [
+  'chat', 'embedding', 'projection', 'employee_run', 'pii_detect', 'crawl', 'extraction',
+]);
+
+export const spendCaps = pgTable('spend_caps', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  scope: varchar('scope', { length: 32 }).notNull(), // 'user_daily' | 'org_monthly' | 'employee_run'
+  capCents: integer('cap_cents').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (t) => [
+  uniqueIndex('caps_unique_idx').on(t.orgId, t.userId, t.scope),
+]);
+
+export const spendLedger = pgTable('spend_ledger', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
+  kind: spendKindEnum('kind').notNull(),
+  cents: integer('cents').notNull(),
+  meta: jsonb('meta').default({}),
+  ts: timestamp('ts').defaultNow().notNull(),
+}, (t) => [
+  index('sl_org_ts_idx').on(t.orgId, t.ts),
+  index('sl_user_ts_idx').on(t.userId, t.ts),
 ]);
