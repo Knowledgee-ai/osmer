@@ -52,7 +52,23 @@ export async function projectAtoms(
       return { examined: recent.length, proposed: 0, created: 0, affirmed: 0, superseded: 0 };
     }
 
-    const formatted = recent
+    // Drop chunks tagged medium+ severity from projection input —
+    // we never want to summarize sensitive content into a shared atom.
+    const piiSeverity = await tx.execute(sql`
+      SELECT chunk_id, severity
+      FROM chunk_pii_labels
+      WHERE chunk_id = ANY(${recent.map((c) => c.id)}::uuid[])
+    `);
+    const drops = new Set<string>();
+    for (const row of piiSeverity.rows as Array<{ chunk_id: string; severity: string }>) {
+      if (row.severity === 'medium' || row.severity === 'high') drops.add(row.chunk_id);
+    }
+    const safe = recent.filter((c) => !drops.has(c.id));
+    if (safe.length < 2) {
+      return { examined: recent.length, proposed: 0, created: 0, affirmed: 0, superseded: 0 };
+    }
+
+    const formatted = safe
       .map((c) => `[${c.id}] ${c.content}`)
       .join('\n\n')
       .slice(0, 30_000);
@@ -125,7 +141,7 @@ ${formatted}`,
         content: a.content,
         confidence: a.confidence,
         topics: a.topics,
-        sourceIds: recent.map((c) => c.id),
+        sourceIds: safe.map((c) => c.id),
         supersedesId,
         embeddingVersion: currentEmbeddingVersion,
       }).returning({ id: memoryAtoms.id });

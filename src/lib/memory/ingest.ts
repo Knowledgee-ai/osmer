@@ -1,7 +1,8 @@
-import { sources, sourceChunks } from '@/lib/db/schema';
+import { sources, sourceChunks, chunkPiiLabels } from '@/lib/db/schema';
 import { sql } from 'drizzle-orm';
 import { embedBatch } from './embed';
 import { withTenant } from '@/lib/db/tenant';
+import { detectPii } from '@/lib/ingest/pii';
 import type { IngestRequest } from './types';
 
 /**
@@ -33,13 +34,18 @@ export async function ingestSource(req: IngestRequest): Promise<string> {
 
     if (chunks.length === 0) return src.id;
 
-    // 2. Embed chunks in parallel (outside tx, just CPU-light awaits on AI Gateway)
-    const embeddings = await embedBatch(chunks.map((c) => c.content));
+    // 2. Embed + classify in parallel. PII detection is best-effort —
+    //    a failure shouldn't block ingest, the chunk just lands as 'none'.
+    const [embeddings, piiLabels] = await Promise.all([
+      embedBatch(chunks.map((c) => c.content)),
+      Promise.all(chunks.map((c) => detectPii(c.content).catch(() => ({ severity: 'none' as const, categories: [], spans: [], detectorVersion: 1 })))),
+    ]);
 
-    // 3. Insert chunks; update embedding via raw SQL (vector type isn't a Drizzle column)
+    // 3. Insert chunks + embedding + PII label rows.
     for (let i = 0; i < chunks.length; i++) {
       const c = chunks[i];
       const e = embeddings[i];
+      const pii = piiLabels[i];
       const [row] = await tx
         .insert(sourceChunks)
         .values({
@@ -58,6 +64,15 @@ export async function ingestSource(req: IngestRequest): Promise<string> {
       await tx.execute(
         sql`UPDATE source_chunks SET embedding = ${JSON.stringify(e.vector)}::vector WHERE id = ${row.id}`,
       );
+
+      await tx.insert(chunkPiiLabels).values({
+        chunkId: row.id,
+        orgId,
+        severity: pii.severity,
+        categories: pii.categories,
+        spans: pii.spans,
+        detectorVersion: pii.detectorVersion,
+      });
     }
 
     return src.id;
