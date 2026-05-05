@@ -538,3 +538,90 @@ export const spendLedger = pgTable('spend_ledger', {
   index('sl_org_ts_idx').on(t.orgId, t.ts),
   index('sl_user_ts_idx').on(t.userId, t.ts),
 ]);
+
+// ============================================================
+// AI Employees (M4)
+// ============================================================
+
+export const employeeStatusEnum = pgEnum('employee_status', ['active', 'archived']);
+export const runStatusEnum = pgEnum('run_status', [
+  'queued', 'running', 'awaiting_approval', 'complete', 'failed', 'canceled',
+]);
+
+export const employees = pgTable('employees', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  ownerUserId: uuid('owner_user_id').references(() => users.id, { onDelete: 'set null' }),
+  name: varchar('name', { length: 255 }).notNull(),
+  description: text('description').notNull(),
+  inputs: jsonb('inputs').notNull().default([]),
+  toolbelt: jsonb('toolbelt').notNull().default([]),
+  exampleSourceIds: jsonb('example_source_ids').notNull().default([]),
+  memoryScope: jsonb('memory_scope').notNull().default({ kind: 'org' }),
+  shared: boolean('shared').notNull().default(false),
+  version: integer('version').notNull().default(1),
+  status: employeeStatusEnum('status').notNull().default('active'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (t) => [
+  index('emp_org_idx').on(t.orgId),
+  index('emp_owner_idx').on(t.ownerUserId),
+]);
+
+export const employeeRuns = pgTable('employee_runs', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  employeeId: uuid('employee_id').references(() => employees.id, { onDelete: 'cascade' }).notNull(),
+  orgId: uuid('org_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  requestedByUserId: uuid('requested_by_user_id').references(() => users.id, { onDelete: 'set null' }),
+  inputs: jsonb('inputs').notNull(),
+  status: runStatusEnum('status').notNull().default('queued'),
+  startedAt: timestamp('started_at'),
+  completedAt: timestamp('completed_at'),
+  outputText: text('output_text'),
+  outputBlobUrl: text('output_blob_url'),
+  cost: real('cost'),
+  steps: jsonb('steps').notNull().default([]),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (t) => [
+  index('runs_emp_idx').on(t.employeeId),
+  index('runs_org_idx').on(t.orgId),
+  index('runs_status_idx').on(t.status),
+]);
+
+export const irreversibleApprovals = pgTable('irreversible_approvals', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  runId: uuid('run_id').references(() => employeeRuns.id, { onDelete: 'cascade' }).notNull(),
+  orgId: uuid('org_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  toolId: varchar('tool_id', { length: 64 }).notNull(),
+  payload: jsonb('payload').notNull(),
+  status: varchar('status', { length: 16 }).notNull().default('pending'),
+  decidedByUserId: uuid('decided_by_user_id').references(() => users.id, { onDelete: 'set null' }),
+  decidedAt: timestamp('decided_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const toolAudit = pgTable('tool_audit', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  runId: uuid('run_id').references(() => employeeRuns.id, { onDelete: 'cascade' }).notNull(),
+  orgId: uuid('org_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  toolId: varchar('tool_id', { length: 64 }).notNull(),
+  args: jsonb('args').notNull(),
+  result: jsonb('result'),
+  errorMessage: text('error_message'),
+  durationMs: integer('duration_ms'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (t) => [
+  index('ta_run_idx').on(t.runId),
+  index('ta_tool_idx').on(t.toolId),
+]);
+
+export const mcpTokens = pgTable('mcp_tokens', {
+  token: text('token').primaryKey(),
+  orgId: uuid('org_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  revokedAt: timestamp('revoked_at'),
+}, (t) => [
+  index('mcp_org_idx').on(t.orgId),
+]);
