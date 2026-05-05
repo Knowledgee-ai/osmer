@@ -313,3 +313,124 @@ export const knowledgeAtomsRelations = relations(knowledgeAtoms, ({ one, many })
   }),
   entityLinks: many(knowledgeEntityLinks),
 }));
+
+// ============================================================
+// Verbatim source store (M1 — memory rebuild)
+// ============================================================
+
+export const sourceTypeEnum = pgEnum('source_type', [
+  'conversation', 'document', 'interview', 'crawl',
+]);
+
+export const sourceStatusEnum = pgEnum('source_status', [
+  'active', 'archived', 'deleted',
+]);
+
+export const sources = pgTable('sources', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  ownerUserId: uuid('owner_user_id').references(() => users.id, { onDelete: 'set null' }),
+  type: sourceTypeEnum('type').notNull(),
+  title: varchar('title', { length: 500 }),
+  status: sourceStatusEnum('status').notNull().default('active'),
+  meta: jsonb('meta').default({}),
+  validAt: timestamp('valid_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (t) => [
+  index('sources_org_idx').on(t.orgId),
+  index('sources_owner_idx').on(t.ownerUserId),
+  index('sources_type_idx').on(t.type),
+]);
+
+export const sourceChunks = pgTable('source_chunks', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  sourceId: uuid('source_id').references(() => sources.id, { onDelete: 'cascade' }).notNull(),
+  orgId: uuid('org_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  ord: integer('ord').notNull(),
+  role: varchar('role', { length: 32 }),
+  speakerUserId: uuid('speaker_user_id').references(() => users.id, { onDelete: 'set null' }),
+  content: text('content').notNull(),
+  tokenCount: integer('token_count'),
+  embeddingVersion: integer('embedding_version').notNull().default(1),
+  // embedding vector(1536) — added via raw SQL in the migration
+  // tsv tsvector — added via raw SQL in the migration
+  meta: jsonb('meta').default({}),
+  validAt: timestamp('valid_at').defaultNow().notNull(),
+  invalidAt: timestamp('invalid_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (t) => [
+  index('chunks_source_idx').on(t.sourceId),
+  index('chunks_org_idx').on(t.orgId),
+  index('chunks_speaker_idx').on(t.speakerUserId),
+  index('chunks_valid_idx').on(t.validAt),
+]);
+
+export const memoryAtoms = pgTable('memory_atoms', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  scopeUserId: uuid('scope_user_id').references(() => users.id, { onDelete: 'cascade' }),
+  scopeTeamId: uuid('scope_team_id').references(() => teams.id, { onDelete: 'cascade' }),
+  type: varchar('type', { length: 32 }).notNull(),
+  content: text('content').notNull(),
+  confidence: real('confidence').notNull().default(0.7),
+  affirmedCount: integer('affirmed_count').notNull().default(1),
+  lastAffirmed: timestamp('last_affirmed').defaultNow().notNull(),
+  status: varchar('status', { length: 16 }).notNull().default('active'),
+  supersedesId: uuid('supersedes_id'),
+  validAt: timestamp('valid_at').defaultNow().notNull(),
+  invalidAt: timestamp('invalid_at'),
+  // embedding vector(1536) — raw SQL
+  sourceIds: jsonb('source_ids').notNull().default([]),
+  topics: jsonb('topics').notNull().default([]),
+  embeddingVersion: integer('embedding_version').notNull().default(1),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (t) => [
+  index('atoms_org_idx').on(t.orgId),
+  index('atoms_scope_user_idx').on(t.scopeUserId),
+  index('atoms_scope_team_idx').on(t.scopeTeamId),
+  index('atoms_status_idx').on(t.status),
+]);
+
+export const memoryEntities = pgTable('memory_entities', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  name: varchar('name', { length: 255 }).notNull(),
+  canonicalName: varchar('canonical_name', { length: 255 }).notNull(),
+  type: varchar('type', { length: 32 }).notNull(),
+  // embedding vector(1536) — raw SQL
+  mentionCount: integer('mention_count').notNull().default(0),
+  lastSeen: timestamp('last_seen').defaultNow().notNull(),
+  meta: jsonb('meta').default({}),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (t) => [
+  index('entities_org_idx').on(t.orgId),
+  index('entities_canonical_idx').on(t.orgId, t.canonicalName),
+]);
+
+export const entityLinks = pgTable('entity_links', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  entityId: uuid('entity_id').references(() => memoryEntities.id, { onDelete: 'cascade' }).notNull(),
+  chunkId: uuid('chunk_id').references(() => sourceChunks.id, { onDelete: 'cascade' }),
+  atomId: uuid('atom_id').references(() => memoryAtoms.id, { onDelete: 'cascade' }),
+  relationship: varchar('relationship', { length: 64 }).notNull().default('mentioned_in'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (t) => [
+  index('elinks_entity_idx').on(t.entityId),
+  index('elinks_chunk_idx').on(t.chunkId),
+  index('elinks_atom_idx').on(t.atomId),
+]);
+
+export const memorySnapshots = pgTable('memory_snapshots', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  computedAt: timestamp('computed_at').defaultNow().notNull(),
+  nodes: jsonb('nodes').notNull(),
+  edges: jsonb('edges').notNull(),
+  contributorWeights: jsonb('contributor_weights').notNull(),
+  topicClusters: jsonb('topic_clusters').notNull(),
+}, (t) => [
+  index('snapshots_org_idx').on(t.orgId, t.computedAt),
+]);
