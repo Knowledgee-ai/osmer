@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm';
 import { embed } from './embed';
 import { withTenant } from '@/lib/db/tenant';
 import { rerank } from './rerank';
+import { withSpan } from '@/lib/observability/otel';
 import type { RetrievalCandidate, RetrievalResult, RetrievalScope } from './types';
 
 interface RetrieveOpts {
@@ -141,10 +142,17 @@ export async function retrieveByEntity(opts: RetrieveOpts): Promise<RetrievalCan
  * fuses + reranks, returns top-N final results with provenance.
  */
 export async function retrieve(opts: UnifiedRetrieveOpts): Promise<RetrievalResult[]> {
-  const [sem, lex, ent] = await Promise.all([
-    retrieveSemantic(opts).catch(() => []),
-    retrieveLexical(opts).catch(() => []),
-    retrieveByEntity(opts).catch(() => []),
-  ]);
-  return rerank({ query: opts.query, candidates: [...sem, ...lex, ...ent], topN: opts.topN ?? 8 });
+  return withSpan('memory.retrieve', async (span) => {
+    span.setAttribute('topN', opts.topN ?? 8);
+    span.setAttribute('hasAsOf', !!opts.asOf);
+    const [sem, lex, ent] = await Promise.all([
+      retrieveSemantic(opts).catch(() => []),
+      retrieveLexical(opts).catch(() => []),
+      retrieveByEntity(opts).catch(() => []),
+    ]);
+    span.setAttribute('candidates.semantic', sem.length);
+    span.setAttribute('candidates.lexical', lex.length);
+    span.setAttribute('candidates.entity', ent.length);
+    return rerank({ query: opts.query, candidates: [...sem, ...lex, ...ent], topN: opts.topN ?? 8 });
+  });
 }

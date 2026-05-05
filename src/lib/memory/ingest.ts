@@ -3,6 +3,7 @@ import { sql } from 'drizzle-orm';
 import { embedBatch } from './embed';
 import { withTenant } from '@/lib/db/tenant';
 import { detectPii } from '@/lib/ingest/pii';
+import { withSpan } from '@/lib/observability/otel';
 import type { IngestRequest } from './types';
 
 /**
@@ -14,7 +15,10 @@ import type { IngestRequest } from './types';
 export async function ingestSource(req: IngestRequest): Promise<string> {
   const { orgId, type, ownerUserId, title, meta = {}, chunks, sourceId } = req;
 
-  return withTenant(orgId, async (tx) => {
+  return withSpan('memory.ingest', async (span) => {
+    span.setAttribute('source.type', type);
+    span.setAttribute('chunks.count', chunks.length);
+    return withTenant(orgId, async (tx) => {
     // 1. Create or upsert the source row
     const [src] = await tx
       .insert(sources)
@@ -76,5 +80,6 @@ export async function ingestSource(req: IngestRequest): Promise<string> {
     }
 
     return src.id;
+  });
   });
 }

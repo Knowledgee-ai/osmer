@@ -1,0 +1,46 @@
+name: eval
+
+on:
+  pull_request:
+    paths:
+      - 'src/lib/memory/**'
+      - 'src/lib/agent/**'
+      - 'src/lib/ingest/**'
+      - 'src/lib/spend/**'
+      - 'evals/**'
+      - 'package.json'
+  workflow_dispatch:
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL_TEST }}
+      DATABASE_URL_OWNER: ${{ secrets.DATABASE_URL_OWNER_TEST }}
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '24' }
+      - run: npm ci
+      - run: npm test
+
+  evals:
+    runs-on: ubuntu-latest
+    needs: unit
+    timeout-minutes: 30
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL_TEST }}
+      DATABASE_URL_OWNER: ${{ secrets.DATABASE_URL_OWNER_TEST }}
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '24' }
+      - run: npm ci
+      - run: npm run eval

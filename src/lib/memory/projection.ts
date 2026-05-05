@@ -4,6 +4,7 @@ import { sql } from 'drizzle-orm';
 import { withTenant } from '@/lib/db/tenant';
 import { memoryAtoms, sourceChunks } from '@/lib/db/schema';
 import { getLanguageModel } from '@/lib/ai/router';
+import { withSpan } from '@/lib/observability/otel';
 import { embed, currentEmbeddingVersion } from './embed';
 
 const PROJECTION_MODEL = process.env.PROJECTION_MODEL ?? 'anthropic/claude-sonnet-4-6';
@@ -41,7 +42,9 @@ export async function projectAtoms(
   scopeUserId: string | null,
   sinceHours = 24,
 ): Promise<ProjectionReport> {
-  return withTenant(orgId, async (tx) => {
+  return withSpan('memory.project', async (span) => {
+    span.setAttribute('sinceHours', sinceHours);
+    return withTenant(orgId, async (tx) => {
     const since = new Date(Date.now() - sinceHours * 60 * 60 * 1000);
     const recent = await tx
       .select({ id: sourceChunks.id, content: sourceChunks.content, ord: sourceChunks.ord })
@@ -151,5 +154,6 @@ ${formatted}`,
     }
 
     return { examined: recent.length, proposed: proposed.length, created, affirmed, superseded };
+  });
   });
 }

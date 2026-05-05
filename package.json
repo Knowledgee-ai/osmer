@@ -8,7 +8,13 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "eval": "tsx evals/run-all.ts",
+    "eval:longmemeval": "tsx evals/longmemeval/run.ts",
+    "eval:cross-user": "tsx evals/cross-user/run.ts",
+    "eval:knowledge-update": "tsx evals/knowledge-update/run.ts",
+    "eval:abstention": "tsx evals/abstention/run.ts",
+    "eval:safety": "tsx evals/safety/run.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.66",
