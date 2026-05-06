@@ -1,0 +1,64 @@
+{
+  "snapshot": {
+    "orgId": "sample",
+    "computedAt": "2026-05-06T00:00:00.000Z",
+    "nodes": [
+      { "id": "topic:0", "kind": "topic",       "label": "Customer Renewals",    "size": 8, "meta": {} },
+      { "id": "topic:1", "kind": "topic",       "label": "Product Strategy",      "size": 7, "meta": {} },
+      { "id": "topic:2", "kind": "topic",       "label": "Engineering Process",   "size": 6, "meta": {} },
+      { "id": "topic:3", "kind": "topic",       "label": "Marketing Campaigns",   "size": 5, "meta": {} },
+      { "id": "atom:1",  "kind": "atom",        "label": "Acme renews in Q3 with analytics module",                                "size": 3.5, "meta": { "type": "decision" } },
+      { "id": "atom:2",  "kind": "atom",        "label": "We migrated from AWS to Vercel for the SaaS",                            "size": 3.2, "meta": { "type": "decision" } },
+      { "id": "atom:3",  "kind": "atom",        "label": "Discount cap is 20% — VP approval over that",                            "size": 3.0, "meta": { "type": "fact" } },
+      { "id": "atom:4",  "kind": "atom",        "label": "Q3 priority shifted to retention",                                       "size": 2.8, "meta": { "type": "decision" } },
+      { "id": "atom:5",  "kind": "atom",        "label": "Sarah Lee is BigCo's main contact",                                      "size": 2.5, "meta": { "type": "fact" } },
+      { "id": "atom:6",  "kind": "atom",        "label": "Standard demo length is 20 minutes",                                     "size": 2.3, "meta": { "type": "preference" } },
+      { "id": "atom:7",  "kind": "atom",        "label": "Brand voice: short sentences, second person, no jargon",                 "size": 2.4, "meta": { "type": "preference" } },
+      { "id": "atom:8",  "kind": "atom",        "label": "Engineering cadence: 6-week sprints, biweekly checkpoints",              "size": 2.6, "meta": { "type": "process" } },
+      { "id": "source:1","kind": "source",      "label": "Q1 customer plan",      "size": 2.2, "meta": { "type": "document" } },
+      { "id": "source:2","kind": "source",      "label": "Pricing thread w/ team","size": 2.0, "meta": { "type": "conversation" } },
+      { "id": "source:3","kind": "source",      "label": "Retro: Q2 ship",        "size": 2.0, "meta": { "type": "document" } },
+      { "id": "source:4","kind": "source",      "label": "Brand voice memo",      "size": 1.9, "meta": { "type": "document" } },
+      { "id": "entity:1","kind": "entity",      "label": "Acme",                  "size": 3.0, "meta": { "type": "customer" } },
+      { "id": "entity:2","kind": "entity",      "label": "BigCo",                 "size": 2.7, "meta": { "type": "customer" } },
+      { "id": "entity:3","kind": "entity",      "label": "Globex",                "size": 2.4, "meta": { "type": "customer" } },
+      { "id": "entity:4","kind": "entity",      "label": "Sarah Lee",             "size": 2.0, "meta": { "type": "person" } },
+      { "id": "entity:5","kind": "entity",      "label": "Vercel",                "size": 2.2, "meta": { "type": "product" } },
+      { "id": "entity:6","kind": "entity",      "label": "Stripe",                "size": 2.0, "meta": { "type": "product" } },
+      { "id": "user:1",  "kind": "contributor", "label": "Maya",                  "size": 3.5, "meta": {} },
+      { "id": "user:2",  "kind": "contributor", "label": "Devon",                 "size": 3.2, "meta": {} },
+      { "id": "user:3",  "kind": "contributor", "label": "Lin",                   "size": 2.8, "meta": {} }
+    ],
+    "edges": [
+      { "source": "topic:0", "target": "atom:1", "kind": "contains",    "weight": 1 },
+      { "source": "topic:0", "target": "atom:5", "kind": "contains",    "weight": 1 },
+      { "source": "topic:0", "target": "atom:3", "kind": "contains",    "weight": 1 },
+      { "source": "topic:1", "target": "atom:4", "kind": "contains",    "weight": 1 },
+      { "source": "topic:1", "target": "atom:2", "kind": "contains",    "weight": 1 },
+      { "source": "topic:2", "target": "atom:8", "kind": "contains",    "weight": 1 },
+      { "source": "topic:2", "target": "atom:2", "kind": "contains",    "weight": 1 },
+      { "source": "topic:3", "target": "atom:7", "kind": "contains",    "weight": 1 },
+      { "source": "topic:3", "target": "atom:6", "kind": "contains",    "weight": 1 },
+      { "source": "atom:1",  "target": "entity:1", "kind": "about",     "weight": 1 },
+      { "source": "atom:5",  "target": "entity:2", "kind": "about",     "weight": 1 },
+      { "source": "atom:5",  "target": "entity:4", "kind": "about",     "weight": 1 },
+      { "source": "atom:2",  "target": "entity:5", "kind": "about",     "weight": 1 },
+      { "source": "source:1","target": "user:1",   "kind": "authored_by","weight": 1 },
+      { "source": "source:2","target": "user:2",   "kind": "authored_by","weight": 1 },
+      { "source": "source:3","target": "user:3",   "kind": "authored_by","weight": 1 },
+      { "source": "source:4","target": "user:1",   "kind": "authored_by","weight": 1 }
+    ],
+    "contributorWeights": [
+      { "userId": "1", "name": "Maya",  "score": 7, "weekDelta": 2 },
+      { "userId": "2", "name": "Devon", "score": 5, "weekDelta": 1 },
+      { "userId": "3", "name": "Lin",   "score": 3, "weekDelta": 0 }
+    ],
+    "topicClusters": [
+      { "id": "topic:0", "label": "Customer Renewals",  "chunkIds": [] },
+      { "id": "topic:1", "label": "Product Strategy",   "chunkIds": [] },
+      { "id": "topic:2", "label": "Engineering Process","chunkIds": [] },
+      { "id": "topic:3", "label": "Marketing Campaigns","chunkIds": [] }
+    ]
+  },
+  "anonymous": false
+}
