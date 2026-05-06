@@ -79,8 +79,11 @@ export function Graph3D({ src = '/api/memory/map', background = 'rgba(8,8,8,0)' 
           nodeLabel={(n: object) => (n as SnapNode).label}
           nodeColor={(n: object) => COLOR[(n as SnapNode).kind] ?? '#888'}
           nodeVal={(n: object) => (n as SnapNode).size}
-          linkColor={() => 'rgba(180,180,180,0.18)'}
-          linkOpacity={0.18}
+          nodeOpacity={0.95}
+          nodeResolution={16}
+          linkColor={() => 'rgba(232,222,205,0.55)'}
+          linkOpacity={0.55}
+          linkWidth={0.6}
           backgroundColor={background}
           enableNodeDrag={false}
           enableNavigationControls={false}

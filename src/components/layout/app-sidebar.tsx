@@ -280,7 +280,7 @@ function SidebarFooter({ onOpenSettings }: { onOpenSettings?: () => void }) {
         <FooterLink href="/chat/teams" label="Teams" />
         <FooterLink href="/chat/analytics" label="Analytics" />
         <FooterLink href="/chat/ask" label="Ask the company" />
-        <FooterLink href="/chat/graph" label="Knowledge graph" />
+        <FooterLink href="/chat/map" label="Memory map" />
         {isAdmin && <FooterLink href="/chat/admin/knowledge" label="Knowledge admin" />}
         <button
           onClick={onOpenSettings}

@@ -45,12 +45,18 @@ export async function computeSnapshot(orgId: string): Promise<Snapshot> {
     for (const a of atoms) for (const sid of a.source_ids ?? []) chunkIdSet.add(sid);
     const chunkIds = Array.from(chunkIdSet);
 
-    const chunksR = chunkIds.length === 0
+    // Pg array literal — Drizzle's tagged sql expands JS arrays as
+    // positional value lists (`($1, $2, …)`) which doesn't cast to
+    // uuid[]. Build the literal explicitly and bind as a single param.
+    // Each id is a UUID; sanitize defensively before joining.
+    const safeIds = chunkIds.filter((id) => /^[0-9a-f-]{36}$/i.test(id));
+    const idArrLiteral = `{${safeIds.join(',')}}`;
+    const chunksR = safeIds.length === 0
       ? { rows: [] as Array<{ id: string; content: string; source_id: string; embedding: string | null }> }
       : await tx.execute(sql`
           SELECT id, content, source_id, embedding::text AS embedding
           FROM source_chunks
-          WHERE id = ANY(${chunkIds}::uuid[])
+          WHERE id = ANY(${idArrLiteral}::uuid[])
             AND embedding IS NOT NULL
         `);
     const chunks = chunksR.rows as Array<{ id: string; content: string; source_id: string; embedding: string | null }>;
