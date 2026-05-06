@@ -44,7 +44,6 @@ async function main() {
         }),
       );
       added++;
-      void sql; // keep import live for future use
     }
   }
   console.log(`seeded ${added} employees, skipped ${skipped} (already present)`);
