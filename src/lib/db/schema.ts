@@ -625,3 +625,19 @@ export const mcpTokens = pgTable('mcp_tokens', {
 }, (t) => [
   index('mcp_org_idx').on(t.orgId),
 ]);
+
+// ============================================================
+// Mobile push devices (M6)
+// ============================================================
+
+export const devices = pgTable('devices', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  orgId: uuid('org_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  expoPushToken: text('expo_push_token').notNull(),
+  platform: varchar('platform', { length: 16 }).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (t) => [
+  uniqueIndex('devices_token_idx').on(t.expoPushToken),
+  index('devices_user_idx').on(t.userId),
+]);

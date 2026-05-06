@@ -9,6 +9,7 @@ import { assertSpendOk, recordSpend, SpendExceeded } from '@/lib/spend/caps';
 import { withSpan } from '@/lib/observability/otel';
 import { pickTools } from './tools';
 import { sanitizeToolOutput, wrapUntrusted, isIrreversible } from './safety';
+import { sendPush } from '@/lib/notifications/expo-push';
 import type { ToolContext } from './types';
 
 const RUN_MODEL = process.env.AGENT_RUN_MODEL ?? 'anthropic/claude-sonnet-4-6';
@@ -196,6 +197,14 @@ When you call doc.markdown_to_pdf or file.write, return the file URL to the user
           outputText: result.text,
           updatedAt: new Date(),
         }).where(eq(employeeRuns.id, run.id)));
+
+        // Notify the requesting user on their registered devices.
+        // Best-effort; failure here doesn't reverse a successful run.
+        sendPush(args.userId, {
+          title: `${emp.name} finished`,
+          body: result.text.slice(0, 140),
+          data: { runId: run.id, employeeId: emp.id },
+        }).catch(() => { /* swallowed */ });
 
         // Record spend (estimate; real cost via tokens would be a follow-up).
         await recordSpend(args.orgId, args.userId, 'employee_run', RUN_EST_CENTS, {

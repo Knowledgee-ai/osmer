@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { queryClient } from '../lib/api';
 import { getSessionCookie } from '../lib/auth';
+import { registerForPush } from '../lib/notifications';
 import { useRouter, useSegments } from 'expo-router';
 
 export default function RootLayout() {
@@ -38,6 +39,10 @@ function AuthGate({ children }: { children: React.ReactNode }) {
     const inAuthGroup = segments[0] === '(auth)';
     if (!authed && !inAuthGroup) router.replace('/(auth)/sign-in');
     if (authed && inAuthGroup) router.replace('/(tabs)/ask');
+    if (authed) {
+      // Best-effort device registration on first authed render.
+      void registerForPush();
+    }
   }, [authed, segments, router]);
 
   if (authed == null) {
