@@ -4,6 +4,7 @@ import { runDisagreement } from '@/lib/memory/cron/disagreement';
 import { runConsolidation } from '@/lib/memory/cron/consolidation';
 import { runHealth } from '@/lib/memory/cron/health';
 import { runMonitor } from '@/lib/agent/cron/monitor';
+import { runMemoryMapSnapshot } from '@/lib/memory-map/cron';
 
 export const maxDuration = 300;
 
@@ -14,6 +15,7 @@ const HANDLERS: Record<string, () => Promise<unknown>> = {
   consolidation: runConsolidation,
   health: runHealth,
   monitor: runMonitor,
+  'memory-map': runMemoryMapSnapshot,
 };
 
 function isAuthorized(req: Request) {
