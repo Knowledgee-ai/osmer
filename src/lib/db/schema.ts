@@ -43,6 +43,8 @@ export const knowledgeScopeEnum = pgEnum('knowledge_scope', ['personal', 'team',
 export const knowledgeStatusEnum = pgEnum('knowledge_status', ['active', 'stale', 'disputed', 'archived']);
 export const entityTypeEnum = pgEnum('entity_type', ['person', 'system', 'technology', 'project', 'process', 'team', 'concept']);
 export const conflictStatusEnum = pgEnum('conflict_status', ['open', 'resolved', 'dismissed']);
+export const voiceFlowEnum = pgEnum('voice_flow', ['founder_interview', 'employee_intro']);
+export const voiceStatusEnum = pgEnum('voice_status', ['active', 'completed', 'transcribing', 'failed']);
 
 // ============================================================
 // Organizations
@@ -640,4 +642,26 @@ export const devices = pgTable('devices', {
 }, (t) => [
   uniqueIndex('devices_token_idx').on(t.expoPushToken),
   index('devices_user_idx').on(t.userId),
+]);
+
+// ============================================================
+// Voice onboarding sessions (M7)
+// ============================================================
+
+export const voiceSessions = pgTable('voice_sessions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
+  flow: voiceFlowEnum('flow').notNull(),
+  status: voiceStatusEnum('status').notNull().default('active'),
+  audioBlobUrl: text('audio_blob_url'),
+  realtimeTranscript: text('realtime_transcript'),
+  whisperTranscript: text('whisper_transcript'),
+  sourceId: uuid('source_id').references(() => sources.id, { onDelete: 'set null' }),
+  durationMs: integer('duration_ms'),
+  startedAt: timestamp('started_at').defaultNow().notNull(),
+  completedAt: timestamp('completed_at'),
+}, (t) => [
+  index('vs_org_idx').on(t.orgId),
+  index('vs_user_idx').on(t.userId),
 ]);
