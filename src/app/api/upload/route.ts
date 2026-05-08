@@ -4,6 +4,7 @@ import { users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { uploadAndQueue } from '@/lib/ingest/upload';
 import { processIngestionJob } from '@/lib/ingest/process';
+import { readForm } from '@/lib/util/formdata';
 
 export const maxDuration = 300;
 const MAX_BYTES = 50 * 1024 * 1024; // 50 MB per file
@@ -20,7 +21,7 @@ export async function POST(req: Request) {
   const [me] = await db.select({ orgId: users.orgId }).from(users).where(eq(users.id, session.user.id)).limit(1);
   if (!me?.orgId) return Response.json({ error: 'no_org' }, { status: 400 });
 
-  const form = await req.formData();
+  const form = await readForm(req);
   const file = form.get('file');
   if (!(file instanceof File)) return Response.json({ error: 'no_file' }, { status: 400 });
   if (file.size > MAX_BYTES) return Response.json({ error: 'too_large', maxBytes: MAX_BYTES }, { status: 413 });

@@ -48,7 +48,7 @@ export function AppSidebar({ onOpenSettings }: AppSidebarProps) {
 
   const [searchResults, setSearchResults] = useState<Array<{ conversationId: string; title: string; matchPreview: string }>>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const searchTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (search.length < 3) {
